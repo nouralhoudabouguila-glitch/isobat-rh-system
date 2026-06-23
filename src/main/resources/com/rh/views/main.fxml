@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.image.*?>
+<?import javafx.geometry.*?>
+
+<BorderPane xmlns="http://javafx.com/javafx/17"
+            xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="com.rh.contollers.MainController"
+            prefWidth="1300" prefHeight="820">
+
+    <!-- ═══════════════════ SIDEBAR ═══════════════════ -->
+    <left>
+        <VBox styleClass="sidebar" prefWidth="245">
+
+            <!-- Logo -->
+            <VBox styleClass="logo-box" alignment="CENTER">
+                <ImageView fx:id="logoImg"
+                           fitWidth="190" fitHeight="72"
+                           preserveRatio="true" smooth="true"/>
+            </VBox>
+
+            <!-- Navigation buttons (avec padding horizontal pour l'effet rounded) -->
+            <VBox styleClass="nav-container" VBox.vgrow="ALWAYS" spacing="2">
+
+                <Button fx:id="btnDashboard"   text="🏠   Tableau de bord"  styleClass="sidebar-btn" maxWidth="Infinity" onAction="#onDashboard"/>
+                <Button fx:id="btnEmploye"     text="👥   Employés"          styleClass="sidebar-btn" maxWidth="Infinity" onAction="#onEmploye"/>
+                <Button fx:id="btnPresence"    text="✅   Présence"           styleClass="sidebar-btn" maxWidth="Infinity" onAction="#onPresence"/>
+                <Button fx:id="btnConges"      text="🌴   Congés"             styleClass="sidebar-btn" maxWidth="Infinity" onAction="#onConges"/>
+                <Button fx:id="btnPlanning"    text="📅   Planning"           styleClass="sidebar-btn" maxWidth="Infinity" onAction="#onPlanning"/>
+                <Button fx:id="btnFournisseur" text="🏢   Fournisseurs"       styleClass="sidebar-btn" maxWidth="Infinity" onAction="#onFournisseur"/>
+                <Button fx:id="btnFacture"     text="📄   Factures"           styleClass="sidebar-btn" maxWidth="Infinity" onAction="#onFacture"/>
+                <Button fx:id="btnDepense"     text="💰   Dépenses"           styleClass="sidebar-btn" maxWidth="Infinity" onAction="#onDepense"/>
+
+                <!-- Spacer -->
+                <Region VBox.vgrow="ALWAYS"/>
+
+                <!-- Paramètres en bas -->
+                <Button fx:id="btnParametres"  text="⚙   Paramètres"         styleClass="sidebar-btn" maxWidth="Infinity" onAction="#onParametres"/>
+
+            </VBox>
+
+            <!-- Separator + Déconnexion -->
+            <Separator styleClass="sidebar-sep"/>
+            <Button text="⇥   Déconnexion" styleClass="sidebar-btn-logout" maxWidth="Infinity"/>
+
+        </VBox>
+    </left>
+
+    <!-- ═══════════════════ MAIN CONTENT ═══════════════════ -->
+    <center>
+        <BorderPane>
+
+            <!-- Top Header -->
+            <top>
+                <HBox styleClass="header" alignment="CENTER_LEFT" spacing="15">
+                    <Label text="≡" style="-fx-font-size:20px; -fx-text-fill:#555; -fx-cursor:hand;"/>
+                    <Label fx:id="headerTitle" text="Tableau de bord" styleClass="header-title"/>
+                    <Region HBox.hgrow="ALWAYS"/>
+
+                    <!-- Search -->
+                    <HBox styleClass="search-box" alignment="CENTER_LEFT" spacing="6">
+                        <Label text="🔍" style="-fx-font-size:13px; -fx-text-fill:#aaa;"/>
+                        <TextField promptText="Rechercher..." styleClass="search-field" prefWidth="210"/>
+                    </HBox>
+
+                    <!-- Notifications -->
+                    <StackPane>
+                        <Label text="🔔" style="-fx-font-size:20px; -fx-cursor:hand;"/>
+                        <Label text="3" styleClass="notif-badge" StackPane.alignment="TOP_RIGHT"/>
+                    </StackPane>
+
+                    <!-- Avatar -->
+                    <Label text="A" styleClass="avatar-circle"/>
+                </HBox>
+            </top>
+
+            <!-- Dynamic Content Area -->
+            <center>
+                <StackPane fx:id="contentArea"/>
+            </center>
+
+        </BorderPane>
+    </center>
+
+</BorderPane>

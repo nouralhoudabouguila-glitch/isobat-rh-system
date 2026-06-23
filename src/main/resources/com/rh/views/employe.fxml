@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.geometry.Insets?>
+
+<VBox xmlns="http://javafx.com/javafx/17"
+      xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="com.rh.contollers.EmployeController"
+      spacing="0"
+      style="-fx-background-color:#F0E6DA; -fx-padding:24;">
+
+    <!-- En-tête -->
+    <HBox alignment="CENTER_LEFT" spacing="12" style="-fx-padding:0 0 20 0;">
+        <VBox spacing="3" HBox.hgrow="ALWAYS">
+            <Label text="Gestion des Employés"
+                   style="-fx-font-family:'Poppins';-fx-font-size:20;-fx-font-weight:bold;-fx-text-fill:#75070C;"/>
+            <Label fx:id="lblCount" text="Chargement..."
+                   style="-fx-font-family:'Poppins';-fx-font-size:12;-fx-text-fill:#888888;"/>
+        </VBox>
+        <HBox spacing="10" alignment="CENTER_RIGHT">
+            <TextField fx:id="tfSearch" promptText="🔍  Rechercher un employé..."
+                       style="-fx-background-color:#FFFFFF;-fx-background-radius:20;
+                              -fx-border-color:#E0D0BE;-fx-border-radius:20;-fx-border-width:1;
+                              -fx-padding:8 16 8 16;-fx-font-family:'Poppins';-fx-font-size:12;
+                              -fx-pref-width:230;"/>
+            <ComboBox fx:id="cbFilterDept" promptText="Tous les depts"
+                      style="-fx-background-color:#FFFFFF;-fx-border-color:#E0D0BE;
+                             -fx-border-radius:8;-fx-font-family:'Poppins';-fx-font-size:12;
+                             -fx-pref-width:180;"/>
+            <Button fx:id="btnAdd" text="＋  Nouvel employé"
+                    style="-fx-background-color:#75070C;-fx-text-fill:#FFFFFF;
+                           -fx-font-family:'Poppins';-fx-font-size:12;-fx-font-weight:bold;
+                           -fx-background-radius:20;-fx-padding:9 20 9 20;-fx-cursor:hand;
+                           -fx-border-color:transparent;"
+                    onAction="#handleAdd"/>
+        </HBox>
+    </HBox>
+
+    <!-- Zone scrollable des cards -->
+    <ScrollPane fitToWidth="true" hbarPolicy="NEVER" VBox.vgrow="ALWAYS"
+                style="-fx-background-color:transparent;-fx-background:#F0E6DA;
+                       -fx-border-color:transparent;">
+        <FlowPane fx:id="cardsContainer"
+                  hgap="16" vgap="16"
+                  style="-fx-background-color:transparent;-fx-padding:4 0 20 0;">
+        </FlowPane>
+    </ScrollPane>
+
+</VBox>

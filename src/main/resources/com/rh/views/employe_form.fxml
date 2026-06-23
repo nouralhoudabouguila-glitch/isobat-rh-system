@@ -1,0 +1,388 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<ScrollPane fitToWidth="true" hbarPolicy="NEVER" vbarPolicy="AS_NEEDED"
+            xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="com.rh.contollers.EmployesController"
+            style="-fx-background-color:#F0E6DA; -fx-background:#F0E6DA;">
+    <content>
+        <VBox spacing="0" style="-fx-background-color:#F0E6DA;">
+
+            <!-- HEADER -->
+            <HBox spacing="16" alignment="CENTER_LEFT"
+                  style="-fx-background-color:#1A0406; -fx-padding:18 24 18 24; -fx-min-height:72;">
+                <StackPane style="-fx-background-color:#75070C; -fx-background-radius:10;
+                                  -fx-min-width:44; -fx-min-height:44; -fx-max-width:44; -fx-max-height:44;"
+                           alignment="CENTER">
+                    <Label text="👤" style="-fx-font-size:20;"/>
+                </StackPane>
+                <VBox spacing="3">
+                    <Label fx:id="lblFormTitle" text="Nouvel employé"
+                           style="-fx-font-family:'Poppins';-fx-font-size:16;-fx-font-weight:bold;-fx-text-fill:#FFFFFF;"/>
+                    <Label text="Remplissez tous les champs obligatoires"
+                           style="-fx-font-family:'Poppins';-fx-font-size:11;-fx-text-fill:#886670;"/>
+                </VBox>
+            </HBox>
+
+            <VBox spacing="16" style="-fx-padding:24 28 8 28;">
+
+                <!-- SECTION 1 : Informations personnelles -->
+                <VBox spacing="14" style="-fx-background-color:#FFFFFF; -fx-background-radius:12;
+                                          -fx-border-color:#E0D0BE; -fx-border-radius:12;
+                                          -fx-border-width:1; -fx-padding:18 20 18 20;">
+
+                    <HBox alignment="CENTER_LEFT" spacing="8"
+                          style="-fx-border-color:transparent transparent #F0E6DA transparent;
+                                 -fx-border-width:0 0 1.5 0; -fx-padding:0 0 10 0;">
+                        <Label text="👤" style="-fx-font-size:13;"/>
+                        <Label text="INFORMATIONS PERSONNELLES"
+                               style="-fx-font-family:'Poppins';-fx-font-size:10;-fx-font-weight:bold;-fx-text-fill:#75070C;"/>
+                    </HBox>
+
+                    <!-- Matricule + Situation familiale -->
+                    <GridPane hgap="16" vgap="6">
+                        <columnConstraints>
+                            <ColumnConstraints percentWidth="40"/>
+                            <ColumnConstraints percentWidth="60"/>
+                        </columnConstraints>
+
+                        <Label text="Matricule (auto)" GridPane.rowIndex="0" GridPane.columnIndex="0"
+                               style="-fx-font-family:'Poppins';-fx-font-size:11;-fx-font-weight:bold;-fx-text-fill:#555555;"/>
+                        <Label fx:id="lblMatricule" text="EMP-001"
+                               style="-fx-background-color:#FFF0F0;-fx-border-color:#F5C0C0;
+                                      -fx-border-radius:6;-fx-background-radius:6;-fx-border-width:1;
+                                      -fx-font-family:'Poppins';-fx-font-size:12;-fx-text-fill:#75070C;
+                                      -fx-font-weight:bold;-fx-padding:9 12 9 12;"
+                               GridPane.rowIndex="1" GridPane.columnIndex="0"/>
+
+                        <Label text="Situation familiale *" GridPane.rowIndex="0" GridPane.columnIndex="1"
+                               style="-fx-font-family:'Poppins';-fx-font-size:11;-fx-font-weight:bold;-fx-text-fill:#555555;"/>
+                        <HBox spacing="6" GridPane.rowIndex="1" GridPane.columnIndex="1">
+                            <ToggleButton fx:id="tbSitCelib" text="Célibataire"
+                                          style="-fx-font-family:'Poppins';-fx-font-size:11;-fx-font-weight:bold;
+                                                -fx-background-color:#FFFFFF;-fx-border-color:#E0D0BE;
+                                                -fx-border-radius:6;-fx-background-radius:6;-fx-border-width:1.5;
+                                                -fx-text-fill:#555555;-fx-cursor:hand;-fx-padding:7 12 7 12;"/>
+                            <ToggleButton fx:id="tbSitMarie" text="Marié(e)"
+                                          style="-fx-font-family:'Poppins';-fx-font-size:11;-fx-font-weight:bold;
+                                                -fx-background-color:#FFFFFF;-fx-border-color:#E0D0BE;
+                                                -fx-border-radius:6;-fx-background-radius:6;-fx-border-width:1.5;
+                                                -fx-text-fill:#555555;-fx-cursor:hand;-fx-padding:7 12 7 12;"/>
+                            <ToggleButton fx:id="tbSitDivorce" text="Divorcé(e)"
+                                          style="-fx-font-family:'Poppins';-fx-font-size:11;-fx-font-weight:bold;
+                                                -fx-background-color:#FFFFFF;-fx-border-color:#E0D0BE;
+                                                -fx-border-radius:6;-fx-background-radius:6;-fx-border-width:1.5;
+                                                -fx-text-fill:#555555;-fx-cursor:hand;-fx-padding:7 12 7 12;"/>
+                            <ToggleButton fx:id="tbSitVeuf" text="Veuf(ve)"
+                                          style="-fx-font-family:'Poppins';-fx-font-size:11;-fx-font-weight:bold;
+                                                -fx-background-color:#FFFFFF;-fx-border-color:#E0D0BE;
+                                                -fx-border-radius:6;-fx-background-radius:6;-fx-border-width:1.5;
+                                                -fx-text-fill:#555555;-fx-cursor:hand;-fx-padding:7 12 7 12;"/>
+                        </HBox>
+                    </GridPane>
+
+                    <!-- Nom, Prénom, Date naissance -->
+                    <GridPane hgap="16" vgap="6">
+                        <columnConstraints>
+                            <ColumnConstraints percentWidth="33"/>
+                            <ColumnConstraints percentWidth="33"/>
+                            <ColumnConstraints percentWidth="34"/>
+                        </columnConstraints>
+                        <Label text="Nom *" GridPane.rowIndex="0" GridPane.columnIndex="0"
+                               style="-fx-font-family:'Poppins';-fx-font-size:11;-fx-font-weight:bold;-fx-text-fill:#555555;"/>
+                        <VBox GridPane.rowIndex="1" GridPane.columnIndex="0" spacing="3">
+                            <TextField fx:id="tfNom" promptText="ex : Garrouri"
+                                       style="-fx-font-family:'Poppins';-fx-font-size:12;-fx-padding:9 12 9 12;
+                                              -fx-background-color:#FFFFFF;-fx-border-color:#E0D0BE;
+                                              -fx-border-radius:8;-fx-background-radius:8;-fx-border-width:1;"/>
+                            <Label fx:id="errNom" text=""
+                                   style="-fx-font-family:'Poppins';-fx-font-size:10;-fx-text-fill:#75070C;"/>
+                        </VBox>
+
+                        <Label text="Prénom *" GridPane.rowIndex="0" GridPane.columnIndex="1"
+                               style="-fx-font-family:'Poppins';-fx-font-size:11;-fx-font-weight:bold;-fx-text-fill:#555555;"/>
+                        <TextField fx:id="tfPrenom" promptText="ex : Issam"
+                                   style="-fx-font-family:'Poppins';-fx-font-size:12;-fx-padding:9 12 9 12;
+                                          -fx-background-color:#FFFFFF;-fx-border-color:#E0D0BE;
+                                          -fx-border-radius:8;-fx-background-radius:8;-fx-border-width:1;"
+                                   GridPane.rowIndex="1" GridPane.columnIndex="1"/>
+
+                        <Label text="Date de naissance" GridPane.rowIndex="0" GridPane.columnIndex="2"
+                               style="-fx-font-family:'Poppins';-fx-font-size:11;-fx-font-weight:bold;-fx-text-fill:#555555;"/>
+                        <DatePicker fx:id="dpNaissance"
+                                    style="-fx-font-family:'Poppins';-fx-font-size:12;"
+                                    GridPane.rowIndex="1" GridPane.columnIndex="2"/>
+                    </GridPane>
+
+                    <!-- CIN, Téléphone, CNSS -->
+                    <GridPane hgap="16" vgap="6">
+                        <columnConstraints>
+                            <ColumnConstraints percentWidth="33"/>
+                            <ColumnConstraints percentWidth="33"/>
+                            <ColumnConstraints percentWidth="34"/>
+                        </columnConstraints>
+                        <Label text="CIN *" GridPane.rowIndex="0" GridPane.columnIndex="0"
+                               style="-fx-font-family:'Poppins';-fx-font-size:11;-fx-font-weight:bold;-fx-text-fill:#555555;"/>
+                        <VBox GridPane.rowIndex="1" GridPane.columnIndex="0" spacing="3">
+                            <TextField fx:id="tfCIN" promptText="8 chiffres"
+                                       style="-fx-font-family:'Poppins';-fx-font-size:12;-fx-padding:9 12 9 12;
+                                              -fx-background-color:#FFFFFF;-fx-border-color:#E0D0BE;
+                                              -fx-border-radius:8;-fx-background-radius:8;-fx-border-width:1;"/>
+                            <Label fx:id="errCIN" text=""
+                                   style="-fx-font-family:'Poppins';-fx-font-size:10;-fx-text-fill:#75070C;"/>
+                        </VBox>
+
+                        <Label text="Téléphone *" GridPane.rowIndex="0" GridPane.columnIndex="1"
+                               style="-fx-font-family:'Poppins';-fx-font-size:11;-fx-font-weight:bold;-fx-text-fill:#555555;"/>
+                        <VBox GridPane.rowIndex="1" GridPane.columnIndex="1" spacing="3">
+                            <TextField fx:id="tfTelephone" promptText="+216 55 123 456"
+                                       style="-fx-font-family:'Poppins';-fx-font-size:12;-fx-padding:9 12 9 12;
+                                              -fx-background-color:#FFFFFF;-fx-border-color:#E0D0BE;
+                                              -fx-border-radius:8;-fx-background-radius:8;-fx-border-width:1;"/>
+                            <Label fx:id="errTelephone" text=""
+                                   style="-fx-font-family:'Poppins';-fx-font-size:10;-fx-text-fill:#75070C;"/>
+                        </VBox>
+
+                        <Label text="N° CNSS" GridPane.rowIndex="0" GridPane.columnIndex="2"
+                               style="-fx-font-family:'Poppins';-fx-font-size:11;-fx-font-weight:bold;-fx-text-fill:#555555;"/>
+                        <VBox GridPane.rowIndex="1" GridPane.columnIndex="2" spacing="3">
+                            <TextField fx:id="tfCNSS" promptText="ex : 12345678"
+                                       style="-fx-font-family:'Poppins';-fx-font-size:12;-fx-padding:9 12 9 12;
+                                              -fx-background-color:#FFFFFF;-fx-border-color:#E0D0BE;
+                                              -fx-border-radius:8;-fx-background-radius:8;-fx-border-width:1;"/>
+                            <Label text="Caisse Nationale Sécurité Sociale"
+                                   style="-fx-font-family:'Poppins';-fx-font-size:10;-fx-text-fill:#AAAAAA;"/>
+                        </VBox>
+                    </GridPane>
+                </VBox>
+
+                <!-- SECTION 2 : Informations professionnelles -->
+                <VBox spacing="14" style="-fx-background-color:#FFFFFF; -fx-background-radius:12;
+                                          -fx-border-color:#E0D0BE; -fx-border-radius:12;
+                                          -fx-border-width:1; -fx-padding:18 20 18 20;">
+
+                    <HBox alignment="CENTER_LEFT" spacing="8"
+                          style="-fx-border-color:transparent transparent #F0E6DA transparent;
+                                 -fx-border-width:0 0 1.5 0; -fx-padding:0 0 10 0;">
+                        <Label text="💼" style="-fx-font-size:13;"/>
+                        <Label text="INFORMATIONS PROFESSIONNELLES"
+                               style="-fx-font-family:'Poppins';-fx-font-size:10;-fx-font-weight:bold;-fx-text-fill:#75070C;"/>
+                    </HBox>
+
+                    <!-- Département : 3 grands boutons -->
+                    <VBox spacing="6">
+                        <Label text="Département *"
+                               style="-fx-font-family:'Poppins';-fx-font-size:11;-fx-font-weight:bold;-fx-text-fill:#555555;"/>
+                        <HBox spacing="10">
+                            <ToggleButton fx:id="tbDeptB2B" HBox.hgrow="ALWAYS" maxWidth="1.7976931348623157E308"
+                                          style="-fx-font-family:'Poppins';-fx-font-size:12;-fx-font-weight:bold;
+                                                 -fx-background-color:#FFFFFF;-fx-border-color:#E0D0BE;
+                                                 -fx-border-radius:8;-fx-background-radius:8;-fx-border-width:1.5;
+                                                 -fx-text-fill:#555555;-fx-cursor:hand;-fx-padding:14 10 14 10;
+                                                 -fx-alignment:center;">
+                                <graphic>
+                                    <VBox spacing="6" alignment="CENTER">
+                                        <Label text="📞" style="-fx-font-size:22;"/>
+                                        <Label text="Centre d'appel B2B"
+                                               style="-fx-font-family:'Poppins';-fx-font-size:11;-fx-font-weight:bold;-fx-text-fill:#555555;"/>
+                                    </VBox>
+                                </graphic>
+                            </ToggleButton>
+                            <ToggleButton fx:id="tbDeptB2C" HBox.hgrow="ALWAYS" maxWidth="1.7976931348623157E308"
+                                          style="-fx-font-family:'Poppins';-fx-font-size:12;-fx-font-weight:bold;
+                                                 -fx-background-color:#FFFFFF;-fx-border-color:#E0D0BE;
+                                                 -fx-border-radius:8;-fx-background-radius:8;-fx-border-width:1.5;
+                                                 -fx-text-fill:#555555;-fx-cursor:hand;-fx-padding:14 10 14 10;
+                                                 -fx-alignment:center;">
+                                <graphic>
+                                    <VBox spacing="6" alignment="CENTER">
+                                        <Label text="📞" style="-fx-font-size:22;"/>
+                                        <Label text="Centre d'appel B2C"
+                                               style="-fx-font-family:'Poppins';-fx-font-size:11;-fx-font-weight:bold;-fx-text-fill:#555555;"/>
+                                    </VBox>
+                                </graphic>
+                            </ToggleButton>
+                            <ToggleButton fx:id="tbDeptBureau" HBox.hgrow="ALWAYS" maxWidth="1.7976931348623157E308"
+                                          style="-fx-font-family:'Poppins';-fx-font-size:12;-fx-font-weight:bold;
+                                                 -fx-background-color:#FFFFFF;-fx-border-color:#E0D0BE;
+                                                 -fx-border-radius:8;-fx-background-radius:8;-fx-border-width:1.5;
+                                                 -fx-text-fill:#555555;-fx-cursor:hand;-fx-padding:14 10 14 10;
+                                                 -fx-alignment:center;">
+                                <graphic>
+                                    <VBox spacing="6" alignment="CENTER">
+                                        <Label text="📐" style="-fx-font-size:22;"/>
+                                        <Label text="Bureau d'étude"
+                                               style="-fx-font-family:'Poppins';-fx-font-size:11;-fx-font-weight:bold;-fx-text-fill:#555555;"/>
+                                    </VBox>
+                                </graphic>
+                            </ToggleButton>
+                        </HBox>
+                        <Label fx:id="errDept" text=""
+                               style="-fx-font-family:'Poppins';-fx-font-size:10;-fx-text-fill:#75070C;"/>
+                    </VBox>
+
+                    <!-- Profil, Date embauche, Salaire -->
+                    <GridPane hgap="16" vgap="6">
+                        <columnConstraints>
+                            <ColumnConstraints percentWidth="33"/>
+                            <ColumnConstraints percentWidth="33"/>
+                            <ColumnConstraints percentWidth="34"/>
+                        </columnConstraints>
+                        <Label text="Profil / Poste *" GridPane.rowIndex="0" GridPane.columnIndex="0"
+                               style="-fx-font-family:'Poppins';-fx-font-size:11;-fx-font-weight:bold;-fx-text-fill:#555555;"/>
+                        <TextField fx:id="tfProfil" promptText="Agent call, Ingénieur..."
+                                   style="-fx-font-family:'Poppins';-fx-font-size:12;-fx-padding:9 12 9 12;
+                                          -fx-background-color:#FFFFFF;-fx-border-color:#E0D0BE;
+                                          -fx-border-radius:8;-fx-background-radius:8;-fx-border-width:1;"
+                                   GridPane.rowIndex="1" GridPane.columnIndex="0"/>
+
+                        <Label text="Date d'embauche *" GridPane.rowIndex="0" GridPane.columnIndex="1"
+                               style="-fx-font-family:'Poppins';-fx-font-size:11;-fx-font-weight:bold;-fx-text-fill:#555555;"/>
+                        <VBox GridPane.rowIndex="1" GridPane.columnIndex="1" spacing="3">
+                            <DatePicker fx:id="dpEmbauche" style="-fx-font-family:'Poppins';"/>
+                            <Label fx:id="errEmbauche" text=""
+                                   style="-fx-font-family:'Poppins';-fx-font-size:10;-fx-text-fill:#75070C;"/>
+                        </VBox>
+
+                        <Label text="Salaire mensuel net (TND)" GridPane.rowIndex="0" GridPane.columnIndex="2"
+                               style="-fx-font-family:'Poppins';-fx-font-size:11;-fx-font-weight:bold;-fx-text-fill:#555555;"/>
+                        <TextField fx:id="tfSalaire" promptText="ex : 1200"
+                                   style="-fx-font-family:'Poppins';-fx-font-size:12;-fx-padding:9 12 9 12;
+                                          -fx-background-color:#FFFFFF;-fx-border-color:#E0D0BE;
+                                          -fx-border-radius:8;-fx-background-radius:8;-fx-border-width:1;"
+                                   GridPane.rowIndex="1" GridPane.columnIndex="2"/>
+                    </GridPane>
+
+                    <!-- Contrat + Statut -->
+                    <GridPane hgap="16" vgap="6">
+                        <columnConstraints>
+                            <ColumnConstraints percentWidth="50"/>
+                            <ColumnConstraints percentWidth="50"/>
+                        </columnConstraints>
+
+                        <Label text="Type de contrat *" GridPane.rowIndex="0" GridPane.columnIndex="0"
+                               style="-fx-font-family:'Poppins';-fx-font-size:11;-fx-font-weight:bold;-fx-text-fill:#555555;"/>
+                        <HBox spacing="8" GridPane.rowIndex="1" GridPane.columnIndex="0">
+                            <ToggleButton fx:id="tbContratCDI" text="CDI"
+                                          style="-fx-font-family:'Poppins';-fx-font-size:12;-fx-font-weight:bold;
+                                                 -fx-background-color:#FFFFFF;-fx-border-color:#E0D0BE;
+                                                 -fx-border-radius:8;-fx-background-radius:8;-fx-border-width:1.5;
+                                                 -fx-text-fill:#4F6815;-fx-cursor:hand;-fx-padding:8 22 8 22;"/>
+                            <ToggleButton fx:id="tbContratCDD" text="CDD"
+                                          style="-fx-font-family:'Poppins';-fx-font-size:12;-fx-font-weight:bold;
+                                                 -fx-background-color:#FFFFFF;-fx-border-color:#E0D0BE;
+                                                 -fx-border-radius:8;-fx-background-radius:8;-fx-border-width:1.5;
+                                                 -fx-text-fill:#4F6815;-fx-cursor:hand;-fx-padding:8 22 8 22;"/>
+                            <ToggleButton fx:id="tbContratStage" text="Stage"
+                                          style="-fx-font-family:'Poppins';-fx-font-size:12;-fx-font-weight:bold;
+                                                 -fx-background-color:#FFFFFF;-fx-border-color:#E0D0BE;
+                                                 -fx-border-radius:8;-fx-background-radius:8;-fx-border-width:1.5;
+                                                 -fx-text-fill:#4F6815;-fx-cursor:hand;-fx-padding:8 22 8 22;"/>
+                        </HBox>
+
+                        <Label text="Statut *" GridPane.rowIndex="0" GridPane.columnIndex="1"
+                               style="-fx-font-family:'Poppins';-fx-font-size:11;-fx-font-weight:bold;-fx-text-fill:#555555;"/>
+                        <HBox spacing="10" GridPane.rowIndex="1" GridPane.columnIndex="1">
+                            <ToggleButton fx:id="tbStatutActif"
+                                          style="-fx-font-family:'Poppins';-fx-font-size:12;-fx-font-weight:bold;
+                                                 -fx-background-color:#F0F5E8;-fx-border-color:#4F6815;
+                                                 -fx-border-radius:8;-fx-background-radius:8;-fx-border-width:1.5;
+                                                 -fx-text-fill:#4F6815;-fx-cursor:hand;-fx-padding:8 20 8 20;">
+                                <graphic>
+                                    <HBox spacing="7" alignment="CENTER_LEFT">
+                                        <StackPane style="-fx-background-color:#4F6815;-fx-background-radius:50%;
+                                                          -fx-min-width:8;-fx-min-height:8;-fx-max-width:8;-fx-max-height:8;"/>
+                                        <Label text="Actif"
+                                               style="-fx-font-family:'Poppins';-fx-font-size:12;-fx-font-weight:bold;-fx-text-fill:#4F6815;"/>
+                                    </HBox>
+                                </graphic>
+                            </ToggleButton>
+                            <ToggleButton fx:id="tbStatutInactif"
+                                          style="-fx-font-family:'Poppins';-fx-font-size:12;-fx-font-weight:bold;
+                                                 -fx-background-color:#FFF0F0;-fx-border-color:#75070C;
+                                                 -fx-border-radius:8;-fx-background-radius:8;-fx-border-width:1.5;
+                                                 -fx-text-fill:#75070C;-fx-cursor:hand;-fx-padding:8 20 8 20;">
+                                <graphic>
+                                    <HBox spacing="7" alignment="CENTER_LEFT">
+                                        <StackPane style="-fx-background-color:#75070C;-fx-background-radius:50%;
+                                                          -fx-min-width:8;-fx-min-height:8;-fx-max-width:8;-fx-max-height:8;"/>
+                                        <Label text="Inactif"
+                                               style="-fx-font-family:'Poppins';-fx-font-size:12;-fx-font-weight:bold;-fx-text-fill:#75070C;"/>
+                                    </HBox>
+                                </graphic>
+                            </ToggleButton>
+                        </HBox>
+                    </GridPane>
+                </VBox>
+
+                <!-- SECTION 3 : Informations bancaires -->
+                <VBox spacing="14" style="-fx-background-color:#FFFFFF; -fx-background-radius:12;
+                                          -fx-border-color:#E0D0BE; -fx-border-radius:12;
+                                          -fx-border-width:1; -fx-padding:18 20 18 20;">
+
+                    <HBox alignment="CENTER_LEFT" spacing="8"
+                          style="-fx-border-color:transparent transparent #F0E6DA transparent;
+                                 -fx-border-width:0 0 1.5 0; -fx-padding:0 0 10 0;">
+                        <Label text="🏦" style="-fx-font-size:13;"/>
+                        <Label text="INFORMATIONS BANCAIRES"
+                               style="-fx-font-family:'Poppins';-fx-font-size:10;-fx-font-weight:bold;-fx-text-fill:#75070C;"/>
+                    </HBox>
+
+                    <GridPane hgap="16" vgap="6">
+                        <columnConstraints>
+                            <ColumnConstraints percentWidth="60"/>
+                            <ColumnConstraints percentWidth="40"/>
+                        </columnConstraints>
+                        <Label text="N° RIB" GridPane.rowIndex="0" GridPane.columnIndex="0"
+                               style="-fx-font-family:'Poppins';-fx-font-size:11;-fx-font-weight:bold;-fx-text-fill:#555555;"/>
+                        <VBox GridPane.rowIndex="1" GridPane.columnIndex="0" spacing="3">
+                            <TextField fx:id="tfRIB" promptText="TN59 1234 5678 9012 3456 7890"
+                                       style="-fx-font-family:'Poppins';-fx-font-size:12;-fx-padding:9 12 9 12;
+                                              -fx-background-color:#FFFFFF;-fx-border-color:#E0D0BE;
+                                              -fx-border-radius:8;-fx-background-radius:8;-fx-border-width:1;"/>
+                            <Label text="Relevé d'Identité Bancaire"
+                                   style="-fx-font-family:'Poppins';-fx-font-size:10;-fx-text-fill:#AAAAAA;"/>
+                        </VBox>
+
+                        <Label text="Banque" GridPane.rowIndex="0" GridPane.columnIndex="1"
+                               style="-fx-font-family:'Poppins';-fx-font-size:11;-fx-font-weight:bold;-fx-text-fill:#555555;"/>
+                        <ComboBox fx:id="cbBanque" maxWidth="1.7976931348623157E308"
+                                  style="-fx-font-family:'Poppins';-fx-font-size:12;"
+                                  GridPane.rowIndex="1" GridPane.columnIndex="1"/>
+                    </GridPane>
+                </VBox>
+
+                <Region minHeight="8"/>
+            </VBox>
+
+            <!-- FOOTER -->
+            <HBox spacing="12" alignment="CENTER_LEFT"
+                  style="-fx-padding:14 28 18 28;-fx-background-color:#FDFAF7;
+                         -fx-border-color:#F0E6DA transparent transparent transparent;
+                         -fx-border-width:1 0 0 0;">
+                <Button fx:id="btnCancel" text="✕  Annuler"
+                        style="-fx-font-family:'Poppins';-fx-font-size:12;-fx-font-weight:bold;
+                               -fx-padding:10 18 10 18;-fx-border-color:#E0D0BE;-fx-border-radius:8;
+                               -fx-background-color:#FFFFFF;-fx-background-radius:8;
+                               -fx-text-fill:#666666;-fx-cursor:hand;"
+                        onAction="#handleCancel"/>
+                <Pane HBox.hgrow="ALWAYS"/>
+                <Button fx:id="btnSaveAndAdd" text="＋  Enregistrer et ajouter un autre"
+                        style="-fx-font-family:'Poppins';-fx-font-size:12;-fx-font-weight:bold;
+                               -fx-padding:10 20 10 20;-fx-background-color:#4F6815;
+                               -fx-background-radius:8;-fx-text-fill:#FFFFFF;-fx-cursor:hand;
+                               -fx-border-color:transparent;"
+                        onAction="#handleSaveAndAdd"/>
+                <Button fx:id="btnCreate" text="✔  Créer la fiche employé"
+                        style="-fx-font-family:'Poppins';-fx-font-size:12;-fx-font-weight:bold;
+                               -fx-padding:10 22 10 22;-fx-background-color:#75070C;
+                               -fx-background-radius:8;-fx-text-fill:#FFFFFF;-fx-cursor:hand;
+                               -fx-border-color:transparent;"
+                        onAction="#handleCreate"/>
+            </HBox>
+
+        </VBox>
+    </content>
+</ScrollPane>

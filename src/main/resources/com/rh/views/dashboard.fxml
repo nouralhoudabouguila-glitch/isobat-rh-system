@@ -1,0 +1,130 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.chart.*?>
+<?import javafx.geometry.*?>
+
+<ScrollPane fitToWidth="true" hbarPolicy="NEVER"
+            styleClass="content-scroll"
+            xmlns="http://javafx.com/javafx/17"
+            xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="com.rh.contollers.DashboardController">
+
+    <VBox spacing="22" styleClass="dashboard-root">
+
+        <!-- ── Subtitle ──────────────────────────────────────── -->
+        <HBox alignment="CENTER_LEFT" spacing="8">
+            <Label text="Bonjour, Administrateur 👋" styleClass="welcome-label"/>
+            <Region HBox.hgrow="ALWAYS"/>
+            <Label text="Vendredi, 19 Juin 2026" styleClass="date-label"/>
+        </HBox>
+
+        <!-- ══════════════ KPI CARDS ══════════════ -->
+        <HBox spacing="18">
+
+            <!-- Card: Employés -->
+            <VBox styleClass="stat-card" HBox.hgrow="ALWAYS" spacing="14">
+                <HBox alignment="CENTER_LEFT" spacing="14">
+                    <Label text="👥" styleClass="card-icon card-icon-olive"/>
+                    <VBox spacing="2">
+                        <Label text="Total Employés" styleClass="card-label"/>
+                        <Label fx:id="kpiEmployes" text="—" styleClass="card-value"/>
+                    </VBox>
+                </HBox>
+                <Separator/>
+                <Label fx:id="trendEmployes" text="" styleClass="trend-positive"/>
+            </VBox>
+
+            <!-- Card: Présences -->
+            <VBox styleClass="stat-card" HBox.hgrow="ALWAYS" spacing="14">
+                <HBox alignment="CENTER_LEFT" spacing="14">
+                    <Label text="✅" styleClass="card-icon card-icon-olive"/>
+                    <VBox spacing="2">
+                        <Label text="Présences Aujourd'hui" styleClass="card-label"/>
+                        <Label fx:id="kpiPresence" text="—" styleClass="card-value"/>
+                    </VBox>
+                </HBox>
+                <Separator/>
+                <Label fx:id="trendPresence" text="" styleClass="trend-positive"/>
+            </VBox>
+
+            <!-- Card: Congés -->
+            <VBox styleClass="stat-card" HBox.hgrow="ALWAYS" spacing="14">
+                <HBox alignment="CENTER_LEFT" spacing="14">
+                    <Label text="🌴" styleClass="card-icon card-icon-butter"/>
+                    <VBox spacing="2">
+                        <Label text="Congés en attente" styleClass="card-label"/>
+                        <Label fx:id="kpiConges" text="—" styleClass="card-value"/>
+                    </VBox>
+                </HBox>
+                <Separator/>
+                <Label fx:id="trendConges" text="" styleClass="trend-negative"/>
+            </VBox>
+
+            <!-- Card: Planning -->
+            <VBox styleClass="stat-card" HBox.hgrow="ALWAYS" spacing="14">
+                <HBox alignment="CENTER_LEFT" spacing="14">
+                    <Label text="📅" styleClass="card-icon card-icon-cherry"/>
+                    <VBox spacing="2">
+                        <Label text="Équipes en planning" styleClass="card-label"/>
+                        <Label fx:id="kpiPlanning" text="—" styleClass="card-value"/>
+                    </VBox>
+                </HBox>
+                <Separator/>
+                <Label fx:id="trendPlanning" text="" styleClass="trend-positive"/>
+            </VBox>
+
+        </HBox>
+
+        <!-- ══════════════ CHARTS ROW ══════════════ -->
+        <HBox spacing="18" prefHeight="320">
+
+            <!-- Bar Chart: Présences semaine -->
+            <VBox styleClass="chart-card" HBox.hgrow="ALWAYS" spacing="10">
+                <HBox alignment="CENTER_LEFT">
+                    <Label text="📊  Présences — Semaine en cours" styleClass="section-title"/>
+                </HBox>
+                <BarChart fx:id="presenceChart" animated="false"
+                          VBox.vgrow="ALWAYS"
+                          barGap="3" categoryGap="18">
+                    <xAxis>
+                        <CategoryAxis label="Jour"/>
+                    </xAxis>
+                    <yAxis>
+                        <NumberAxis label="Employés" lowerBound="0" upperBound="50" tickUnit="10"/>
+                    </yAxis>
+                </BarChart>
+            </VBox>
+
+            <!-- Pie Chart: Répartition départements -->
+            <VBox styleClass="chart-card" prefWidth="340" spacing="10">
+                <Label text="🏗️  Répartition par département" styleClass="section-title"/>
+                <PieChart fx:id="deptChart" animated="false"
+                          VBox.vgrow="ALWAYS" labelsVisible="true" legendVisible="true"/>
+            </VBox>
+
+        </HBox>
+
+        <!-- ══════════════ RECENT ACTIVITIES TABLE ══════════════ -->
+        <!-- TODO: Décommenter et implémenter une fois la base de données connectée -->
+        <!--
+        <VBox styleClass="chart-card" spacing="12">
+            <HBox alignment="CENTER_LEFT">
+                <Label text="🕐  Activités récentes" styleClass="section-title"/>
+                <Region HBox.hgrow="ALWAYS"/>
+                <Button text="Voir tout →" styleClass="btn-link"/>
+            </HBox>
+            <TableView fx:id="activityTable" prefHeight="260" styleClass="activity-table">
+                <columns>
+                    <TableColumn text="Employé"  prefWidth="200"/>
+                    <TableColumn text="Action"   prefWidth="260"/>
+                    <TableColumn text="Date"     prefWidth="140"/>
+                    <TableColumn text="Statut"   prefWidth="140"/>
+                </columns>
+            </TableView>
+        </VBox>
+        -->
+
+    </VBox>
+</ScrollPane>
+

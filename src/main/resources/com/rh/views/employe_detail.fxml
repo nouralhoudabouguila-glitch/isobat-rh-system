@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.control.*?>
+
+<VBox xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" spacing="8" fx:controller="com.rh.contollers.EmployeDetailController" styleClass="chart-card">
+    <Label text="Détails Employé" styleClass="section-title" />
+    <VBox spacing="6">
+        <Label fx:id="lblName" />
+        <Label fx:id="lblDept" />
+        <Label fx:id="lblProfil" />
+        <Label fx:id="lblTel" />
+        <Label fx:id="lblSalaire" />
+        <Label fx:id="lblDateEmbauche" />
+    </VBox>
+
+    <HBox spacing="10" alignment="CENTER_RIGHT">
+        <Button text="Modifier" fx:id="btnEdit" />
+        <Button text="Supprimer" fx:id="btnDelete" />
+        <Button text="Fermer" fx:id="btnClose" />
+    </HBox>
+</VBox>
+
