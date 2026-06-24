@@ -1,0 +1,265 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<ScrollPane fitToWidth="true" hbarPolicy="NEVER" vbarPolicy="AS_NEEDED"
+            xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="com.rh.contollers.CongeFormController"
+            style="-fx-background-color:#F0E6DA;-fx-background:#F0E6DA;">
+    <content>
+        <VBox spacing="0" style="-fx-background-color:#F0E6DA;">
+
+            <!-- HEADER -->
+            <HBox spacing="16" alignment="CENTER_LEFT"
+                  style="-fx-background-color:#1A0406;-fx-padding:18 24 18 24;-fx-min-height:72;">
+                <StackPane style="-fx-background-color:#75070C;-fx-background-radius:10;
+                                  -fx-min-width:44;-fx-min-height:44;-fx-max-width:44;-fx-max-height:44;"
+                           alignment="CENTER">
+                    <Label text="🌴" style="-fx-font-size:20;"/>
+                </StackPane>
+                <VBox spacing="3">
+                    <Label fx:id="lblFormTitle" text="Nouvelle demande de congé"
+                           style="-fx-font-family:'Poppins';-fx-font-size:16;-fx-font-weight:bold;-fx-text-fill:#FFFFFF;"/>
+                    <Label text="Saisir la demande reçue par email de l'employé"
+                           style="-fx-font-family:'Poppins';-fx-font-size:11;-fx-text-fill:#886670;"/>
+                </VBox>
+            </HBox>
+
+            <VBox spacing="16" style="-fx-padding:24 28 8 28;">
+
+                <!-- SECTION 1 : Employé concerné -->
+                <VBox spacing="14"
+                      style="-fx-background-color:#FFFFFF;-fx-background-radius:12;
+                             -fx-border-color:#E0D0BE;-fx-border-radius:12;
+                             -fx-border-width:1;-fx-padding:18 20 18 20;">
+
+                    <HBox alignment="CENTER_LEFT" spacing="8"
+                          style="-fx-border-color:transparent transparent #F0E6DA transparent;
+                                 -fx-border-width:0 0 1.5 0;-fx-padding:0 0 10 0;">
+                        <Label text="👤" style="-fx-font-size:13;"/>
+                        <Label text="EMPLOYÉ CONCERNÉ"
+                               style="-fx-font-family:'Poppins';-fx-font-size:10;-fx-font-weight:bold;-fx-text-fill:#75070C;"/>
+                    </HBox>
+
+                    <GridPane hgap="16" vgap="6">
+                        <columnConstraints>
+                            <ColumnConstraints percentWidth="50"/>
+                            <ColumnConstraints percentWidth="50"/>
+                        </columnConstraints>
+
+                        <Label text="Employé *"
+                               style="-fx-font-family:'Poppins';-fx-font-size:11;-fx-font-weight:bold;-fx-text-fill:#555555;"
+                               GridPane.rowIndex="0" GridPane.columnIndex="0"/>
+                        <VBox GridPane.rowIndex="1" GridPane.columnIndex="0" spacing="3">
+                            <ComboBox fx:id="cbEmploye" maxWidth="1.7976931348623157E308"
+                                      promptText="Sélectionner un employé..."
+                                      style="-fx-font-family:'Poppins';-fx-font-size:12;"/>
+                            <Label fx:id="errEmploye" text=""
+                                   style="-fx-font-family:'Poppins';-fx-font-size:10;-fx-text-fill:#75070C;"/>
+                        </VBox>
+
+                        <Label text="Poste"
+                               style="-fx-font-family:'Poppins';-fx-font-size:11;-fx-font-weight:bold;-fx-text-fill:#555555;"
+                               GridPane.rowIndex="0" GridPane.columnIndex="1"/>
+                        <Label fx:id="lblPoste" text="—"
+                               style="-fx-font-family:'Poppins';-fx-font-size:12;-fx-text-fill:#888888;
+                                      -fx-background-color:#F8F5F2;-fx-background-radius:8;-fx-padding:9 12 9 12;"
+                               GridPane.rowIndex="1" GridPane.columnIndex="1"/>
+                    </GridPane>
+
+                    <!-- Solde disponible (affiché après sélection employé + type) -->
+                    <HBox fx:id="soldeBox" alignment="CENTER_LEFT" spacing="16"
+                          style="-fx-background-color:#FFF8F0;-fx-background-radius:8;
+                                 -fx-border-color:#FFEDAB;-fx-border-radius:8;-fx-border-width:1;
+                                 -fx-padding:10 14 10 14;" managed="false" visible="false">
+                        <Label text="📊 Solde disponible :"
+                               style="-fx-font-family:'Poppins';-fx-font-size:12;-fx-text-fill:#555555;"/>
+                        <Label fx:id="lblSoldeRestant" text="— jours"
+                               style="-fx-font-family:'Poppins';-fx-font-size:14;-fx-font-weight:bold;-fx-text-fill:#75070C;"/>
+                        <Label text="sur"
+                               style="-fx-font-family:'Poppins';-fx-font-size:12;-fx-text-fill:#888888;"/>
+                        <Label fx:id="lblSoldeInitial" text="— jours initiaux"
+                               style="-fx-font-family:'Poppins';-fx-font-size:12;-fx-text-fill:#888888;"/>
+                    </HBox>
+
+                </VBox>
+
+                <!-- SECTION 2 : Détails de la demande -->
+                <VBox spacing="14"
+                      style="-fx-background-color:#FFFFFF;-fx-background-radius:12;
+                             -fx-border-color:#E0D0BE;-fx-border-radius:12;
+                             -fx-border-width:1;-fx-padding:18 20 18 20;">
+
+                    <HBox alignment="CENTER_LEFT" spacing="8"
+                          style="-fx-border-color:transparent transparent #F0E6DA transparent;
+                                 -fx-border-width:0 0 1.5 0;-fx-padding:0 0 10 0;">
+                        <Label text="📋" style="-fx-font-size:13;"/>
+                        <Label text="DÉTAILS DE LA DEMANDE"
+                               style="-fx-font-family:'Poppins';-fx-font-size:10;-fx-font-weight:bold;-fx-text-fill:#75070C;"/>
+                    </HBox>
+
+                    <!-- Type de congé -->
+                    <VBox spacing="6">
+                        <Label text="Type de congé *"
+                               style="-fx-font-family:'Poppins';-fx-font-size:11;-fx-font-weight:bold;-fx-text-fill:#555555;"/>
+                        <HBox spacing="8">
+                            <ToggleButton fx:id="tbTypeAnnuel" text="🌴  Annuel"
+                                          style="-fx-font-family:'Poppins';-fx-font-size:11;-fx-font-weight:bold;
+                                                 -fx-background-color:#FFFFFF;-fx-border-color:#E0D0BE;
+                                                 -fx-border-radius:8;-fx-background-radius:8;-fx-border-width:1.5;
+                                                 -fx-text-fill:#555555;-fx-cursor:hand;-fx-padding:8 14 8 14;"/>
+                            <ToggleButton fx:id="tbTypeMaladie" text="🏥  Maladie"
+                                          style="-fx-font-family:'Poppins';-fx-font-size:11;-fx-font-weight:bold;
+                                                 -fx-background-color:#FFFFFF;-fx-border-color:#E0D0BE;
+                                                 -fx-border-radius:8;-fx-background-radius:8;-fx-border-width:1.5;
+                                                 -fx-text-fill:#555555;-fx-cursor:hand;-fx-padding:8 14 8 14;"/>
+                            <ToggleButton fx:id="tbTypeExceptionnel" text="⭐  Exceptionnel"
+                                          style="-fx-font-family:'Poppins';-fx-font-size:11;-fx-font-weight:bold;
+                                                 -fx-background-color:#FFFFFF;-fx-border-color:#E0D0BE;
+                                                 -fx-border-radius:8;-fx-background-radius:8;-fx-border-width:1.5;
+                                                 -fx-text-fill:#555555;-fx-cursor:hand;-fx-padding:8 14 8 14;"/>
+                            <ToggleButton fx:id="tbTypeSansSolde" text="💼  Sans solde"
+                                          style="-fx-font-family:'Poppins';-fx-font-size:11;-fx-font-weight:bold;
+                                                 -fx-background-color:#FFFFFF;-fx-border-color:#E0D0BE;
+                                                 -fx-border-radius:8;-fx-background-radius:8;-fx-border-width:1.5;
+                                                 -fx-text-fill:#555555;-fx-cursor:hand;-fx-padding:8 14 8 14;"/>
+                            <ToggleButton fx:id="tbTypeRecup" text="🔄  Récupération"
+                                          style="-fx-font-family:'Poppins';-fx-font-size:11;-fx-font-weight:bold;
+                                                 -fx-background-color:#FFFFFF;-fx-border-color:#E0D0BE;
+                                                 -fx-border-radius:8;-fx-background-radius:8;-fx-border-width:1.5;
+                                                 -fx-text-fill:#555555;-fx-cursor:hand;-fx-padding:8 14 8 14;"/>
+                        </HBox>
+                        <Label fx:id="errType" text=""
+                               style="-fx-font-family:'Poppins';-fx-font-size:10;-fx-text-fill:#75070C;"/>
+                    </VBox>
+
+                    <!-- Dates + Nombre de jours -->
+                    <GridPane hgap="16" vgap="6">
+                        <columnConstraints>
+                            <ColumnConstraints percentWidth="33"/>
+                            <ColumnConstraints percentWidth="33"/>
+                            <ColumnConstraints percentWidth="34"/>
+                        </columnConstraints>
+
+                        <Label text="Date de début *"
+                               style="-fx-font-family:'Poppins';-fx-font-size:11;-fx-font-weight:bold;-fx-text-fill:#555555;"
+                               GridPane.rowIndex="0" GridPane.columnIndex="0"/>
+                        <VBox GridPane.rowIndex="1" GridPane.columnIndex="0" spacing="3">
+                            <DatePicker fx:id="dpDebut" style="-fx-font-family:'Poppins';" maxWidth="1.7976931348623157E308"/>
+                            <Label fx:id="errDebut" text=""
+                                   style="-fx-font-family:'Poppins';-fx-font-size:10;-fx-text-fill:#75070C;"/>
+                        </VBox>
+
+                        <Label text="Date de fin *"
+                               style="-fx-font-family:'Poppins';-fx-font-size:11;-fx-font-weight:bold;-fx-text-fill:#555555;"
+                               GridPane.rowIndex="0" GridPane.columnIndex="1"/>
+                        <VBox GridPane.rowIndex="1" GridPane.columnIndex="1" spacing="3">
+                            <DatePicker fx:id="dpFin" style="-fx-font-family:'Poppins';" maxWidth="1.7976931348623157E308"/>
+                            <Label fx:id="errFin" text=""
+                                   style="-fx-font-family:'Poppins';-fx-font-size:10;-fx-text-fill:#75070C;"/>
+                        </VBox>
+
+                        <Label text="Nombre de jours "
+                               style="-fx-font-family:'Poppins';-fx-font-size:11;-fx-font-weight:bold;-fx-text-fill:#555555;"
+                               GridPane.rowIndex="0" GridPane.columnIndex="2"/>
+                        <Label fx:id="lblNbJours" text="—"
+                               style="-fx-font-family:'Poppins';-fx-font-size:20;-fx-font-weight:bold;
+                                      -fx-text-fill:#75070C;-fx-background-color:#FFF0F0;
+                                      -fx-background-radius:8;-fx-padding:6 16 6 16;"
+                               GridPane.rowIndex="1" GridPane.columnIndex="2"/>
+                    </GridPane>
+
+                </VBox>
+
+                <!-- SECTION 3 : Remplaçant + Statut + Commentaire -->
+                <VBox spacing="14"
+                      style="-fx-background-color:#FFFFFF;-fx-background-radius:12;
+                             -fx-border-color:#E0D0BE;-fx-border-radius:12;
+                             -fx-border-width:1;-fx-padding:18 20 18 20;">
+
+                    <HBox alignment="CENTER_LEFT" spacing="8"
+                          style="-fx-border-color:transparent transparent #F0E6DA transparent;
+                                 -fx-border-width:0 0 1.5 0;-fx-padding:0 0 10 0;">
+                        <Label text="ℹ" style="-fx-font-size:13;"/>
+                        <Label text="INFORMATIONS COMPLÉMENTAIRES"
+                               style="-fx-font-family:'Poppins';-fx-font-size:10;-fx-font-weight:bold;-fx-text-fill:#75070C;"/>
+                    </HBox>
+
+                    <GridPane hgap="16" vgap="6">
+                        <columnConstraints>
+                            <ColumnConstraints percentWidth="50"/>
+                            <ColumnConstraints percentWidth="50"/>
+                        </columnConstraints>
+
+                        <Label text="Remplaçant"
+                               style="-fx-font-family:'Poppins';-fx-font-size:11;-fx-font-weight:bold;-fx-text-fill:#555555;"
+                               GridPane.rowIndex="0" GridPane.columnIndex="0"/>
+                        <TextField fx:id="tfRemplacant" promptText="Nom du remplaçant..."
+                                   style="-fx-font-family:'Poppins';-fx-font-size:12;-fx-padding:9 12 9 12;
+                                          -fx-background-color:#FFFFFF;-fx-border-color:#E0D0BE;
+                                          -fx-border-radius:8;-fx-background-radius:8;-fx-border-width:1;"
+                                   GridPane.rowIndex="1" GridPane.columnIndex="0"/>
+
+                        <!-- Statut décision -->
+                        <Label text="Décision *"
+                               style="-fx-font-family:'Poppins';-fx-font-size:11;-fx-font-weight:bold;-fx-text-fill:#555555;"
+                               GridPane.rowIndex="0" GridPane.columnIndex="1"/>
+                        <HBox spacing="8" GridPane.rowIndex="1" GridPane.columnIndex="1">
+                            <ToggleButton fx:id="tbStatutAttente" text="⏳  En attente"
+                                          style="-fx-font-family:'Poppins';-fx-font-size:11;-fx-font-weight:bold;
+                                                 -fx-background-color:#FFFBEE;-fx-border-color:#C8A000;
+                                                 -fx-border-radius:8;-fx-background-radius:8;-fx-border-width:1.5;
+                                                 -fx-text-fill:#C8A000;-fx-cursor:hand;-fx-padding:8 12 8 12;"/>
+                            <ToggleButton fx:id="tbStatutApprouve" text="✔  Approuvé"
+                                          style="-fx-font-family:'Poppins';-fx-font-size:11;-fx-font-weight:bold;
+                                                 -fx-background-color:#F0F5E8;-fx-border-color:#4F6815;
+                                                 -fx-border-radius:8;-fx-background-radius:8;-fx-border-width:1.5;
+                                                 -fx-text-fill:#4F6815;-fx-cursor:hand;-fx-padding:8 12 8 12;"/>
+                            <ToggleButton fx:id="tbStatutRefuse" text="✕  Refusé"
+                                          style="-fx-font-family:'Poppins';-fx-font-size:11;-fx-font-weight:bold;
+                                                 -fx-background-color:#FFF0F0;-fx-border-color:#75070C;
+                                                 -fx-border-radius:8;-fx-background-radius:8;-fx-border-width:1.5;
+                                                 -fx-text-fill:#75070C;-fx-cursor:hand;-fx-padding:8 12 8 12;"/>
+                        </HBox>
+                    </GridPane>
+
+                    <!-- Commentaire -->
+                    <VBox spacing="6">
+                        <Label text="Commentaire / Motif de refus"
+                               style="-fx-font-family:'Poppins';-fx-font-size:11;-fx-font-weight:bold;-fx-text-fill:#555555;"/>
+                        <TextArea fx:id="taCommentaire" promptText="Ajouter un commentaire..."
+                                  prefRowCount="3"
+                                  style="-fx-font-family:'Poppins';-fx-font-size:12;-fx-padding:9 12 9 12;
+                                         -fx-background-color:#FFFFFF;-fx-border-color:#E0D0BE;
+                                         -fx-border-radius:8;-fx-background-radius:8;-fx-border-width:1;"/>
+                    </VBox>
+
+                </VBox>
+
+                <Region minHeight="8"/>
+            </VBox>
+
+            <!-- FOOTER -->
+            <HBox spacing="12" alignment="CENTER_LEFT"
+                  style="-fx-padding:14 28 18 28;-fx-background-color:#FDFAF7;
+                         -fx-border-color:#F0E6DA transparent transparent transparent;
+                         -fx-border-width:1 0 0 0;">
+                <Button fx:id="btnCancel" text="✕  Annuler"
+                        style="-fx-font-family:'Poppins';-fx-font-size:12;-fx-font-weight:bold;
+                               -fx-padding:10 18 10 18;-fx-border-color:#E0D0BE;-fx-border-radius:8;
+                               -fx-background-color:#FFFFFF;-fx-background-radius:8;
+                               -fx-text-fill:#666666;-fx-cursor:hand;"
+                        onAction="#handleCancel"/>
+                <Pane HBox.hgrow="ALWAYS"/>
+                <Button fx:id="btnSave" text="✔  Enregistrer la demande"
+                        style="-fx-font-family:'Poppins';-fx-font-size:12;-fx-font-weight:bold;
+                               -fx-padding:10 22 10 22;-fx-background-color:#75070C;
+                               -fx-background-radius:8;-fx-text-fill:#FFFFFF;-fx-cursor:hand;
+                               -fx-border-color:transparent;"
+                        onAction="#handleSave"/>
+            </HBox>
+
+        </VBox>
+    </content>
+</ScrollPane>

@@ -1,23 +1,86 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.control.*?>
+<?import javafx.geometry.Insets?>
 
-<ScrollPane fitToWidth="true" hbarPolicy="NEVER" styleClass="content-scroll"
-            xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1"
-            fx:controller="com.rh.contollers.CongesController">
+<VBox xmlns="http://javafx.com/javafx/17"
+      xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="com.rh.contollers.CongesController"
+      spacing="0"
+      style="-fx-background-color:#F0E6DA; -fx-padding:24;">
 
-    <VBox styleClass="dashboard-root" spacing="20">
-
-        <!-- En-tête -->
-        <HBox alignment="CENTER_LEFT" spacing="8">
-            <Label text="🌴  Gestion des Congés" styleClass="welcome-label"/>
+    <!-- ══ EN-TÊTE ══ -->
+    <HBox alignment="CENTER_LEFT" spacing="12" style="-fx-padding:0 0 18 0;">
+        <VBox spacing="3" HBox.hgrow="ALWAYS">
+            <Label text="Gestion des Congés"
+                   style="-fx-font-family:'Poppins';-fx-font-size:20;-fx-font-weight:bold;-fx-text-fill:#75070C;"/>
+            <Label fx:id="lblCount" text="Chargement..."
+                   style="-fx-font-family:'Poppins';-fx-font-size:12;-fx-text-fill:#888888;"/>
+        </VBox>
+        <HBox spacing="10" alignment="CENTER_RIGHT">
+            <ComboBox fx:id="cbFilterStatut" promptText="Tous les statuts"
+                      style="-fx-font-family:'Poppins';-fx-font-size:12;-fx-pref-width:160;"/>
+            <ComboBox fx:id="cbFilterType" promptText="Tous les types"
+                      style="-fx-font-family:'Poppins';-fx-font-size:12;-fx-pref-width:160;"/>
+            <Button text="＋  Nouvelle demande"
+                    style="-fx-background-color:#75070C;-fx-text-fill:#FFFFFF;
+                           -fx-font-family:'Poppins';-fx-font-size:12;-fx-font-weight:bold;
+                           -fx-background-radius:20;-fx-padding:9 20 9 20;-fx-cursor:hand;
+                           -fx-border-color:transparent;"
+                    onAction="#handleAdd"/>
         </HBox>
+    </HBox>
 
-        <!-- Zone de contenu — à implémenter -->
-        <VBox styleClass="chart-card" VBox.vgrow="ALWAYS" spacing="16">
-            <!-- TODO: Ajouter votre interface ici (demandes, validation, etc.) -->
+    <!-- ══ KPI ROW ══ -->
+    <HBox spacing="14" style="-fx-padding:0 0 18 0;">
+
+        <VBox styleClass="kpi-card" spacing="4" HBox.hgrow="ALWAYS"
+              style="-fx-background-color:#FFFFFF;-fx-background-radius:12;
+                     -fx-border-color:#E0D0BE;-fx-border-radius:12;-fx-border-width:1;
+                     -fx-padding:14 16 14 16;">
+            <Label text="En attente" style="-fx-font-family:'Poppins';-fx-font-size:11;-fx-text-fill:#888888;"/>
+            <Label fx:id="kpiAttente" text="0"
+                   style="-fx-font-family:'Poppins';-fx-font-size:26;-fx-font-weight:bold;-fx-text-fill:#C8A000;"/>
+            <Label text="demandes à traiter" style="-fx-font-family:'Poppins';-fx-font-size:10;-fx-text-fill:#AAAAAA;"/>
         </VBox>
 
-    </VBox>
-</ScrollPane>
+        <VBox spacing="4" HBox.hgrow="ALWAYS"
+              style="-fx-background-color:#FFFFFF;-fx-background-radius:12;
+                     -fx-border-color:#E0D0BE;-fx-border-radius:12;-fx-border-width:1;
+                     -fx-padding:14 16 14 16;">
+            <Label text="Approuvées" style="-fx-font-family:'Poppins';-fx-font-size:11;-fx-text-fill:#888888;"/>
+            <Label fx:id="kpiApprouve" text="0"
+                   style="-fx-font-family:'Poppins';-fx-font-size:26;-fx-font-weight:bold;-fx-text-fill:#4F6815;"/>
+            <Label text="ce mois" style="-fx-font-family:'Poppins';-fx-font-size:10;-fx-text-fill:#AAAAAA;"/>
+        </VBox>
 
+        <VBox spacing="4" HBox.hgrow="ALWAYS"
+              style="-fx-background-color:#FFFFFF;-fx-background-radius:12;
+                     -fx-border-color:#E0D0BE;-fx-border-radius:12;-fx-border-width:1;
+                     -fx-padding:14 16 14 16;">
+            <Label text="Refusées" style="-fx-font-family:'Poppins';-fx-font-size:11;-fx-text-fill:#888888;"/>
+            <Label fx:id="kpiRefuse" text="0"
+                   style="-fx-font-family:'Poppins';-fx-font-size:26;-fx-font-weight:bold;-fx-text-fill:#75070C;"/>
+            <Label text="ce mois" style="-fx-font-family:'Poppins';-fx-font-size:10;-fx-text-fill:#AAAAAA;"/>
+        </VBox>
+
+        <VBox spacing="4" HBox.hgrow="ALWAYS"
+              style="-fx-background-color:#FFFFFF;-fx-background-radius:12;
+                     -fx-border-color:#E0D0BE;-fx-border-radius:12;-fx-border-width:1;
+                     -fx-padding:14 16 14 16;">
+            <Label text="Total demandes" style="-fx-font-family:'Poppins';-fx-font-size:11;-fx-text-fill:#888888;"/>
+            <Label fx:id="kpiTotal" text="0"
+                   style="-fx-font-family:'Poppins';-fx-font-size:26;-fx-font-weight:bold;-fx-text-fill:#222222;"/>
+            <Label text="toutes périodes" style="-fx-font-family:'Poppins';-fx-font-size:10;-fx-text-fill:#AAAAAA;"/>
+        </VBox>
+
+    </HBox>
+
+    <!-- ══ CARDS ZONE ══ -->
+    <ScrollPane fitToWidth="true" hbarPolicy="NEVER" VBox.vgrow="ALWAYS"
+                style="-fx-background-color:transparent;-fx-background:#F0E6DA;-fx-border-color:transparent;">
+        <FlowPane fx:id="cardsContainer" hgap="16" vgap="16"
+                  style="-fx-background-color:transparent;-fx-padding:4 0 20 0;"/>
+    </ScrollPane>
+
+</VBox>
