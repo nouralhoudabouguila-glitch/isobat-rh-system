@@ -42,7 +42,8 @@ public class EmployeController implements Initializable {
                 "Tous les départements",
                 "Centre d'appel B2B",
                 "Centre d'appel B2C",
-                "Bureau d'étude"
+                "Bureau d'étude",
+                "Administration"
         );
         cbFilterDept.setValue("Tous les départements");
         tfSearch.textProperty().addListener((obs, o, n) -> applyFilter());
@@ -287,6 +288,7 @@ public class EmployeController implements Initializable {
             case CENTRE_APPEL_B2B -> "Centre d'appel B2B";
             case CENTRE_APPEL_B2C -> "Centre d'appel B2C";
             case BUREAU_ETUDE     -> "Bureau d'étude";
+            case ADMINISTRATION     -> "Administration";
         };
     }
 }

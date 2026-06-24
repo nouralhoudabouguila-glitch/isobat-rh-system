@@ -18,7 +18,7 @@ public class EmployesController implements Initializable {
     @FXML private ToggleButton tbSitCelib, tbSitMarie, tbSitDivorce, tbSitVeuf;
     @FXML private TextField tfNom, tfPrenom, tfCIN, tfTelephone, tfCNSS, tfProfil, tfSalaire, tfRIB;
     @FXML private DatePicker dpNaissance, dpEmbauche;
-    @FXML private ToggleButton tbDeptB2B, tbDeptB2C, tbDeptBureau;
+    @FXML private ToggleButton tbDeptB2B, tbDeptB2C, tbDeptBureau,tbDeptAdmin;
     @FXML private ToggleButton tbContratCDI, tbContratCDD, tbContratStage;
     @FXML private ToggleButton tbStatutActif, tbStatutInactif;
     @FXML private ComboBox<String> cbBanque;
@@ -59,10 +59,11 @@ public class EmployesController implements Initializable {
         tbSitDivorce.setToggleGroup(g1); tbSitVeuf.setToggleGroup(g1);
 
         ToggleGroup g2 = new ToggleGroup();
-        tbDeptB2B.setToggleGroup(g2); tbDeptB2C.setToggleGroup(g2); tbDeptBureau.setToggleGroup(g2);
+        tbDeptB2B.setToggleGroup(g2); tbDeptB2C.setToggleGroup(g2); tbDeptBureau.setToggleGroup(g2); tbDeptAdmin.setToggleGroup(g2);
         tbDeptB2B.setUserData(Departement.CENTRE_APPEL_B2B);
         tbDeptB2C.setUserData(Departement.CENTRE_APPEL_B2C);
         tbDeptBureau.setUserData(Departement.BUREAU_ETUDE);
+        tbDeptAdmin.setUserData(Departement.ADMINISTRATION);
 
         ToggleGroup g3 = new ToggleGroup();
         tbContratCDI.setToggleGroup(g3); tbContratCDD.setToggleGroup(g3); tbContratStage.setToggleGroup(g3);
@@ -76,7 +77,7 @@ public class EmployesController implements Initializable {
         for (ToggleButton tb : new ToggleButton[]{tbSitCelib, tbSitMarie, tbSitDivorce, tbSitVeuf})
             tb.selectedProperty().addListener((o, was, is) -> tb.setStyle(is ? SIT_ON : SIT_OFF));
 
-        for (ToggleButton tb : new ToggleButton[]{tbDeptB2B, tbDeptB2C, tbDeptBureau})
+        for (ToggleButton tb : new ToggleButton[]{tbDeptB2B, tbDeptB2C, tbDeptBureau,tbDeptAdmin})
             tb.selectedProperty().addListener((o, was, is) -> tb.setStyle(is ? DEPT_ON : DEPT_OFF));
 
         for (ToggleButton tb : new ToggleButton[]{tbContratCDI, tbContratCDD, tbContratStage})
@@ -120,6 +121,7 @@ public class EmployesController implements Initializable {
             case CENTRE_APPEL_B2B -> tbDeptB2B.setSelected(true);
             case CENTRE_APPEL_B2C -> tbDeptB2C.setSelected(true);
             case BUREAU_ETUDE     -> tbDeptBureau.setSelected(true);
+            case ADMINISTRATION     -> tbDeptAdmin.setSelected(true);
         }
         String c = e.getTypeContrat();
         if ("CDD".equals(c)) tbContratCDD.setSelected(true);
@@ -142,7 +144,7 @@ public class EmployesController implements Initializable {
         e.setSituationFamiliale(getSit());
         e.setCin(tfCIN.getText().trim()); e.setTelephone(tfTelephone.getText().trim());
         e.setnCNSS(tfCNSS.getText().trim());
-        ToggleButton d = getSelected(tbDeptB2B, tbDeptB2C, tbDeptBureau);
+        ToggleButton d = getSelected(tbDeptB2B, tbDeptB2C, tbDeptBureau,tbDeptAdmin);
         if (d != null && d.getUserData() instanceof Departement)
             e.setDepartement((Departement) d.getUserData());
         e.setProfil(tfProfil.getText().trim()); e.setDateEmbauche(dpEmbauche.getValue());
@@ -167,7 +169,7 @@ public class EmployesController implements Initializable {
         { errCIN.setText("8 chiffres requis"); tfCIN.setStyle(err); ok = false; }
         if (tfTelephone.getText() == null || tfTelephone.getText().trim().isEmpty())
         { errTelephone.setText("Obligatoire"); tfTelephone.setStyle(err); ok = false; }
-        if (getSelected(tbDeptB2B, tbDeptB2C, tbDeptBureau) == null)
+        if (getSelected(tbDeptB2B, tbDeptB2C, tbDeptBureau,tbDeptAdmin) == null)
         { errDept.setText("Choisissez un département"); ok = false; }
         if (dpEmbauche.getValue() == null)
         { errEmbauche.setText("Obligatoire"); ok = false; }
@@ -188,7 +190,7 @@ public class EmployesController implements Initializable {
         tfProfil.clear(); dpEmbauche.setValue(null); tfSalaire.clear(); tfRIB.clear();
         cbBanque.setValue(null);
         tbSitCelib.setSelected(true);
-        tbDeptB2B.setSelected(false); tbDeptB2C.setSelected(false); tbDeptBureau.setSelected(false);
+        tbDeptB2B.setSelected(false); tbDeptB2C.setSelected(false); tbDeptBureau.setSelected(false); tbDeptAdmin.setSelected(false);
         tbContratCDI.setSelected(true); tbStatutActif.setSelected(true);
         if (lblFormTitle != null) lblFormTitle.setText("Nouvel employé");
         generateMatricule(); clearErrors();
