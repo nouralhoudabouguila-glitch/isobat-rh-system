@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.geometry.Insets?>
+
+<ScrollPane fitToWidth="true" hbarPolicy="NEVER" styleClass="content-scroll"
+            xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="com.rh.contollers.TriTelephoniqueController">
+
+    <VBox styleClass="dashboard-root" spacing="20">
+
+        <!-- ── En-tête ── -->
+        <HBox alignment="CENTER_LEFT" spacing="8">
+            <Label text="📞  Tri Téléphonique" styleClass="welcome-label"/>
+            <Region HBox.hgrow="ALWAYS"/>
+            <Button text="＋  Ajouter un candidat" styleClass="btn-primary"/>
+            <Button text="📥  Exporter" styleClass="btn-secondary"/>
+        </HBox>
+
+        <!-- ── Filtres / Recherche ── -->
+        <HBox spacing="12" alignment="CENTER_LEFT">
+            <TextField promptText="🔍  Rechercher un candidat..."
+                       style="-fx-background-color: white; -fx-background-radius: 8; -fx-padding: 8 14; -fx-border-color: #F0E6DA; -fx-border-radius: 8;"
+                       prefWidth="300"/>
+            <ComboBox promptText="Filtrer par statut"
+                      style="-fx-background-color: white; -fx-background-radius: 8; -fx-padding: 4 8; -fx-border-color: #F0E6DA; -fx-border-radius: 8; -fx-pref-height: 36;"/>
+            <Button text="Filtrer" styleClass="btn-secondary"/>
+        </HBox>
+
+        <!-- ── Tableau ── -->
+        <VBox styleClass="chart-card" VBox.vgrow="ALWAYS" spacing="12">
+
+            <!-- En-tête de la table -->
+            <HBox alignment="CENTER_LEFT">
+                <Label text="📋  Liste des candidats" styleClass="section-title"/>
+                <Region HBox.hgrow="ALWAYS"/>
+                <Label fx:id="lblTotalCandidats" text="0 candidat(s)" styleClass="depense-meta"/>
+            </HBox>
+
+            <Separator/>
+
+            <!-- TableView -->
+            <TableView fx:id="tableView" styleClass="activity-table" VBox.vgrow="ALWAYS" prefHeight="500">
+                <columns>
+                    <TableColumn fx:id="colNom" text="NOM &amp; PRÉNOM" prefWidth="200"/>
+                    <TableColumn fx:id="colTel" text="TÉLÉPHONE" prefWidth="140"/>
+                    <TableColumn fx:id="colExperience" text="EXPÉRIENCE" prefWidth="280"/>
+                    <TableColumn fx:id="colPoste" text="POSTE" prefWidth="140"/>
+                    <TableColumn fx:id="colCommentaire" text="COMMENTAIRE" prefWidth="100"/>
+                    <TableColumn fx:id="colStatut" text="STATUT" prefWidth="120"/>
+                </columns>
+            </TableView>
+
+            <!-- Pagination (optionnelle) -->
+            <HBox alignment="CENTER_RIGHT" spacing="8" style="-fx-padding: 8 0 0 0;">
+                <Label text="Lignes par page : " styleClass="depense-meta"/>
+                <ComboBox fx:id="comboLignesParPage" prefWidth="70"
+                          style="-fx-background-color: white; -fx-background-radius: 4; -fx-border-color: #F0E6DA; -fx-border-radius: 4;"/>
+                <HBox spacing="4">
+                    <Button text="←" styleClass="btn-back" style="-fx-padding: 4 10;"/>
+                    <Label fx:id="lblPageActuelle" text="1" style="-fx-padding: 4 10; -fx-background-color: #4F6815; -fx-text-fill: white; -fx-background-radius: 4;"/>
+                    <Button text="→" styleClass="btn-back" style="-fx-padding: 4 10;"/>
+                </HBox>
+            </HBox>
+
+        </VBox>
+
+    </VBox>
+</ScrollPane>

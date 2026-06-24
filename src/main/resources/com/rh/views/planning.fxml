@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.control.*?>
+
+<ScrollPane fitToWidth="true" hbarPolicy="NEVER" styleClass="content-scroll"
+            xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="com.rh.contollers.PlanningController">
+
+    <VBox styleClass="dashboard-root" spacing="20">
+
+        <!-- En-tête -->
+        <HBox alignment="CENTER_LEFT" spacing="8">
+            <Label text="📅  Planning" styleClass="welcome-label"/>
+        </HBox>
+
+        <!-- Zone de contenu — à implémenter -->
+        <VBox styleClass="chart-card" VBox.vgrow="ALWAYS" spacing="16">
+            <!-- TODO: Ajouter votre interface ici (calendrier, planning équipes, etc.) -->
+        </VBox>
+
+    </VBox>
+</ScrollPane>
+

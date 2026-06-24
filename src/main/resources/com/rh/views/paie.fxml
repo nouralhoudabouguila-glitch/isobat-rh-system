@@ -1,0 +1,112 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.control.Separator?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Region?>
+<?import javafx.scene.layout.VBox?>
+
+<ScrollPane fitToWidth="true" hbarPolicy="NEVER" styleClass="content-scroll"
+            xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="com.rh.contollers.PaieController">
+
+    <VBox spacing="24" styleClass="dashboard-root">
+
+        <!-- ── En-tête ── -->
+        <HBox alignment="CENTER_LEFT">
+            <Label styleClass="welcome-label" text="💳  Gestion de la Paie"/>
+            <Region HBox.hgrow="ALWAYS"/>
+            <Button text="📥  Exporter" styleClass="btn-back"/>
+        </HBox>
+
+        <!-- ══════════ LIGNE 1 : Avance | Bulletins | Retenue ══════════ -->
+        <HBox spacing="22">
+
+            <!-- Avance -->
+            <VBox styleClass="detail-paie-card" HBox.hgrow="ALWAYS" spacing="12">
+                <HBox alignment="CENTER_LEFT" spacing="10">
+                    <Label text="💸" styleClass="detail-paie-icon detail-icon-cherry"/>
+                    <Label text="Avance" styleClass="detail-paie-title"/>
+                </HBox>
+                <Separator/>
+                <Label text="Ce mois" styleClass="detail-paie-period"/>
+                <Label fx:id="lblAvanceMontant" text="0,00 DT" styleClass="detail-paie-value"/>
+                <Label fx:id="lblAvanceCount" text="0 avance(s) enregistrée(s)" styleClass="detail-paie-count"/>
+                <Button text="Voir les détails →" styleClass="btn-link" onAction="#onVoirAvance"/>
+            </VBox>
+
+            <!-- Bulletins de paie -->
+            <VBox styleClass="detail-paie-card" HBox.hgrow="ALWAYS" spacing="12">
+                <HBox alignment="CENTER_LEFT" spacing="10">
+                    <Label text="📋" styleClass="detail-paie-icon detail-icon-olive"/>
+                    <Label text="Bulletins de paie" styleClass="detail-paie-title"/>
+                </HBox>
+                <Separator/>
+                <Label text="Ce mois" styleClass="detail-paie-period"/>
+                <Label fx:id="lblBulletinMontant" text="0" styleClass="detail-paie-value"/>
+                <Label fx:id="lblBulletinCount" text="0 bulletin(s) généré(s)" styleClass="detail-paie-count"/>
+                <Button text="Voir les détails →" styleClass="btn-link" onAction="#onVoirBulletins"/>
+            </VBox>
+
+            <!-- Retenue -->
+            <VBox styleClass="detail-paie-card" HBox.hgrow="ALWAYS" spacing="12">
+                <HBox alignment="CENTER_LEFT" spacing="10">
+                    <Label text="🔒" styleClass="detail-paie-icon detail-icon-cherry"/>
+                    <Label text="Retenue" styleClass="detail-paie-title"/>
+                </HBox>
+                <Separator/>
+                <Label text="Ce mois" styleClass="detail-paie-period"/>
+                <Label fx:id="lblRetenueMontant" text="0,00 DT" styleClass="detail-paie-value"/>
+                <Label fx:id="lblRetenueCount" text="0 retenue(s) appliquée(s)" styleClass="detail-paie-count"/>
+                <Button text="Voir les détails →" styleClass="btn-link" onAction="#onVoirRetenue"/>
+            </VBox>
+
+        </HBox>
+
+        <!-- ══════════ LIGNE 2 : Prime | Heures sup | Tickets ══════════ -->
+        <HBox spacing="22">
+
+            <!-- Prime -->
+            <VBox styleClass="detail-paie-card" HBox.hgrow="ALWAYS" spacing="12">
+                <HBox alignment="CENTER_LEFT" spacing="10">
+                    <Label text="🎁" styleClass="detail-paie-icon detail-icon-butter"/>
+                    <Label text="Primes" styleClass="detail-paie-title"/>
+                </HBox>
+                <Separator/>
+                <Label text="Total du mois" styleClass="detail-paie-period"/>
+                <Label fx:id="lblPrimeMontant" text="0,00 DT" styleClass="detail-paie-value"/>
+                <Label fx:id="lblPrimeCount" text="0 prime(s) accordée(s)" styleClass="detail-paie-count"/>
+                <Button text="Voir les détails →" styleClass="btn-link" onAction="#onVoirPrimes"/>
+            </VBox>
+
+            <!-- Heures supplémentaires -->
+            <VBox styleClass="detail-paie-card" HBox.hgrow="ALWAYS" spacing="12">
+                <HBox alignment="CENTER_LEFT" spacing="10">
+                    <Label text="⏰" styleClass="detail-paie-icon detail-icon-olive"/>
+                    <Label text="Heures supplémentaires" styleClass="detail-paie-title"/>
+                </HBox>
+                <Separator/>
+                <Label text="Ce mois" styleClass="detail-paie-period"/>
+                <Label fx:id="lblHeureSupMontant" text="0 h" styleClass="detail-paie-value"/>
+                <Label fx:id="lblHeureSupCount" text="0 saisie(s) enregistrée(s)" styleClass="detail-paie-count"/>
+                <Button text="Voir les détails →" styleClass="btn-link" onAction="#onVoirHeuresSup"/>
+            </VBox>
+
+            <!-- Tickets restaurant -->
+            <VBox styleClass="detail-paie-card" HBox.hgrow="ALWAYS" spacing="12">
+                <HBox alignment="CENTER_LEFT" spacing="10">
+                    <Label text="🍽️" styleClass="detail-paie-icon detail-icon-butter"/>
+                    <Label text="Tickets restaurant" styleClass="detail-paie-title"/>
+                </HBox>
+                <Separator/>
+                <Label text="Ce mois" styleClass="detail-paie-period"/>
+                <Label fx:id="lblTicketMontant" text="0" styleClass="detail-paie-value"/>
+                <Label fx:id="lblTicketCount" text="0 ticket(s) attribué(s)" styleClass="detail-paie-count"/>
+                <Button text="Voir les détails →" styleClass="btn-link" onAction="#onVoirTickets"/>
+            </VBox>
+
+        </HBox>
+
+    </VBox>
+</ScrollPane>
