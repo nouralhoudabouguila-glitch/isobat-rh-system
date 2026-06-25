@@ -756,3 +756,729 @@
     -fx-text-fill: #4F6815;
     -fx-font-weight: bold;
 }
+
+/* ── Style pour le formulaire d'ajout ── */
+.dialog-pane {
+    -fx-background-color: #F0E6DA;
+    -fx-padding: 20;
+}
+
+.dialog-pane .label {
+    -fx-text-fill: #333333;
+}
+
+.dialog-pane .text-field,
+.dialog-pane .text-area,
+.dialog-pane .combo-box {
+    -fx-background-color: white;
+    -fx-background-radius: 8;
+    -fx-border-color: #F0E6DA;
+    -fx-border-radius: 8;
+    -fx-padding: 10 14;
+}
+
+.dialog-pane .text-field:focused,
+.dialog-pane .text-area:focused,
+.dialog-pane .combo-box:focused {
+    -fx-border-color: #4F6815;
+    -fx-border-width: 2;
+}
+
+.dialog-pane .text-area {
+    -fx-padding: 8 14;
+}
+
+/* ── Style des boutons dans le formulaire ── */
+.dialog-pane .button-bar .button {
+    -fx-padding: 10 24;
+    -fx-font-size: 13px;
+    -fx-font-weight: bold;
+    -fx-background-radius: 8;
+    -fx-cursor: hand;
+}
+
+.dialog-pane .button-bar .button:default {
+    -fx-background-color: #4F6815;
+    -fx-text-fill: white;
+}
+
+.dialog-pane .button-bar .button:default:hover {
+    -fx-background-color: #3E5210;
+}
+
+.dialog-pane .button-bar .button:cancel {
+    -fx-background-color: #F0E6DA;
+    -fx-text-fill: #4F6815;
+    -fx-border-color: #EDE4D8;
+    -fx-border-width: 1;
+    -fx-border-radius: 8;
+}
+
+.dialog-pane .button-bar .button:cancel:hover {
+    -fx-background-color: #e5d8cc;
+}
+
+/* ── Style pour les boutons d'action ── */
+.btn-action {
+    -fx-padding: 4 10;
+    -fx-font-size: 12px;
+    -fx-background-radius: 6;
+    -fx-cursor: hand;
+}
+
+.btn-action:hover {
+    -fx-opacity: 0.8;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.15), 4, 0, 0, 2);
+}
+
+/* ── Colonne Actions centrée ── */
+.column-statut {
+    -fx-alignment: CENTER;
+}
+
+/* ── Style pour les cellules de la colonne Actions ── */
+.table-cell .hbox {
+    -fx-alignment: CENTER;
+}
+
+/* ── Style pour le ComboBox dans la colonne Statut ── */
+.combo-box-statut {
+    -fx-background-color: transparent;
+    -fx-padding: 0;
+    -fx-font-size: 12px;
+    -fx-font-weight: bold;
+    -fx-pref-width: 100px;
+    -fx-max-width: 120px;
+    -fx-min-width: 80px;
+}
+
+.combo-box-statut .arrow {
+    -fx-background-color: #888;
+}
+
+.combo-box-statut .list-cell {
+    -fx-padding: 4 8;
+    -fx-alignment: CENTER;
+}
+
+/* ── Styles pour les options du ComboBox ── */
+.combo-box-statut .list-view .list-cell:selected {
+    -fx-background-color: #4F6815;
+    -fx-text-fill: white;
+}
+
+.combo-box-statut .list-view .list-cell:hover {
+    -fx-background-color: #e8f0d8;
+}
+
+/* ── Styles des statuts dans le ComboBox ── */
+.combo-box-statut.statut-accepte .list-cell {
+    -fx-background-color: #4F6815;
+    -fx-text-fill: white;
+    -fx-background-radius: 12;
+}
+
+.combo-box-statut.statut-pas-accepte .list-cell {
+    -fx-background-color: #75070C;
+    -fx-text-fill: white;
+    -fx-background-radius: 12;
+}
+
+.combo-box-statut.statut-en-attente .list-cell {
+    -fx-background-color: #FFEDAB;
+    -fx-text-fill: #7a5c00;
+    -fx-background-radius: 12;
+}
+
+/* ── Style pour le bouton supprimer ── */
+.btn-supprimer {
+    -fx-background-color: #fde8e9;
+    -fx-background-radius: 6;
+    -fx-padding: 4 10;
+    -fx-font-size: 14px;
+    -fx-cursor: hand;
+}
+
+.btn-supprimer:hover {
+    -fx-background-color: #f5c8c9;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.15), 4, 0, 0, 2);
+}
+
+/* ── Style pour le ComboBox dans la colonne Statut ── */
+.combo-box-statut {
+    -fx-background-color: transparent;
+    -fx-padding: 0;
+    -fx-font-size: 12px;
+    -fx-font-weight: bold;
+    -fx-pref-width: 100px;
+    -fx-min-width: 80px;
+    -fx-max-width: 120px;
+}
+
+.combo-box-statut .arrow {
+    -fx-background-color: #888;
+    -fx-padding: 2;
+}
+
+.combo-box-statut .list-cell {
+    -fx-padding: 4 8;
+    -fx-alignment: CENTER;
+}
+
+/* ── Styles des statuts dans le ComboBox ── */
+.combo-box-statut.statut-accepte .list-cell {
+    -fx-background-color: #4F6815;
+    -fx-text-fill: white;
+    -fx-background-radius: 12;
+    -fx-padding: 2 10;
+}
+
+.combo-box-statut.statut-pas-accepte .list-cell {
+    -fx-background-color: #75070C;
+    -fx-text-fill: white;
+    -fx-background-radius: 12;
+    -fx-padding: 2 10;
+}
+
+.combo-box-statut.statut-en-attente .list-cell {
+    -fx-background-color: #FFEDAB;
+    -fx-text-fill: #7a5c00;
+    -fx-background-radius: 12;
+    -fx-padding: 2 10;
+}
+
+/* ── Style pour la colonne Actions ── */
+.column-statut {
+    -fx-alignment: CENTER;
+}
+
+.btn-supprimer {
+    -fx-background-color: #fde8e9;
+    -fx-background-radius: 6;
+    -fx-padding: 4 10;
+    -fx-font-size: 14px;
+    -fx-cursor: hand;
+}
+
+.btn-supprimer:hover {
+    -fx-background-color: #f5c8c9;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.15), 4, 0, 0, 2);
+}
+
+/* ═══════════════════════════════════════════════════════
+   TABLEAU TRI TÉLÉPHONIQUE - STYLES AMÉLIORÉS
+   ═══════════════════════════════════════════════════════ */
+
+/* ── Conteneur du tableau ── */
+.table-container {
+    -fx-background-color: #FFFFFF;
+    -fx-background-radius: 14px;
+    -fx-border-color: #F0E6DA;
+    -fx-border-radius: 14px;
+    -fx-border-width: 1;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.08), 8, 0, 2, 8);
+    -fx-padding: 20 22 20 22;
+}
+
+/* ── TableView améliorée ── */
+.activity-table {
+    -fx-background-color: transparent;
+    -fx-border-color: #F0E6DA;
+    -fx-border-radius: 10px;
+    -fx-background-radius: 10px;
+}
+
+/* ── En-tête des colonnes ── */
+.activity-table .column-header-background {
+    -fx-background-color: #F5F0EA;
+    -fx-background-radius: 10px 10px 0 0;
+    -fx-padding: 0;
+}
+
+.activity-table .column-header {
+    -fx-background-color: transparent;
+    -fx-border-color: #EDE4D8;
+    -fx-border-width: 0 0 1 0;
+    -fx-padding: 12 8;
+}
+
+.activity-table .column-header .label {
+    -fx-font-weight: bold;
+    -fx-font-size: 12px;
+    -fx-text-fill: #4F6815;
+    -fx-font-family: 'Segoe UI', 'Arial', sans-serif;
+    -fx-padding: 0 4;
+}
+
+/* ── Cellules du tableau ── */
+.activity-table .table-cell {
+    -fx-font-size: 12.5px;
+    -fx-text-fill: #333333;
+    -fx-padding: 10 12;
+    -fx-alignment: CENTER-LEFT;
+    -fx-border-color: #F5F0EA;
+    -fx-border-width: 0 0 1 0;
+}
+
+.activity-table .table-cell:last-child {
+    -fx-alignment: CENTER;
+}
+
+/* ── Lignes alternées ── */
+.activity-table .table-row-cell:even {
+    -fx-background-color: #FCFAF8;
+}
+
+.activity-table .table-row-cell:odd {
+    -fx-background-color: #F5F2EF;
+}
+
+/* ── Survol des lignes ── */
+.activity-table .table-row-cell:hover {
+    -fx-background-color: #E8F0D8;
+    -fx-cursor: hand;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.05), 4, 0, 0, 0);
+}
+
+/* ── Ligne sélectionnée ── */
+.activity-table .table-row-cell:selected {
+    -fx-background-color: #4F6815;
+    -fx-text-fill: white;
+}
+
+.activity-table .table-row-cell:selected .table-cell {
+    -fx-text-fill: white;
+}
+
+.activity-table .table-row-cell:selected .table-cell .combo-box-statut {
+    -fx-text-fill: white;
+}
+
+/* ═══════════════════════════════════════════════════════
+   STATUTS AVEC BADGES MODERNES
+   ═══════════════════════════════════════════════════════ */
+
+/* ── Badge Accepté ── */
+.statut-accepte {
+    -fx-background-color: #4F6815;
+    -fx-text-fill: white;
+    -fx-font-weight: bold;
+    -fx-font-size: 11px;
+    -fx-padding: 4 14;
+    -fx-background-radius: 20px;
+    -fx-effect: dropshadow(gaussian, rgba(79,104,21,0.3), 4, 0, 0, 1);
+}
+
+.statut-accepte:hover {
+    -fx-background-color: #3E5210;
+    -fx-effect: dropshadow(gaussian, rgba(79,104,21,0.5), 6, 0, 0, 2);
+}
+
+/* ── Badge Pas accepté ── */
+.statut-pas-accepte {
+    -fx-background-color: #75070C;
+    -fx-text-fill: white;
+    -fx-font-weight: bold;
+    -fx-font-size: 11px;
+    -fx-padding: 4 14;
+    -fx-background-radius: 20px;
+    -fx-effect: dropshadow(gaussian, rgba(117,7,12,0.3), 4, 0, 0, 1);
+}
+
+.statut-pas-accepte:hover {
+    -fx-background-color: #5C0509;
+    -fx-effect: dropshadow(gaussian, rgba(117,7,12,0.5), 6, 0, 0, 2);
+}
+
+/* ── Badge En attente ── */
+.statut-en-attente {
+    -fx-background-color: #FFEDAB;
+    -fx-text-fill: #7a5c00;
+    -fx-font-weight: bold;
+    -fx-font-size: 11px;
+    -fx-padding: 4 14;
+    -fx-background-radius: 20px;
+    -fx-effect: dropshadow(gaussian, rgba(255,237,171,0.3), 4, 0, 0, 1);
+}
+
+.statut-en-attente:hover {
+    -fx-background-color: #FFE08A;
+    -fx-effect: dropshadow(gaussian, rgba(255,237,171,0.5), 6, 0, 0, 2);
+}
+
+/* ═══════════════════════════════════════════════════════
+   COMBOBOX STATUT DANS LE TABLEAU
+   ═══════════════════════════════════════════════════════ */
+
+.combo-box-statut {
+    -fx-background-color: transparent;
+    -fx-padding: 0;
+    -fx-font-size: 11px;
+    -fx-font-weight: bold;
+    -fx-pref-width: 105px;
+    -fx-min-width: 90px;
+    -fx-max-width: 120px;
+    -fx-cursor: hand;
+}
+
+.combo-box-statut .arrow-button {
+    -fx-background-color: transparent;
+    -fx-padding: 0 4 0 0;
+}
+
+.combo-box-statut .arrow {
+    -fx-background-color: #888;
+    -fx-padding: 2;
+}
+
+.combo-box-statut .list-cell {
+    -fx-padding: 4 10;
+    -fx-alignment: CENTER;
+    -fx-background-radius: 12px;
+}
+
+/* ── Style pour les options du ComboBox ── */
+.combo-box-statut .list-view {
+    -fx-background-color: white;
+    -fx-background-radius: 8px;
+    -fx-border-color: #F0E6DA;
+    -fx-border-radius: 8px;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.15), 10, 0, 0, 2);
+    -fx-padding: 4;
+}
+
+.combo-box-statut .list-view .list-cell {
+    -fx-padding: 8 14;
+    -fx-background-radius: 6px;
+    -fx-font-size: 12px;
+    -fx-font-weight: bold;
+}
+
+.combo-box-statut .list-view .list-cell:selected {
+    -fx-background-color: #4F6815;
+    -fx-text-fill: white;
+}
+
+.combo-box-statut .list-view .list-cell:hover {
+    -fx-background-color: #E8F0D8;
+}
+
+/* ── Styles des statuts dans le ComboBox ── */
+.combo-box-statut.statut-accepte {
+    -fx-background-color: #4F6815;
+    -fx-text-fill: white;
+    -fx-background-radius: 20px;
+    -fx-padding: 2 10;
+}
+
+.combo-box-statut.statut-pas-accepte {
+    -fx-background-color: #75070C;
+    -fx-text-fill: white;
+    -fx-background-radius: 20px;
+    -fx-padding: 2 10;
+}
+
+.combo-box-statut.statut-en-attente {
+    -fx-background-color: #FFEDAB;
+    -fx-text-fill: #7a5c00;
+    -fx-background-radius: 20px;
+    -fx-padding: 2 10;
+}
+
+/* ═══════════════════════════════════════════════════════
+   BOUTON SUPPRIMER
+   ═══════════════════════════════════════════════════════ */
+
+.btn-supprimer {
+    -fx-background-color: #fde8e9;
+    -fx-background-radius: 8px;
+    -fx-padding: 4 12;
+    -fx-font-size: 14px;
+    -fx-cursor: hand;
+    -fx-border-color: transparent;
+    -fx-border-radius: 8px;
+}
+
+.btn-supprimer:hover {
+    -fx-background-color: #f5c8c9;
+    -fx-effect: dropshadow(gaussian, rgba(117,7,12,0.2), 8, 0, 0, 2);
+}
+
+.btn-supprimer:pressed {
+    -fx-background-color: #e8a8a9;
+    -fx-effect: dropshadow(gaussian, rgba(117,7,12,0.3), 4, 0, 0, 1);
+}
+
+/* ═══════════════════════════════════════════════════════
+   COMPTEUR DE CANDIDATS
+   ═══════════════════════════════════════════════════════ */
+
+.candidat-counter {
+    -fx-font-size: 13px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #4F6815;
+    -fx-background-color: #E8F0D8;
+    -fx-padding: 4 16;
+    -fx-background-radius: 20px;
+}
+
+/* ═══════════════════════════════════════════════════════
+   PAGINATION
+   ═══════════════════════════════════════════════════════ */
+
+.pagination-box {
+    -fx-padding: 12 0 0 0;
+    -fx-border-color: #F0E6DA;
+    -fx-border-width: 1 0 0 0;
+}
+
+.pagination-label {
+    -fx-font-size: 12px;
+    -fx-text-fill: #888;
+}
+
+.pagination-button {
+    -fx-background-color: transparent;
+    -fx-text-fill: #333;
+    -fx-font-size: 12px;
+    -fx-font-weight: bold;
+    -fx-padding: 4 12;
+    -fx-background-radius: 6px;
+    -fx-cursor: hand;
+    -fx-border-color: #F0E6DA;
+    -fx-border-radius: 6px;
+    -fx-border-width: 1;
+}
+
+.pagination-button:hover {
+    -fx-background-color: #E8F0D8;
+    -fx-border-color: #4F6815;
+}
+
+.pagination-button-active {
+    -fx-background-color: #4F6815;
+    -fx-text-fill: white;
+    -fx-font-weight: bold;
+    -fx-padding: 4 12;
+    -fx-background-radius: 6px;
+    -fx-border-color: #4F6815;
+    -fx-border-radius: 6px;
+    -fx-border-width: 1;
+}
+
+.pagination-button-active:hover {
+    -fx-background-color: #3E5210;
+}
+
+/* ═══════════════════════════════════════════════════════
+   BARRE DE RECHERCHE AMÉLIORÉE
+   ═══════════════════════════════════════════════════════ */
+
+.search-field-modern {
+    -fx-background-color: white;
+    -fx-background-radius: 10px;
+    -fx-border-color: #F0E6DA;
+    -fx-border-radius: 10px;
+    -fx-padding: 10 16;
+    -fx-font-size: 13px;
+    -fx-text-fill: #333;
+    -fx-prompt-text-fill: #aaa;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.05), 4, 0, 0, 1);
+}
+
+.search-field-modern:focused {
+    -fx-border-color: #4F6815;
+    -fx-border-width: 2;
+    -fx-effect: dropshadow(gaussian, rgba(79,104,21,0.15), 8, 0, 0, 2);
+}
+
+/* ═══════════════════════════════════════════════════════
+   FILTRE COMBOBOX
+   ═══════════════════════════════════════════════════════ */
+
+.filter-combo {
+    -fx-background-color: white;
+    -fx-background-radius: 10px;
+    -fx-border-color: #F0E6DA;
+    -fx-border-radius: 10px;
+    -fx-padding: 6 12;
+    -fx-font-size: 12px;
+    -fx-pref-height: 38px;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.05), 4, 0, 0, 1);
+}
+
+.filter-combo:focused {
+    -fx-border-color: #4F6815;
+    -fx-border-width: 2;
+}
+
+.filter-combo .list-view {
+    -fx-background-color: white;
+    -fx-background-radius: 8px;
+    -fx-border-color: #F0E6DA;
+    -fx-border-radius: 8px;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.1), 8, 0, 0, 2);
+}
+
+.filter-combo .list-view .list-cell:hover {
+    -fx-background-color: #E8F0D8;
+}
+
+.filter-combo .list-view .list-cell:selected {
+    -fx-background-color: #4F6815;
+    -fx-text-fill: white;
+}
+
+/* ═══════════════════════════════════════════════════════
+   ANIMATIONS
+   ═══════════════════════════════════════════════════════ */
+
+.table-row-cell {
+    -fx-transition: all 0.2s ease;
+}
+
+.btn-supprimer {
+    -fx-transition: all 0.2s ease;
+}
+
+.combo-box-statut {
+    -fx-transition: all 0.2s ease;
+}
+
+.statut-accepte, .statut-pas-accepte, .statut-en-attente {
+    -fx-transition: all 0.2s ease;
+}
+
+/* ── Style pour la colonne Statut avec badge et boutons ── */
+.statut-badge {
+    -fx-font-weight: bold;
+    -fx-font-size: 11px;
+    -fx-padding: 4 12;
+    -fx-background-radius: 20px;
+    -fx-min-width: 70px;
+    -fx-alignment: CENTER;
+}
+
+.statut-accepte-badge {
+    -fx-background-color: #4F6815;
+    -fx-text-fill: white;
+}
+
+.statut-pas-accepte-badge {
+    -fx-background-color: #75070C;
+    -fx-text-fill: white;
+}
+
+.statut-en-attente-badge {
+    -fx-background-color: #FFEDAB;
+    -fx-text-fill: #7a5c00;
+}
+
+/* ── Boutons d'action dans la colonne Statut ── */
+.btn-statut-action {
+    -fx-font-size: 12px;
+    -fx-padding: 2 6;
+    -fx-background-color: transparent;
+    -fx-cursor: hand;
+    -fx-border-radius: 4px;
+}
+
+.btn-statut-action:hover {
+    -fx-background-color: #E8F0D8;
+    -fx-border-radius: 4px;
+}
+
+.btn-statut-action:pressed {
+    -fx-background-color: #D0E0C0;
+}
+
+/* ── Container de la colonne Statut ── */
+.statut-container {
+    -fx-alignment: CENTER;
+    -fx-spacing: 6;
+}
+
+/* ── Colonne ACTIONS ── */
+.column-statut {
+    -fx-alignment: CENTER;
+}
+
+/* ── Bouton supprimer ── */
+.btn-supprimer {
+    -fx-font-size: 14px;
+    -fx-padding: 4 10;
+    -fx-background-color: #fde8e9;
+    -fx-background-radius: 6px;
+    -fx-cursor: hand;
+    -fx-border-color: transparent;
+}
+
+.btn-supprimer:hover {
+    -fx-background-color: #f5c8c9;
+    -fx-effect: dropshadow(gaussian, rgba(117,7,12,0.2), 6, 0, 0, 2);
+}
+
+.btn-supprimer:pressed {
+    -fx-background-color: #e8a8a9;
+}
+
+/* ── Styles des statuts (comme Session de Formation) ── */
+.statut-accepte {
+    -fx-background-color: #4F6815;
+    -fx-text-fill: white;
+    -fx-font-weight: bold;
+    -fx-padding: 4 14;
+    -fx-background-radius: 12;
+    -fx-font-size: 11px;
+}
+
+.statut-pas-accepte {
+    -fx-background-color: #75070C;
+    -fx-text-fill: white;
+    -fx-font-weight: bold;
+    -fx-padding: 4 14;
+    -fx-background-radius: 12;
+    -fx-font-size: 11px;
+}
+
+.statut-en-attente {
+    -fx-background-color: #FFEDAB;
+    -fx-text-fill: #7a5c00;
+    -fx-font-weight: bold;
+    -fx-padding: 4 14;
+    -fx-background-radius: 12;
+    -fx-font-size: 11px;
+}
+
+/* ── Style pour la colonne Statut ── */
+.column-statut {
+    -fx-alignment: CENTER;
+}
+
+/* ── Styles des statuts ── */
+.statut-accepte {
+    -fx-background-color: #4F6815;
+    -fx-text-fill: white;
+    -fx-font-weight: bold;
+    -fx-padding: 4 14;
+    -fx-background-radius: 12;
+    -fx-font-size: 11px;
+}
+
+.statut-pas-accepte {
+    -fx-background-color: #75070C;
+    -fx-text-fill: white;
+    -fx-font-weight: bold;
+    -fx-padding: 4 14;
+    -fx-background-radius: 12;
+    -fx-font-size: 11px;
+}
+
+.statut-en-attente {
+    -fx-background-color: #FFEDAB;
+    -fx-text-fill: #7a5c00;
+    -fx-font-weight: bold;
+    -fx-padding: 4 14;
+    -fx-background-radius: 12;
+    -fx-font-size: 11px;
+}

@@ -10,21 +10,23 @@
     <VBox styleClass="dashboard-root" spacing="20">
 
         <!-- ── En-tête ── -->
-        <HBox alignment="CENTER_LEFT" spacing="8">
+        <HBox alignment="CENTER_LEFT" spacing="12">
             <Label text="📞  Tri Téléphonique" styleClass="welcome-label"/>
             <Region HBox.hgrow="ALWAYS"/>
-            <Button text="＋  Ajouter un candidat" styleClass="btn-primary"/>
-            <Button text="📥  Exporter" styleClass="btn-secondary"/>
+            <Button text="＋  Ajouter un candidat" styleClass="btn-primary" onAction="#onAjouterCandidat"/>
+            <Button text="📥  Exporter" styleClass="btn-secondary" onAction="#onExporter"/>
         </HBox>
 
         <!-- ── Filtres / Recherche ── -->
         <HBox spacing="12" alignment="CENTER_LEFT">
-            <TextField promptText="🔍  Rechercher un candidat..."
+            <TextField fx:id="txtRecherche" promptText="🔍  Rechercher un candidat..."
                        style="-fx-background-color: white; -fx-background-radius: 8; -fx-padding: 8 14; -fx-border-color: #F0E6DA; -fx-border-radius: 8;"
-                       prefWidth="300"/>
-            <ComboBox promptText="Filtrer par statut"
-                      style="-fx-background-color: white; -fx-background-radius: 8; -fx-padding: 4 8; -fx-border-color: #F0E6DA; -fx-border-radius: 8; -fx-pref-height: 36;"/>
-            <Button text="Filtrer" styleClass="btn-secondary"/>
+                       prefWidth="350"/>
+            <ComboBox fx:id="comboFiltreStatut" promptText="Filtrer par statut"
+                      style="-fx-background-color: white; -fx-background-radius: 8; -fx-padding: 4 8; -fx-border-color: #F0E6DA; -fx-border-radius: 8; -fx-pref-height: 36;"
+                      prefWidth="180"/>
+            <Button text="Filtrer" styleClass="btn-secondary" onAction="#onFiltrer"/>
+            <Button text="Réinitialiser" styleClass="btn-back" onAction="#onReinitialiser"/>
         </HBox>
 
         <!-- ── Tableau ── -->
@@ -40,18 +42,19 @@
             <Separator/>
 
             <!-- TableView -->
-            <TableView fx:id="tableView" styleClass="activity-table" VBox.vgrow="ALWAYS" prefHeight="500">
+            <TableView fx:id="tableView" styleClass="activity-table" VBox.vgrow="ALWAYS" prefHeight="450">
                 <columns>
-                    <TableColumn fx:id="colNom" text="NOM &amp; PRÉNOM" prefWidth="200"/>
-                    <TableColumn fx:id="colTel" text="TÉLÉPHONE" prefWidth="140"/>
-                    <TableColumn fx:id="colExperience" text="EXPÉRIENCE" prefWidth="280"/>
-                    <TableColumn fx:id="colPoste" text="POSTE" prefWidth="140"/>
+                    <TableColumn fx:id="colNom" text="NOM &amp; PRÉNOM" prefWidth="190"/>
+                    <TableColumn fx:id="colTel" text="TÉLÉPHONE" prefWidth="120"/>
+                    <TableColumn fx:id="colExperience" text="EXPÉRIENCE" prefWidth="240"/>
+                    <TableColumn fx:id="colPoste" text="POSTE" prefWidth="130"/>
                     <TableColumn fx:id="colCommentaire" text="COMMENTAIRE" prefWidth="100"/>
-                    <TableColumn fx:id="colStatut" text="STATUT" prefWidth="120"/>
+                    <TableColumn fx:id="colStatut" text="STATUT" prefWidth="140" styleClass="column-statut"/>
+                    <TableColumn fx:id="colActions" text="ACTIONS" prefWidth="100" styleClass="column-statut"/>
                 </columns>
             </TableView>
 
-            <!-- Pagination (optionnelle) -->
+            <!-- Pagination -->
             <HBox alignment="CENTER_RIGHT" spacing="8" style="-fx-padding: 8 0 0 0;">
                 <Label text="Lignes par page : " styleClass="depense-meta"/>
                 <ComboBox fx:id="comboLignesParPage" prefWidth="70"

@@ -1,154 +1,425 @@
 package com.rh.contollers;
 
+import com.rh.models.TriTelephonique;
+import com.rh.services.ServiceTriTelephonique;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
+import javafx.geometry.Pos;
+import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
-import javafx.scene.layout.HBox;
+import javafx.scene.layout.VBox;
+import javafx.stage.Modality;
+import javafx.stage.Stage;
+
+import java.io.IOException;
+import java.util.Optional;
 
 public class TriTelephoniqueController {
 
+    // ── TableView ──
     @FXML
-    private TableView<CandidatTri> tableView;
+    private TableView<TriTelephonique> tableView;
 
     @FXML
-    private TableColumn<CandidatTri, String> colNom;
+    private TableColumn<TriTelephonique, String> colNom;
     @FXML
-    private TableColumn<CandidatTri, String> colTel;
+    private TableColumn<TriTelephonique, String> colTel;
     @FXML
-    private TableColumn<CandidatTri, String> colExperience;
+    private TableColumn<TriTelephonique, String> colExperience;
     @FXML
-    private TableColumn<CandidatTri, String> colPoste;
+    private TableColumn<TriTelephonique, String> colPoste;
     @FXML
-    private TableColumn<CandidatTri, String> colCommentaire;
+    private TableColumn<TriTelephonique, String> colCommentaire;
     @FXML
-    private TableColumn<CandidatTri, String> colStatut;
+    private TableColumn<TriTelephonique, String> colStatut;
+    @FXML
+    private TableColumn<TriTelephonique, Void> colActions;
 
+    // ── Labels ──
     @FXML
     private Label lblTotalCandidats;
     @FXML
-    private ComboBox<Integer> comboLignesParPage;
-    @FXML
     private Label lblPageActuelle;
 
-    private ObservableList<CandidatTri> candidats = FXCollections.observableArrayList();
+    // ── Champs de recherche et filtres ──
+    @FXML
+    private TextField txtRecherche;
+    @FXML
+    private ComboBox<String> comboFiltreStatut;
+    @FXML
+    private ComboBox<Integer> comboLignesParPage;
+
+    // ── Service ──
+    private ServiceTriTelephonique service;
+    private ObservableList<TriTelephonique> candidats = FXCollections.observableArrayList();
 
     @FXML
     public void initialize() {
-        // Configurer les colonnes
-        colNom.setCellValueFactory(new PropertyValueFactory<>("nom"));
-        colTel.setCellValueFactory(new PropertyValueFactory<>("telephone"));
-        colExperience.setCellValueFactory(new PropertyValueFactory<>("experience"));
-        colPoste.setCellValueFactory(new PropertyValueFactory<>("poste"));
-        colCommentaire.setCellValueFactory(new PropertyValueFactory<>("commentaire"));
-        colStatut.setCellValueFactory(new PropertyValueFactory<>("statut"));
+        try {
+            System.out.println("=== Initialisation du contrôleur TriTelephonique ===");
 
-        // Configurer le style du statut
-        styliserStatuts();
+            // Initialiser le service
+            service = new ServiceTriTelephonique();
 
-        // Configurer la combo de lignes par page
-        comboLignesParPage.setItems(FXCollections.observableArrayList(10, 25, 50, 100));
-        comboLignesParPage.setValue(10);
+            // ── Configurer les colonnes ──
+            colNom.setCellValueFactory(new PropertyValueFactory<>("nomComplet"));
+            colTel.setCellValueFactory(new PropertyValueFactory<>("telephone"));
+            colExperience.setCellValueFactory(new PropertyValueFactory<>("experience"));
+            colPoste.setCellValueFactory(new PropertyValueFactory<>("poste"));
+            colCommentaire.setCellValueFactory(new PropertyValueFactory<>("commentaire"));
 
-        // Ajouter des données d'exemple
-        ajouterDonneesExemple();
+            // IMPORTANT: Configurer la colonne Statut
+            configurerColonneStatut();
 
-        // Lier les données à la table
-        tableView.setItems(candidats);
+            // Configurer la colonne Actions
+            configurerColonneActions();
 
-        // Mettre à jour le compteur
-        mettreAJourCompteur();
+            ajouterDoubleClic();
+
+            // ── Configurer la combo de lignes par page ──
+            if (comboLignesParPage != null) {
+                comboLignesParPage.setItems(FXCollections.observableArrayList(10, 25, 50, 100));
+                comboLignesParPage.setValue(10);
+            }
+
+            // ── Configurer le filtre par statut ──
+            if (comboFiltreStatut != null) {
+                comboFiltreStatut.setItems(FXCollections.observableArrayList("Tous", "Accepté", "Pas accepté", "En attente"));
+                comboFiltreStatut.setValue("Tous");
+            }
+
+            // ── Charger les données ──
+            chargerDonnees();
+
+            // ── Lier les données à la table ──
+            tableView.setItems(candidats);
+
+            // ── Mettre à jour le compteur ──
+            mettreAJourCompteur();
+
+            // ── Écouteurs ──
+            if (txtRecherche != null) {
+                txtRecherche.textProperty().addListener((observable, oldValue, newValue) -> {
+                    if (newValue == null || newValue.isEmpty()) {
+                        chargerDonnees();
+                    } else {
+                        rechercherCandidats(newValue);
+                    }
+                });
+            }
+
+            if (comboFiltreStatut != null) {
+                comboFiltreStatut.setOnAction(e -> {
+                    String statut = comboFiltreStatut.getValue();
+                    if ("Tous".equals(statut)) {
+                        chargerDonnees();
+                    } else {
+                        filtrerParStatut(statut);
+                    }
+                });
+            }
+
+            System.out.println("=== Initialisation terminée ===");
+
+        } catch (Exception e) {
+            System.err.println("Erreur lors de l'initialisation : " + e.getMessage());
+            e.printStackTrace();
+        }
     }
 
-    private void ajouterDonneesExemple() {
-        // À remplacer par vos données provenant de la base de données
-        candidats.add(new CandidatTri("Mohamed Amine Bejaoui", "52 800 489 / 21 688 540",
-                "Responsable Technique Département Élec", "Téléopérateur", "", "Pas accepté"));
-        candidats.add(new CandidatTri("Monthe Kamte Aurelien Wilfried", "27 726 657",
-                "ACTIVE CONTACT (Fev. 2019 – Nov. 2021)", "Téléopérateur", "", "Accepté"));
-        candidats.add(new CandidatTri("Bouzouita Ons", "92 310 242",
-                "Ingénieure en génie civil", "Téléopérateur", "", "Pas accepté"));
-        candidats.add(new CandidatTri("Ichraf Karoui", "22 918 580",
-                "Télévendeuse - Téléopératrice (2 ans)", "Téléopérateur", "RDV", "Accepté"));
-        candidats.add(new CandidatTri("Houda Rawan", "56 065 044",
-                "Centre d'appels (7 mois)", "Téléopérateur", "", "Pas accepté"));
-        candidats.add(new CandidatTri("Ajmi Nejib", "27 660 486 / 90 508 744",
-                "Conseiller client Teleperformance (10 mois)", "Téléopérateur", "", "Pas accepté"));
-        candidats.add(new CandidatTri("Imane Mokded", "55 917 772",
-                "Télévendeur IT (9 mois)", "Téléopérateur", "RDV", "Accepté"));
-        candidats.add(new CandidatTri("Ferchichi Aziza", "90 435 050",
-                "S.J.L Tunisie", "Téléopérateur", "", "Pas accepté"));
-        candidats.add(new CandidatTri("Nadine Ben Hassine", "24 122 832",
-                "Téléopératrice", "Téléopérateur", "", "Pas accepté"));
-    }
+    // ── Configuration de la colonne Statut ──
 
-    private void styliserStatuts() {
-        colStatut.setCellFactory(column -> new TableCell<CandidatTri, String>() {
+    private void configurerColonneStatut() {
+        colStatut.setCellFactory(column -> new TableCell<TriTelephonique, String>() {
+            private final Label badge = new Label();
+
+            {
+                badge.setAlignment(Pos.CENTER);
+                badge.setMaxWidth(Double.MAX_VALUE);
+            }
+
             @Override
             protected void updateItem(String item, boolean empty) {
                 super.updateItem(item, empty);
-                if (empty || item == null) {
-                    setText(null);
+                if (empty) {
                     setGraphic(null);
-                    setStyle("");
+                    setText(null);
                 } else {
-                    setText(item);
-                    setAlignment(javafx.geometry.Pos.CENTER);
+                    // Récupérer le candidat pour avoir son statut
+                    TriTelephonique candidat = getTableView().getItems().get(getIndex());
+                    String statut = (candidat != null && candidat.getStatut() != null && !candidat.getStatut().isEmpty())
+                            ? candidat.getStatut()
+                            : "En attente";
+
+                    badge.setText(statut);
 
                     // Appliquer le style selon le statut
-                    String styleClass = "";
-                    if ("Accepté".equalsIgnoreCase(item)) {
-                        styleClass = "statut-accepte";
-                    } else if ("Pas accepté".equalsIgnoreCase(item) || "Non accepté".equalsIgnoreCase(item)) {
-                        styleClass = "statut-pas-accepte";
-                    } else if ("En attente".equalsIgnoreCase(item)) {
-                        styleClass = "statut-en-attente";
+                    if ("Accepté".equalsIgnoreCase(statut)) {
+                        badge.setStyle("-fx-background-color: #4F6815; -fx-text-fill: white; -fx-font-weight: bold; -fx-padding: 4 14; -fx-background-radius: 12; -fx-font-size: 11px;");
+                    } else if ("Pas accepté".equalsIgnoreCase(statut)) {
+                        badge.setStyle("-fx-background-color: #75070C; -fx-text-fill: white; -fx-font-weight: bold; -fx-padding: 4 14; -fx-background-radius: 12; -fx-font-size: 11px;");
+                    } else {
+                        badge.setStyle("-fx-background-color: #FFEDAB; -fx-text-fill: #7a5c00; -fx-font-weight: bold; -fx-padding: 4 14; -fx-background-radius: 12; -fx-font-size: 11px;");
                     }
 
-                    if (!styleClass.isEmpty()) {
-                        // Créer un Label avec le style
-                        Label label = new Label(item);
-                        label.getStyleClass().add(styleClass);
-                        label.setAlignment(javafx.geometry.Pos.CENTER);
-                        setGraphic(label);
-                        setText(null);
-                    } else {
-                        setGraphic(null);
-                    }
+                    setGraphic(badge);
+                    setText(null);
                 }
             }
         });
     }
 
-    private void mettreAJourCompteur() {
-        lblTotalCandidats.setText(candidats.size() + " candidat(s)");
+    // ── Configuration de la colonne Actions ──
+
+    private void configurerColonneActions() {
+        colActions.setCellFactory(column -> new TableCell<TriTelephonique, Void>() {
+            private final Button btnSupprimer = new Button("🗑️");
+
+            {
+                btnSupprimer.setStyle("-fx-font-size: 14px; -fx-padding: 4 8; -fx-background-color: #fde8e9; -fx-background-radius: 6; -fx-cursor: hand;");
+                btnSupprimer.setTooltip(new Tooltip("Supprimer le candidat"));
+
+                btnSupprimer.setOnAction(event -> {
+                    TriTelephonique candidat = getTableView().getItems().get(getIndex());
+                    supprimerCandidat(candidat);
+                });
+            }
+
+            @Override
+            protected void updateItem(Void item, boolean empty) {
+                super.updateItem(item, empty);
+                if (empty) {
+                    setGraphic(null);
+                } else {
+                    setGraphic(btnSupprimer);
+                    setAlignment(Pos.CENTER);
+                }
+            }
+        });
     }
 
-    // ── Classe interne pour les données ──────────────────────────────────────
+    // ── Chargement des données ──
 
-    public static class CandidatTri {
-        private final String nom;
-        private final String telephone;
-        private final String experience;
-        private final String poste;
-        private final String commentaire;
-        private final String statut;
+    private void chargerDonnees() {
+        try {
+            System.out.println("Chargement des données depuis la BD...");
+            java.util.List<TriTelephonique> liste = service.getAll();
+            System.out.println("Nombre de candidats récupérés : " + liste.size());
 
-        public CandidatTri(String nom, String telephone, String experience, String poste, String commentaire, String statut) {
-            this.nom = nom;
-            this.telephone = telephone;
-            this.experience = experience;
-            this.poste = poste;
-            this.commentaire = commentaire;
-            this.statut = statut;
+            candidats.clear();
+            candidats.addAll(liste);
+
+            // Afficher les statuts pour déboguer
+            for (TriTelephonique c : candidats) {
+                System.out.println("Candidat: " + c.getNomComplet() + " - Statut: '" + c.getStatut() + "'");
+            }
+
+            System.out.println("Candidats dans l'ObservableList : " + candidats.size());
+
+            mettreAJourCompteur();
+            tableView.refresh();
+
+        } catch (Exception e) {
+            System.err.println("Erreur lors du chargement des données : " + e.getMessage());
+            e.printStackTrace();
+            afficherErreur("Impossible de charger les données depuis la base de données.");
         }
+    }
 
-        public String getNom() { return nom; }
-        public String getTelephone() { return telephone; }
-        public String getExperience() { return experience; }
-        public String getPoste() { return poste; }
-        public String getCommentaire() { return commentaire; }
-        public String getStatut() { return statut; }
+    private void rechercherCandidats(String keyword) {
+        try {
+            candidats.setAll(service.search(keyword));
+            mettreAJourCompteur();
+        } catch (Exception e) {
+            System.err.println("Erreur lors de la recherche : " + e.getMessage());
+            afficherErreur("Erreur lors de la recherche");
+        }
+    }
+
+    private void filtrerParStatut(String statut) {
+        try {
+            candidats.setAll(service.filterByStatut(statut));
+            mettreAJourCompteur();
+        } catch (Exception e) {
+            System.err.println("Erreur lors du filtrage : " + e.getMessage());
+            afficherErreur("Erreur lors du filtrage");
+        }
+    }
+
+    // ── Actions ──
+
+    private void supprimerCandidat(TriTelephonique candidat) {
+        Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
+        alert.setTitle("Confirmation de suppression");
+        alert.setHeaderText("Supprimer le candidat");
+        alert.setContentText("Êtes-vous sûr de vouloir supprimer " + candidat.getNomComplet() + " ?");
+
+        Optional<ButtonType> result = alert.showAndWait();
+        if (result.isPresent() && result.get() == ButtonType.OK) {
+            try {
+                service.delete(candidat);
+                candidats.remove(candidat);
+                mettreAJourCompteur();
+                afficherSucces("Candidat supprimé avec succès !");
+            } catch (Exception e) {
+                afficherErreur("Erreur lors de la suppression : " + e.getMessage());
+            }
+        }
+    }
+
+    // ── Mise à jour du compteur ──
+
+    private void mettreAJourCompteur() {
+        if (lblTotalCandidats != null) {
+            lblTotalCandidats.setText(candidats.size() + " candidat(s)");
+        }
+    }
+
+    // ── Actions boutons ──
+
+    @FXML
+    private void onAjouterCandidat() {
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/rh/views/ajouter_candidat.fxml"));
+            VBox root = loader.load();
+
+            AjouterCandidatController controller = loader.getController();
+            controller.setOnAjoutReussi(() -> {
+                chargerDonnees();
+            });
+
+            Scene scene = new Scene(root);
+            String css = getClass().getResource("/com/rh/styles/main.css").toExternalForm();
+            if (css != null) {
+                scene.getStylesheets().add(css);
+            }
+
+            Stage stage = new Stage();
+            stage.setTitle("Ajouter un candidat");
+            stage.setScene(scene);
+            stage.initModality(Modality.WINDOW_MODAL);
+            stage.initOwner(tableView.getScene().getWindow());
+            stage.setResizable(false);
+            stage.showAndWait();
+
+        } catch (IOException e) {
+            System.err.println("Erreur lors de l'ouverture du formulaire : " + e.getMessage());
+            afficherErreur("Impossible d'ouvrir le formulaire d'ajout.");
+        }
+    }
+
+    @FXML
+    private void onExporter() {
+        afficherInformation("Fonctionnalité d'export à implémenter.");
+    }
+
+    @FXML
+    private void onFiltrer() {
+        if (comboFiltreStatut != null) {
+            String statut = comboFiltreStatut.getValue();
+            if ("Tous".equals(statut)) {
+                chargerDonnees();
+            } else {
+                filtrerParStatut(statut);
+            }
+        }
+    }
+
+    @FXML
+    private void onReinitialiser() {
+        if (txtRecherche != null) {
+            txtRecherche.clear();
+        }
+        if (comboFiltreStatut != null) {
+            comboFiltreStatut.setValue("Tous");
+        }
+        chargerDonnees();
+    }
+
+    // ── Méthodes d'affichage des alertes ──
+
+    private void afficherInformation(String message) {
+        Alert alert = new Alert(Alert.AlertType.INFORMATION);
+        alert.setTitle("Information");
+        alert.setHeaderText(null);
+        alert.setContentText(message);
+        alert.showAndWait();
+    }
+
+    private void afficherSucces(String message) {
+        Alert alert = new Alert(Alert.AlertType.INFORMATION);
+        alert.setTitle("Succès");
+        alert.setHeaderText(null);
+        alert.setContentText(message);
+        alert.showAndWait();
+    }
+
+    private void afficherErreur(String message) {
+        Alert alert = new Alert(Alert.AlertType.ERROR);
+        alert.setTitle("Erreur");
+        alert.setHeaderText(null);
+        alert.setContentText(message);
+        alert.showAndWait();
+    }
+
+    private void afficherAvertissement(String message) {
+        Alert alert = new Alert(Alert.AlertType.WARNING);
+        alert.setTitle("Attention");
+        alert.setHeaderText(null);
+        alert.setContentText(message);
+        alert.showAndWait();
+    }
+
+    // ── Ajouter cette méthode pour gérer le double-clic sur la TableView ──
+
+    private void ajouterDoubleClic() {
+        tableView.setOnMouseClicked(event -> {
+            if (event.getClickCount() == 2) { // Double-clic
+                TriTelephonique candidat = tableView.getSelectionModel().getSelectedItem();
+                if (candidat != null) {
+                    ouvrirFormulaireModification(candidat);
+                }
+            }
+        });
+    }
+
+    private void ouvrirFormulaireModification(TriTelephonique candidat) {
+        try {
+            // Charger le formulaire
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/rh/views/modifier_candidat.fxml"));
+            VBox root = loader.load();
+
+            // Récupérer le contrôleur et passer le candidat
+            ModifierCandidatController controller = loader.getController();
+            controller.setCandidat(candidat);
+
+            // Définir le callback pour rafraîchir la liste après la modification
+            controller.setOnModificationReussie(() -> {
+                chargerDonnees();
+            });
+
+            // Créer la scène
+            Scene scene = new Scene(root);
+            String css = getClass().getResource("/com/rh/styles/main.css").toExternalForm();
+            if (css != null) {
+                scene.getStylesheets().add(css);
+            }
+
+            // Créer la fenêtre
+            Stage stage = new Stage();
+            stage.setTitle("Modifier un candidat");
+            stage.setScene(scene);
+            stage.initModality(Modality.WINDOW_MODAL);
+            stage.initOwner(tableView.getScene().getWindow());
+            stage.setResizable(false);
+            stage.showAndWait();
+
+        } catch (IOException e) {
+            System.err.println("Erreur lors de l'ouverture du formulaire : " + e.getMessage());
+            afficherErreur("Impossible d'ouvrir le formulaire de modification.");
+        }
     }
 }

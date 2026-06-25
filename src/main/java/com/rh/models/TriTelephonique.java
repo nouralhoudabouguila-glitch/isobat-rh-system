@@ -92,10 +92,10 @@ public class TriTelephonique {
         this.statut = statut;
     }
 
-    // ── Méthodes utilitaires ──
+    // ── Méthode pour le nom complet ──
 
     public String getNomComplet() {
-        return nom + " " + prenom;
+        return (nom != null ? nom : "") + " " + (prenom != null ? prenom : "");
     }
 
     @Override
