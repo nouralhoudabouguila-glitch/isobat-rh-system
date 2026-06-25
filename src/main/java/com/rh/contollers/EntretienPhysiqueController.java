@@ -1,6 +1,7 @@
 package com.rh.contollers;
 
 import com.rh.models.EntretienPhysique;
+import com.rh.services.ExportEntretienExcelService;
 import com.rh.services.ServiceEntretienPhysique;
 import com.rh.services.ServiceTriTelephonique;
 import javafx.collections.FXCollections;
@@ -331,7 +332,26 @@ public class EntretienPhysiqueController {
 
     @FXML
     private void onExporter() {
-        showAlert("Information", "Fonctionnalité d'export à implémenter.", Alert.AlertType.INFORMATION);
+        if (entretiens.isEmpty()) {
+            showAlert("Attention", "Aucune donnée à exporter.", Alert.AlertType.WARNING);
+            return;
+        }
+
+        try {
+            ExportEntretienExcelService exportService = new ExportEntretienExcelService();
+            Stage stage = (Stage) tableView.getScene().getWindow();
+            boolean success = exportService.exporterVersExcel(entretiens, stage);
+
+            if (success) {
+                showAlert("Succès", "Exportation réussie ! Le fichier va s'ouvrir automatiquement.", Alert.AlertType.INFORMATION);
+            } else {
+                showAlert("Erreur", "L'exportation a été annulée ou a échoué.", Alert.AlertType.ERROR);
+            }
+        } catch (Exception e) {
+            System.err.println("Erreur lors de l'exportation : " + e.getMessage());
+            e.printStackTrace();
+            showAlert("Erreur", "Erreur lors de l'exportation : " + e.getMessage(), Alert.AlertType.ERROR);
+        }
     }
 
     @FXML
