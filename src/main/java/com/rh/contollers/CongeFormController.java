@@ -205,8 +205,8 @@ public class CongeFormController implements Initializable {
                 emp.getId(), type.name(), LocalDate.now().getYear()
         );
         if (solde != null) {
-            lblSoldeRestant.setText(solde.getSoldeRestant() + " jours restants");
-            lblSoldeInitial.setText("sur " + (int) solde.getSoldeInitial() + " initiaux");
+            lblSoldeRestant.setText((int) solde.getSoldeRestant() + " jours restants");
+            lblSoldeInitial.setText("sur 18 initiaux");
             soldeBox.setVisible(true); soldeBox.setManaged(true);
         } else {
             soldeBox.setVisible(false); soldeBox.setManaged(false);
@@ -274,7 +274,17 @@ public class CongeFormController implements Initializable {
         if (editing == null) {
             service.add(d);
             // Si directement approuvé → décrémenter le solde
-            if (d.getStatut() == Statut.APPROUVE) service.approuver(d);
+            if (d.getStatut() == Statut.APPROUVE) {
+                int result = service.approuver(d);
+                if (result == 1) {
+                    Alert warn = new Alert(Alert.AlertType.WARNING);
+                    warn.setTitle("Solde insuffisant");
+                    warn.setHeaderText("Solde insuffisant");
+                    warn.setContentText("Le solde de l'employé est insuffisant pour approuver cette demande.");
+                    warn.showAndWait();
+                    return;
+                }
+            }
         } else {
             service.update(d);
         }

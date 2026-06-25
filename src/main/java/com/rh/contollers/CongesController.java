@@ -2,70 +2,285 @@ package com.rh.contollers;
 
 import com.rh.models.DemandeConge;
 import com.rh.models.DemandeConge.Statut;
+import com.rh.models.SoldeConge;
 import com.rh.services.DemandeCongeService;
+import com.rh.services.SoldeCongeService;
+import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.collections.transformation.FilteredList;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
-import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
-import javafx.scene.layout.*;
+import javafx.scene.layout.HBox;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 
 import java.net.URL;
+import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
-import java.util.List;
-import java.util.Optional;
 import java.util.ResourceBundle;
 
 public class CongesController implements Initializable {
 
-    @FXML private FlowPane cardsContainer;
-    @FXML private ComboBox<String> cbFilterStatut;
+    // ── FXML ─────────────────────────────────────────────────────────────────
+    @FXML private TableView<DemandeConge> tableConges;
+    @FXML private TableColumn<DemandeConge, String> colNom;
+    @FXML private TableColumn<DemandeConge, String> colPoste;
+    @FXML private TableColumn<DemandeConge, String> colType;
+    @FXML private TableColumn<DemandeConge, String> colDebut;
+    @FXML private TableColumn<DemandeConge, String> colFin;
+    @FXML private TableColumn<DemandeConge, String> colNbJours;
+    @FXML private TableColumn<DemandeConge, String> colInitial;
+    @FXML private TableColumn<DemandeConge, String> colConsomme;
+    @FXML private TableColumn<DemandeConge, String> colRestant;
+    @FXML private TableColumn<DemandeConge, Void>   colStatut;
+    @FXML private TableColumn<DemandeConge, String> colRemplacant;
+    @FXML private TableColumn<DemandeConge, String> colCommentaire;
+    @FXML private TableColumn<DemandeConge, Void>   colActions;
+
+    @FXML private TextField tfSearch;
     @FXML private ComboBox<String> cbFilterType;
+    @FXML private ComboBox<String> cbFilterStatut;
     @FXML private Label lblCount;
     @FXML private Label kpiAttente;
     @FXML private Label kpiApprouve;
     @FXML private Label kpiRefuse;
     @FXML private Label kpiTotal;
 
-    private final DemandeCongeService service = new DemandeCongeService();
+    // ── Services ──────────────────────────────────────────────────────────────
+    private final DemandeCongeService service      = new DemandeCongeService();
+    private final SoldeCongeService   soldeService = new SoldeCongeService();
+
     private ObservableList<DemandeConge> masterList = FXCollections.observableArrayList();
+    private FilteredList<DemandeConge>   filteredList;
+
     private static final DateTimeFormatter FMT = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+    private static final int SOLDE_INITIAL = 18; // Solde initial fixe de 18 jours
+
+    // ── Initialize ────────────────────────────────────────────────────────────
 
     @Override
     public void initialize(URL url, ResourceBundle rb) {
+        setupTableStyle();
+        setupColumns();
         setupFilters();
         loadData();
     }
 
-    // ── Setup ────────────────────────────────────────────────────────────────
+    // ── Style tableau ─────────────────────────────────────────────────────────
 
-    private void setupFilters() {
-        cbFilterStatut.getItems().addAll(
-                "Tous les statuts", "En attente", "Approuvé", "Refusé", "Annulé"
-        );
-        cbFilterStatut.setValue("Tous les statuts");
-
-        cbFilterType.getItems().addAll(
-                "Tous les types", "Congé annuel", "Congé maladie",
-                "Congé exceptionnel", "Sans solde", "Récupération"
-        );
-        cbFilterType.setValue("Tous les types");
-
-        cbFilterStatut.valueProperty().addListener((obs, o, n) -> applyFilter());
-        cbFilterType.valueProperty().addListener((obs, o, n) -> applyFilter());
+    private void setupTableStyle() {
+        tableConges.setStyle("-fx-background-color:transparent;");
+        tableConges.setRowFactory(tv -> new TableRow<>() {
+            @Override
+            protected void updateItem(DemandeConge d, boolean empty) {
+                super.updateItem(d, empty);
+                if (empty || d == null) { setStyle(""); return; }
+                if (d.getStatut() == Statut.EN_ATTENTE) {
+                    setStyle("-fx-background-color:#FDFAF7;");
+                } else {
+                    setStyle("");
+                }
+            }
+        });
     }
 
-    // ── Données ──────────────────────────────────────────────────────────────
+    // ── Colonnes ──────────────────────────────────────────────────────────────
+
+    private void setupColumns() {
+
+        // Nom et Prénom
+        colNom.setCellValueFactory(d -> new SimpleStringProperty(d.getValue().getNomEmploye()));
+        colNom.setCellFactory(col -> new TableCell<>() {
+            @Override protected void updateItem(String v, boolean empty) {
+                super.updateItem(v, empty);
+                if (empty || v == null) { setText(null); return; }
+                setText(v);
+                setStyle("-fx-font-family:'Poppins';-fx-font-size:12;-fx-font-weight:bold;-fx-text-fill:#222222;");
+            }
+        });
+
+        // Poste
+        colPoste.setCellValueFactory(d -> new SimpleStringProperty(d.getValue().getPosteEmploye()));
+        colPoste.setCellFactory(col -> textCell("#666666", false));
+
+        // Type de congé
+        colType.setCellValueFactory(d -> new SimpleStringProperty(
+                d.getValue().getTypeConge() != null ? d.getValue().getTypeConge().getLabel() : "—"));
+        colType.setCellFactory(col -> new TableCell<>() {
+            @Override protected void updateItem(String v, boolean empty) {
+                super.updateItem(v, empty);
+                if (empty || v == null || "—".equals(v)) { setText(null); setGraphic(null); return; }
+                Label lbl = new Label(v);
+                lbl.setStyle("-fx-background-color:" + typeBg(v) + ";-fx-text-fill:" + typeFg(v) + ";" +
+                        "-fx-font-family:'Poppins';-fx-font-size:10;-fx-font-weight:bold;" +
+                        "-fx-background-radius:10;-fx-padding:3 8 3 8;");
+                setGraphic(lbl); setText(null);
+            }
+        });
+
+        // Date début
+        colDebut.setCellValueFactory(d -> new SimpleStringProperty(
+                d.getValue().getDateDebut() != null ? d.getValue().getDateDebut().format(FMT) : "—"));
+        colDebut.setCellFactory(col -> textCell("#555555", false));
+
+        // Date fin
+        colFin.setCellValueFactory(d -> new SimpleStringProperty(
+                d.getValue().getDateFin() != null ? d.getValue().getDateFin().format(FMT) : "—"));
+        colFin.setCellFactory(col -> textCell("#555555", false));
+
+        // Nb jours
+        colNbJours.setCellValueFactory(d -> new SimpleStringProperty(
+                String.valueOf(d.getValue().getNombreJours())));
+        colNbJours.setCellFactory(col -> new TableCell<>() {
+            @Override protected void updateItem(String v, boolean empty) {
+                super.updateItem(v, empty);
+                if (empty || v == null) { setText(null); return; }
+                setText(v + "j");
+                setStyle("-fx-font-family:'Poppins';-fx-font-size:12;-fx-font-weight:bold;" +
+                        "-fx-text-fill:#75070C;-fx-alignment:CENTER;");
+            }
+        });
+
+        // Solde initial — TOUJOURS 18
+        colInitial.setCellValueFactory(d -> new SimpleStringProperty(
+                String.valueOf(SOLDE_INITIAL)));
+        colInitial.setCellFactory(col -> new TableCell<>() {
+            @Override protected void updateItem(String v, boolean empty) {
+                super.updateItem(v, empty);
+                if (empty || v == null) { setText(null); return; }
+                setText(v);
+                setStyle("-fx-font-family:'Poppins';-fx-font-size:12;-fx-font-weight:bold;" +
+                        "-fx-text-fill:#185FA5;-fx-alignment:CENTER;");
+            }
+        });
+
+        // Solde consommé — depuis la BDD
+        colConsomme.setCellValueFactory(d -> {
+            DemandeConge dc = d.getValue();
+            if (dc.getEmploye() == null) return new SimpleStringProperty("0");
+            SoldeConge s = soldeService.getSolde(
+                    dc.getEmploye().getId(),
+                    dc.getTypeConge() != null ? dc.getTypeConge().name() : "ANNUEL",
+                    LocalDate.now().getYear());
+            double consomme = (s != null) ? s.getSoldeConsomme() : 0;
+            return new SimpleStringProperty(String.valueOf((int) consomme));
+        });
+        colConsomme.setCellFactory(col -> new TableCell<>() {
+            @Override protected void updateItem(String v, boolean empty) {
+                super.updateItem(v, empty);
+                if (empty || v == null) { setText(null); return; }
+                int val = 0; try { val = Integer.parseInt(v); } catch (Exception ignored) {}
+                setText(v);
+                setStyle("-fx-font-family:'Poppins';-fx-font-size:12;-fx-font-weight:bold;" +
+                        "-fx-text-fill:" + (val > 0 ? "#854F0B" : "#AAAAAA") + ";-fx-alignment:CENTER;");
+            }
+        });
+
+        // Solde restant — coloré selon niveau
+        colRestant.setCellValueFactory(d -> {
+            DemandeConge dc = d.getValue();
+            if (dc.getEmploye() == null) return new SimpleStringProperty(String.valueOf(SOLDE_INITIAL));
+            SoldeConge s = soldeService.getSolde(
+                    dc.getEmploye().getId(),
+                    dc.getTypeConge() != null ? dc.getTypeConge().name() : "ANNUEL",
+                    LocalDate.now().getYear());
+            double restant = (s != null) ? s.getSoldeRestant() : SOLDE_INITIAL;
+            return new SimpleStringProperty(String.valueOf((int) restant));
+        });
+        colRestant.setCellFactory(col -> new TableCell<>() {
+            @Override protected void updateItem(String v, boolean empty) {
+                super.updateItem(v, empty);
+                if (empty || v == null) { setText(null); return; }
+                int val = SOLDE_INITIAL;
+                try { val = Integer.parseInt(v); } catch (Exception ignored) {}
+                String color = val >= 12 ? "#4F6815" : val >= 6 ? "#C8A000" : "#75070C";
+                setText(v);
+                setStyle("-fx-font-family:'Poppins';-fx-font-size:12;-fx-font-weight:bold;" +
+                        "-fx-text-fill:" + color + ";-fx-alignment:CENTER;");
+            }
+        });
+
+        // Statut
+        colStatut.setCellFactory(col -> new TableCell<>() {
+            @Override protected void updateItem(Void v, boolean empty) {
+                super.updateItem(v, empty);
+                if (empty) { setGraphic(null); return; }
+                DemandeConge d = getTableView().getItems().get(getIndex());
+                if (d.getStatut() == null) { setGraphic(null); return; }
+                String[] sc = statutColors(d.getStatut());
+                Label lbl = new Label(d.getStatut().getLabel());
+                lbl.setStyle("-fx-background-color:" + sc[1] + ";-fx-text-fill:" + sc[0] + ";" +
+                        "-fx-font-family:'Poppins';-fx-font-size:10;-fx-font-weight:bold;" +
+                        "-fx-background-radius:10;-fx-padding:4 10 4 10;");
+                setGraphic(lbl); setText(null);
+            }
+        });
+
+        // Remplaçant
+        colRemplacant.setCellValueFactory(d -> new SimpleStringProperty(
+                d.getValue().getRemplacant() != null ? d.getValue().getRemplacant() : "—"));
+        colRemplacant.setCellFactory(col -> textCell("#777777", true));
+
+        // Commentaires
+        colCommentaire.setCellValueFactory(d -> new SimpleStringProperty(
+                d.getValue().getCommentaire() != null ? d.getValue().getCommentaire() : ""));
+        colCommentaire.setCellFactory(col -> textCell("#999999", true));
+
+        // Actions
+        colActions.setCellFactory(col -> new TableCell<>() {
+            private final Button btnEdit = makeBtn("✏", "#FFF8F0", "#854F0B");
+            private final Button btnOk   = makeBtn("✔", "#F0F5E8", "#4F6815");
+            private final Button btnNo   = makeBtn("✕", "#FFF0F0", "#75070C");
+            private final Button btnDel  = makeBtn("🗑", "#FFF0F0", "#75070C");
+
+            {
+                btnEdit.setOnAction(e -> openForm(getTableView().getItems().get(getIndex())));
+                btnOk.setOnAction(e -> handleApprouver(getTableView().getItems().get(getIndex())));
+                btnNo.setOnAction(e -> handleRefuser(getTableView().getItems().get(getIndex())));
+                btnDel.setOnAction(e -> handleDelete(getTableView().getItems().get(getIndex())));
+            }
+
+            @Override protected void updateItem(Void v, boolean empty) {
+                super.updateItem(v, empty);
+                if (empty) { setGraphic(null); return; }
+                DemandeConge d = getTableView().getItems().get(getIndex());
+                HBox box = new HBox(4);
+                box.setAlignment(Pos.CENTER_LEFT);
+                box.getChildren().add(btnEdit);
+                if (d.getStatut() == Statut.EN_ATTENTE) box.getChildren().addAll(btnOk, btnNo);
+                else box.getChildren().add(btnDel);
+                setGraphic(box);
+            }
+        });
+    }
+
+    // ── Filtres ───────────────────────────────────────────────────────────────
+
+    private void setupFilters() {
+        cbFilterType.getItems().addAll("Tous les types", "Congé annuel", "Congé maladie",
+                "Congé exceptionnel", "Sans solde", "Récupération");
+        cbFilterType.setValue("Tous les types");
+
+        cbFilterStatut.getItems().addAll("Tous les statuts", "En attente", "Approuvé", "Refusé", "Annulé");
+        cbFilterStatut.setValue("Tous les statuts");
+
+        tfSearch.textProperty().addListener((obs, o, n) -> applyFilter());
+        cbFilterType.valueProperty().addListener((obs, o, n) -> applyFilter());
+        cbFilterStatut.valueProperty().addListener((obs, o, n) -> applyFilter());
+    }
+
+    // ── Données ───────────────────────────────────────────────────────────────
 
     public void loadData() {
         masterList.setAll(service.getAll());
+        filteredList = new FilteredList<>(masterList, p -> true);
+        tableConges.setItems(filteredList);
         updateKpis();
         applyFilter();
     }
@@ -81,253 +296,151 @@ public class CongesController implements Initializable {
     }
 
     private void applyFilter() {
-        String statut = cbFilterStatut.getValue();
+        String search = tfSearch.getText() == null ? "" : tfSearch.getText().toLowerCase().trim();
         String type   = cbFilterType.getValue();
+        String statut = cbFilterStatut.getValue();
 
-        List<DemandeConge> filtered = masterList.stream().filter(d -> {
-            boolean matchStatut = statut == null || statut.equals("Tous les statuts")
-                    || d.getStatut().getLabel().equals(statut);
-            boolean matchType = type == null || type.equals("Tous les types")
+        filteredList.setPredicate(d -> {
+            boolean ms = search.isEmpty()
+                    || d.getNomEmploye().toLowerCase().contains(search)
+                    || d.getPosteEmploye().toLowerCase().contains(search);
+            boolean mt = type == null || type.equals("Tous les types")
                     || (d.getTypeConge() != null && d.getTypeConge().getLabel().equals(type));
-            return matchStatut && matchType;
-        }).toList();
-
-        renderCards(filtered);
-        lblCount.setText(filtered.size() + " demande(s)");
+            boolean mst = statut == null || statut.equals("Tous les statuts")
+                    || (d.getStatut() != null && d.getStatut().getLabel().equals(statut));
+            return ms && mt && mst;
+        });
+        lblCount.setText(filteredList.size() + " demande(s)");
     }
 
-    // ── Rendu Cards ──────────────────────────────────────────────────────────
-
-    private void renderCards(List<DemandeConge> list) {
-        cardsContainer.getChildren().clear();
-        if (list.isEmpty()) {
-            Label empty = new Label("Aucune demande trouvée");
-            empty.setStyle("-fx-font-family:'Poppins';-fx-font-size:14;-fx-text-fill:#AAAAAA;-fx-padding:40;");
-            cardsContainer.getChildren().add(empty);
-            return;
-        }
-        for (DemandeConge d : list) cardsContainer.getChildren().add(buildCard(d));
-    }
-
-    private VBox buildCard(DemandeConge d) {
-        // Couleurs selon statut
-        String[] colors = statutColors(d.getStatut());
-        String color = colors[0]; // couleur principale
-        String light = colors[1]; // couleur claire
-
-        VBox card = new VBox(0);
-        card.setPrefWidth(300);
-        card.setMaxWidth(300);
-        card.setStyle(
-                "-fx-background-color:#FFFFFF;-fx-background-radius:14;" +
-                        "-fx-border-color:#E0D0BE;-fx-border-radius:14;-fx-border-width:1;" +
-                        "-fx-effect:dropshadow(gaussian,rgba(0,0,0,0.06),8,0,0,2);"
-        );
-
-        // Bande colorée en haut
-        HBox band = new HBox();
-        band.setPrefHeight(5);
-        band.setStyle("-fx-background-color:" + color + ";-fx-background-radius:14 14 0 0;");
-        card.getChildren().add(band);
-
-        VBox body = new VBox(10);
-        body.setPadding(new Insets(14, 16, 14, 16));
-
-        // Ligne 1 : Nom employé + badge statut
-        HBox row1 = new HBox();
-        row1.setAlignment(Pos.CENTER_LEFT);
-
-        VBox empInfo = new VBox(2);
-        empInfo.setMinWidth(0);
-        HBox.setHgrow(empInfo, Priority.ALWAYS);
-        Label nomLbl = new Label(d.getNomEmploye());
-        nomLbl.setStyle("-fx-font-family:'Poppins';-fx-font-size:13;-fx-font-weight:bold;-fx-text-fill:#222222;");
-        Label posteLbl = new Label(d.getPosteEmploye());
-        posteLbl.setStyle("-fx-font-family:'Poppins';-fx-font-size:11;-fx-text-fill:#888888;");
-        empInfo.getChildren().addAll(nomLbl, posteLbl);
-
-        Label statutBadge = new Label(d.getStatut().getLabel());
-        statutBadge.setStyle(
-                "-fx-background-color:" + light + ";-fx-text-fill:" + color + ";" +
-                        "-fx-font-family:'Poppins';-fx-font-size:10;-fx-font-weight:bold;" +
-                        "-fx-background-radius:10;-fx-padding:4 10 4 10;"
-        );
-        row1.getChildren().addAll(empInfo, statutBadge);
-
-        // Séparateur
-        Pane sep1 = new Pane(); sep1.setPrefHeight(1);
-        sep1.setStyle("-fx-background-color:#F5F0EA;");
-
-        // Ligne 2 : Type de congé + Nombre de jours
-        HBox row2 = new HBox(10);
-        row2.setAlignment(Pos.CENTER_LEFT);
-
-        Label typeBadge = new Label(d.getTypeConge() != null ? d.getTypeConge().getLabel() : "—");
-        typeBadge.setStyle(
-                "-fx-background-color:#E6F1FB;-fx-text-fill:#0C447C;" +
-                        "-fx-font-family:'Poppins';-fx-font-size:10;-fx-font-weight:bold;" +
-                        "-fx-background-radius:10;-fx-padding:4 10 4 10;"
-        );
-        Region sp = new Region(); HBox.setHgrow(sp, Priority.ALWAYS);
-        Label joursLbl = new Label(d.getNombreJours() + " jour" + (d.getNombreJours() > 1 ? "s" : ""));
-        joursLbl.setStyle(
-                "-fx-background-color:" + light + ";-fx-text-fill:" + color + ";" +
-                        "-fx-font-family:'Poppins';-fx-font-size:12;-fx-font-weight:bold;" +
-                        "-fx-background-radius:8;-fx-padding:4 12 4 12;"
-        );
-        row2.getChildren().addAll(typeBadge, sp, joursLbl);
-
-        // Ligne 3 : Dates
-        HBox row3 = new HBox(6);
-        row3.setAlignment(Pos.CENTER_LEFT);
-        Label dateLbl = new Label("📅 " +
-                (d.getDateDebut() != null ? d.getDateDebut().format(FMT) : "—") +
-                "  →  " +
-                (d.getDateFin() != null ? d.getDateFin().format(FMT) : "—")
-        );
-        dateLbl.setStyle("-fx-font-family:'Poppins';-fx-font-size:11;-fx-text-fill:#555555;");
-        row3.getChildren().add(dateLbl);
-
-        // Ligne 4 : Remplaçant (si renseigné)
-        if (d.getRemplacant() != null && !d.getRemplacant().isEmpty()) {
-            Label remLbl = new Label("👤 Remplaçant : " + d.getRemplacant());
-            remLbl.setStyle("-fx-font-family:'Poppins';-fx-font-size:11;-fx-text-fill:#888888;");
-            body.getChildren().add(remLbl);
-        }
-
-        // Séparateur 2
-        Pane sep2 = new Pane(); sep2.setPrefHeight(1);
-        sep2.setStyle("-fx-background-color:#F5F0EA;");
-
-        // Ligne 5 : Actions
-        HBox actions = new HBox(8);
-        actions.setAlignment(Pos.CENTER_RIGHT);
-
-        // Bouton Modifier
-        Button btnEdit = new Button("✏  Modifier");
-        btnEdit.setStyle(
-                "-fx-font-family:'Poppins';-fx-font-size:11;-fx-font-weight:bold;" +
-                        "-fx-background-color:#FFF8F0;-fx-text-fill:#854F0B;" +
-                        "-fx-background-radius:8;-fx-cursor:hand;-fx-border-color:transparent;-fx-padding:6 12 6 12;"
-        );
-        btnEdit.setOnAction(e -> openForm(d));
-
-        // Bouton Approuver (seulement si en attente)
-        if (d.getStatut() == Statut.EN_ATTENTE) {
-            Button btnOk = new Button("✔");
-            btnOk.setStyle(
-                    "-fx-font-family:'Poppins';-fx-font-size:13;" +
-                            "-fx-background-color:#F0F5E8;-fx-text-fill:#4F6815;" +
-                            "-fx-background-radius:8;-fx-cursor:hand;-fx-border-color:transparent;-fx-padding:6 10 6 10;"
-            );
-            btnOk.setOnAction(e -> handleApprouver(d));
-
-            Button btnNo = new Button("✕");
-            btnNo.setStyle(
-                    "-fx-font-family:'Poppins';-fx-font-size:13;" +
-                            "-fx-background-color:#FFF0F0;-fx-text-fill:#75070C;" +
-                            "-fx-background-radius:8;-fx-cursor:hand;-fx-border-color:transparent;-fx-padding:6 10 6 10;"
-            );
-            btnNo.setOnAction(e -> handleRefuser(d));
-            actions.getChildren().addAll(btnEdit, btnOk, btnNo);
-        } else {
-            Button btnDel = new Button("🗑");
-            btnDel.setStyle(
-                    "-fx-font-family:'Poppins';-fx-font-size:13;" +
-                            "-fx-background-color:#FFF0F0;-fx-text-fill:#75070C;" +
-                            "-fx-background-radius:8;-fx-cursor:hand;-fx-border-color:transparent;-fx-padding:6 10 6 10;"
-            );
-            btnDel.setOnAction(e -> handleDelete(d));
-            actions.getChildren().addAll(btnEdit, btnDel);
-        }
-
-        body.getChildren().addAll(row1, sep1, row2, row3, sep2, actions);
-        card.getChildren().add(body);
-        return card;
-    }
-
-    // ── Actions ──────────────────────────────────────────────────────────────
+    // ── Actions ───────────────────────────────────────────────────────────────
 
     @FXML
     private void handleAdd() { openForm(null); }
 
     private void openForm(DemandeConge demande) {
         try {
-            // ← ADAPTE CE CHEMIN selon ton projet
             URL url = getClass().getResource("/com/rh/views/conge_form.fxml");
-            if (url == null) { System.err.println("conge_form.fxml introuvable !"); return; }
-
+            if (url == null) { System.err.println("conge_form.fxml introuvable!"); return; }
             FXMLLoader loader = new FXMLLoader(url);
             Parent root = loader.load();
-
             CongeFormController ctrl = loader.getController();
             ctrl.setParent(this);
             if (demande != null) ctrl.setDemande(demande);
-
             Stage stage = new Stage();
-            stage.setTitle(demande == null ? "Nouvelle demande de congé" : "Modifier la demande");
-            stage.setScene(new Scene(root, 820, 700));
+            stage.setTitle(demande == null ? "Nouvelle demande" : "Modifier la demande");
+            stage.setScene(new Scene(root, 850, 720));
             stage.initModality(Modality.APPLICATION_MODAL);
-            if (cardsContainer.getScene() != null)
-                stage.initOwner(cardsContainer.getScene().getWindow());
+            if (tableConges.getScene() != null)
+                stage.initOwner(tableConges.getScene().getWindow());
             stage.showAndWait();
         } catch (Exception ex) { ex.printStackTrace(); }
     }
 
+    /**
+     * Approuve une demande et déduit automatiquement les jours du solde.
+     * Si le solde est insuffisant, la demande ne peut pas être approuvée.
+     */
     private void handleApprouver(DemandeConge d) {
-        Alert confirm = new Alert(Alert.AlertType.CONFIRMATION);
-        confirm.setTitle("Confirmer l'approbation");
-        confirm.setHeaderText("Approuver le congé de " + d.getNomEmploye() + " ?");
-        confirm.setContentText(d.getNombreJours() + " jours seront déduits du solde.");
-        Optional<ButtonType> result = confirm.showAndWait();
-        if (result.isPresent() && result.get() == ButtonType.OK) {
-            boolean ok = service.approuver(d);
-            if (!ok) {
-                Alert err = new Alert(Alert.AlertType.WARNING);
-                err.setTitle("Solde insuffisant");
-                err.setHeaderText("Impossible d'approuver");
-                err.setContentText("Le solde restant de " + d.getNomEmploye() +
-                        " est insuffisant pour ce congé.");
-                err.showAndWait();
-            }
-            loadData();
-        }
-    }
+        SoldeConge s = soldeService.getSolde(
+                d.getEmploye().getId(),
+                d.getTypeConge() != null ? d.getTypeConge().name() : "ANNUEL",
+                LocalDate.now().getYear());
+        int restant = s != null ? (int) s.getSoldeRestant() : SOLDE_INITIAL;
 
-    private void handleRefuser(DemandeConge d) {
-        TextInputDialog dialog = new TextInputDialog();
-        dialog.setTitle("Refuser la demande");
-        dialog.setHeaderText("Motif de refus pour " + d.getNomEmploye());
-        dialog.setContentText("Commentaire :");
-        Optional<String> result = dialog.showAndWait();
-        result.ifPresent(motif -> {
-            service.refuser(d, motif);
-            loadData();
+        String msg = d.getNombreJours() + " jours seront déduits du solde.\n" +
+                "Solde actuel : " + restant + " / " + SOLDE_INITIAL + " jours.\nConfirmer ?";
+
+        Alert confirm = new Alert(Alert.AlertType.CONFIRMATION,
+                msg, ButtonType.YES, ButtonType.NO);
+        confirm.setTitle("Approuver le congé");
+        confirm.setHeaderText("Congé de " + d.getNomEmploye());
+        confirm.showAndWait().ifPresent(bt -> {
+            if (bt != ButtonType.YES) return;
+            int result = service.approuver(d);
+            if (result == 1) {
+                // Solde insuffisant
+                Alert warn = new Alert(Alert.AlertType.WARNING);
+                warn.setTitle("Solde insuffisant");
+                warn.setHeaderText("Solde de " + d.getNomEmploye() + " insuffisant");
+                warn.setContentText("Solde restant : " + restant + " jours\n" +
+                        "Jours demandés : " + d.getNombreJours() + " jours\n" +
+                        "Impossible d'approuver cette demande.");
+                warn.showAndWait();
+            } else {
+                loadData();
+            }
         });
     }
 
+    private void handleRefuser(DemandeConge d) {
+        TextInputDialog dlg = new TextInputDialog();
+        dlg.setTitle("Refuser la demande");
+        dlg.setHeaderText("Motif de refus — " + d.getNomEmploye());
+        dlg.setContentText("Commentaire :");
+        dlg.showAndWait().ifPresent(motif -> { service.refuser(d, motif); loadData(); });
+    }
+
     private void handleDelete(DemandeConge d) {
-        Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
-        alert.setTitle("Supprimer la demande");
-        alert.setHeaderText("Supprimer la demande de " + d.getNomEmploye() + " ?");
-        alert.setContentText("Cette action est irréversible.");
-        Optional<ButtonType> result = alert.showAndWait();
-        if (result.isPresent() && result.get() == ButtonType.OK) {
-            service.delete(d);
-            loadData();
-        }
+        Alert a = new Alert(Alert.AlertType.CONFIRMATION,
+                "Action irréversible.", ButtonType.OK, ButtonType.CANCEL);
+        a.setTitle("Supprimer");
+        a.setHeaderText("Supprimer la demande de " + d.getNomEmploye() + " ?");
+        a.showAndWait().ifPresent(bt -> {
+            if (bt == ButtonType.OK) { service.delete(d); loadData(); }
+        });
     }
 
     public void refresh() { loadData(); }
 
-    // ── Helper couleurs ───────────────────────────────────────────────────────
+    // ── Helpers ───────────────────────────────────────────────────────────────
 
-    private String[] statutColors(Statut statut) {
-        return switch (statut) {
-            case APPROUVE    -> new String[]{"#4F6815", "#F0F5E8"};
-            case REFUSE      -> new String[]{"#75070C", "#FFF0F0"};
-            case ANNULE      -> new String[]{"#888888", "#F5F5F5"};
-            default          -> new String[]{"#C8A000", "#FFFBEE"}; // EN_ATTENTE
+    private Button makeBtn(String text, String bg, String fg) {
+        Button b = new Button(text);
+        b.setStyle("-fx-font-size:12;-fx-background-color:" + bg + ";-fx-text-fill:" + fg + ";" +
+                "-fx-background-radius:6;-fx-cursor:hand;-fx-border-color:transparent;" +
+                "-fx-min-width:28;-fx-min-height:28;");
+        return b;
+    }
+
+    private TableCell<DemandeConge, String> textCell(String color, boolean italic) {
+        return new TableCell<>() {
+            @Override protected void updateItem(String v, boolean empty) {
+                super.updateItem(v, empty);
+                if (empty || v == null) { setText(null); return; }
+                setText(v);
+                setStyle("-fx-font-family:'Poppins';-fx-font-size:11;-fx-text-fill:" + color + ";" +
+                        (italic ? "-fx-font-style:italic;" : ""));
+            }
+        };
+    }
+
+    private String[] statutColors(Statut s) {
+        return switch (s) {
+            case APPROUVE -> new String[]{"#4F6815", "#F0F5E8"};
+            case REFUSE   -> new String[]{"#75070C", "#FFF0F0"};
+            case ANNULE   -> new String[]{"#888888", "#F5F5F5"};
+            default       -> new String[]{"#C8A000", "#FFFBEE"};
+        };
+    }
+
+    private String typeBg(String type) {
+        return switch (type) {
+            case "Congé annuel"       -> "#E6F1FB";
+            case "Congé maladie"      -> "#FFF0F0";
+            case "Congé exceptionnel" -> "#F3E5F5";
+            case "Sans solde"         -> "#FFF8F0";
+            default                   -> "#F0F5E8";
+        };
+    }
+
+    private String typeFg(String type) {
+        return switch (type) {
+            case "Congé annuel"       -> "#0C447C";
+            case "Congé maladie"      -> "#75070C";
+            case "Congé exceptionnel" -> "#6A1B9A";
+            case "Sans solde"         -> "#854F0B";
+            default                   -> "#4F6815";
         };
     }
 }

@@ -93,7 +93,7 @@ public class SoldeCongeService {
         } catch (SQLException e) { e.printStackTrace(); }
     }
 
-    // ── CONSOMMER (appelé quand demande approuvée) ───────────────────────────
+    // ── CONSOMMER (appelé quand demande approuvée, mode = SOLDE) ─────────────
 
     public void consommer(int employeId, String typeConge, int annee, double jours) {
         String sql = "UPDATE solde_conge SET solde_consomme = solde_consomme + ?, " +
@@ -122,12 +122,17 @@ public class SoldeCongeService {
     // ── INIT SOLDES ANNUELS ──────────────────────────────────────────────────
 
     /**
-     * Initialise le solde annuel pour un employé (appelé en début d'année ou à l'embauche).
-     * soldeInitial = 30 jours par défaut (à adapter selon convention).
+     * Initialise le solde annuel pour un employé (appelé en début d'année ou
+     * à l'embauche).
+     *
+     * Règle ISOBAT : le congé ANNUEL est toujours de 18 jours/an, quel que
+     * soit l'employé. (Les autres types ci-dessous sont indicatifs — à
+     * adapter/retirer si votre convention ne les suit pas via ce mécanisme
+     * de solde.)
      */
     public void initSoldesAnnuels(Employe emp, int annee) {
-        String[] types = {"ANNUEL", "MALADIE", "EXCEPTIONNEL"};
-        double[] soldes = {30, 15, 5};
+        String[] types  = {"ANNUEL", "MALADIE", "EXCEPTIONNEL"};
+        double[] soldes = {18,        15,         5};
         for (int i = 0; i < types.length; i++) {
             SoldeConge existing = getSolde(emp.getId(), types[i], annee);
             if (existing == null) {
@@ -144,7 +149,6 @@ public class SoldeCongeService {
         s.setId(rs.getInt("id"));
         Employe emp = new Employe();
         emp.setId(employeId);
-        // Récupérer nom/prenom si disponible dans le résultat
         try { emp.setNom(rs.getString("nom")); } catch (Exception ignored) {}
         try { emp.setPrenom(rs.getString("prenom")); } catch (Exception ignored) {}
         s.setEmploye(emp);

@@ -4,6 +4,8 @@ import java.time.LocalDate;
 
 public class DemandeConge {
 
+    // ── Enums ────────────────────────────────────────────────────────────────
+
     public enum TypeConge {
         ANNUEL("Congé annuel"),
         MALADIE("Congé maladie"),
@@ -14,9 +16,7 @@ public class DemandeConge {
         private final String label;
         TypeConge(String label) { this.label = label; }
         public String getLabel() { return label; }
-
-        @Override
-        public String toString() { return label; }
+        @Override public String toString() { return label; }
     }
 
     public enum Statut {
@@ -28,10 +28,10 @@ public class DemandeConge {
         private final String label;
         Statut(String label) { this.label = label; }
         public String getLabel() { return label; }
-
-        @Override
-        public String toString() { return label; }
+        @Override public String toString() { return label; }
     }
+
+    // ── Attributs ────────────────────────────────────────────────────────────
 
     private int id;
     private Employe employe;
@@ -44,25 +44,14 @@ public class DemandeConge {
     private String commentaire;
     private LocalDate dateCreation;
 
+    // ── Constructeurs ────────────────────────────────────────────────────────
+
     public DemandeConge() {
         this.statut = Statut.EN_ATTENTE;
         this.dateCreation = LocalDate.now();
     }
 
-    public DemandeConge(Employe employe, TypeConge typeConge,
-                        LocalDate dateDebut, LocalDate dateFin,
-                        int nombreJours, String remplacant, String commentaire) {
-        this();
-        this.employe = employe;
-        this.typeConge = typeConge;
-        this.dateDebut = dateDebut;
-        this.dateFin = dateFin;
-        this.nombreJours = nombreJours;
-        this.remplacant = remplacant;
-        this.commentaire = commentaire;
-    }
-
-    // ── Getters / Setters ───────────────────────────────────────────────────
+    // ── Getters / Setters ────────────────────────────────────────────────────
 
     public int getId() { return id; }
     public void setId(int id) { this.id = id; }
@@ -94,7 +83,8 @@ public class DemandeConge {
     public LocalDate getDateCreation() { return dateCreation; }
     public void setDateCreation(LocalDate dateCreation) { this.dateCreation = dateCreation; }
 
-    // Utilitaire : nom complet employé pour affichage
+    // ── Utilitaires affichage ────────────────────────────────────────────────
+
     public String getNomEmploye() {
         if (employe == null) return "—";
         return employe.getNom() + " " + employe.getPrenom();

@@ -22,11 +22,12 @@ public class DemandeCongeService {
         this.soldeService = new SoldeCongeService();
     }
 
-    // ── ADD ─────────────────────────────────────────────────────────────────
+    // ── ADD ──────────────────────────────────────────────────────────────────
 
     public void add(DemandeConge d) {
-        String sql = "INSERT INTO demande_conge (employe_id, type_conge, date_debut, date_fin, " +
-                "nombre_jours, statut, remplacant, commentaire, date_creation) " +
+        String sql = "INSERT INTO demande_conge " +
+                "(employe_id, type_conge, date_debut, date_fin, nombre_jours, " +
+                " statut, remplacant, commentaire, date_creation) " +
                 "VALUES (?,?,?,?,?,?,?,?,?)";
         try (PreparedStatement ps = cnx.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
             ps.setInt(1, d.getEmploye().getId());
@@ -37,8 +38,7 @@ public class DemandeCongeService {
             ps.setString(6, d.getStatut().name());
             ps.setString(7, d.getRemplacant());
             ps.setString(8, d.getCommentaire());
-            ps.setDate(9, d.getDateCreation() != null
-                    ? Date.valueOf(d.getDateCreation()) : Date.valueOf(LocalDate.now()));
+            ps.setDate(9, Date.valueOf(d.getDateCreation() != null ? d.getDateCreation() : LocalDate.now()));
             ps.executeUpdate();
             try (ResultSet rs = ps.getGeneratedKeys()) {
                 if (rs.next()) d.setId(rs.getInt(1));
@@ -46,7 +46,7 @@ public class DemandeCongeService {
         } catch (SQLException e) { e.printStackTrace(); }
     }
 
-    // ── GET ALL ─────────────────────────────────────────────────────────────
+    // ── GET ALL ───────────────────────────────────────────────────────────────
 
     public List<DemandeConge> getAll() {
         List<DemandeConge> list = new ArrayList<>();
@@ -56,8 +56,6 @@ public class DemandeCongeService {
         } catch (SQLException e) { e.printStackTrace(); }
         return list;
     }
-
-    // ── GET BY EMPLOYE ───────────────────────────────────────────────────────
 
     public List<DemandeConge> getByEmploye(int employeId) {
         List<DemandeConge> list = new ArrayList<>();
@@ -70,20 +68,7 @@ public class DemandeCongeService {
         return list;
     }
 
-    // ── GET BY STATUT ────────────────────────────────────────────────────────
-
-    public List<DemandeConge> getByStatut(DemandeConge.Statut statut) {
-        List<DemandeConge> list = new ArrayList<>();
-        String sql = "SELECT * FROM demande_conge WHERE statut=? ORDER BY date_creation DESC";
-        try (PreparedStatement ps = cnx.prepareStatement(sql)) {
-            ps.setString(1, statut.name());
-            ResultSet rs = ps.executeQuery();
-            while (rs.next()) list.add(map(rs));
-        } catch (SQLException e) { e.printStackTrace(); }
-        return list;
-    }
-
-    // ── UPDATE ──────────────────────────────────────────────────────────────
+    // ── UPDATE ────────────────────────────────────────────────────────────────
 
     public void update(DemandeConge d) {
         String sql = "UPDATE demande_conge SET employe_id=?, type_conge=?, date_debut=?, date_fin=?, " +
@@ -102,15 +87,13 @@ public class DemandeCongeService {
         } catch (SQLException e) { e.printStackTrace(); }
     }
 
-    // ── DELETE ──────────────────────────────────────────────────────────────
+    // ── DELETE ────────────────────────────────────────────────────────────────
 
     public void delete(DemandeConge d) {
-        // Si approuvée, restituer le solde avant suppression
+        // Si approuvée → restituer les jours
         if (d.getStatut() == DemandeConge.Statut.APPROUVE) {
             soldeService.restituer(d.getEmploye().getId(),
-                    d.getTypeConge().name(),
-                    LocalDate.now().getYear(),
-                    d.getNombreJours());
+                    d.getTypeConge().name(), LocalDate.now().getYear(), d.getNombreJours());
         }
         String sql = "DELETE FROM demande_conge WHERE id=?";
         try (PreparedStatement ps = cnx.prepareStatement(sql)) {
@@ -119,22 +102,33 @@ public class DemandeCongeService {
         } catch (SQLException e) { e.printStackTrace(); }
     }
 
-    // ── APPROUVER ────────────────────────────────────────────────────────────
+    // ── APPROUVER (simplifié) ────────────────────────────────────────────────
 
     /**
-     * Approuve une demande et décrémente le solde automatiquement.
+     * Approve une demande et déduit automatiquement les jours du solde
+     * Retourne : 0 = OK, 1 = solde insuffisant
      */
-    public boolean approuver(DemandeConge d) {
+    public int approuver(DemandeConge d) {
         // Vérifie le solde disponible
         SoldeConge solde = soldeService.getSolde(
                 d.getEmploye().getId(),
                 d.getTypeConge().name(),
                 LocalDate.now().getYear()
         );
-        if (solde != null && solde.getSoldeRestant() < d.getNombreJours()) {
-            return false; // Solde insuffisant
+
+        // Initialise le solde à 18j si inexistant
+        if (solde == null) {
+            soldeService.initSoldesAnnuels(d.getEmploye(), LocalDate.now().getYear());
+            solde = soldeService.getSolde(
+                    d.getEmploye().getId(), d.getTypeConge().name(), LocalDate.now().getYear());
         }
 
+        // Vérifie si le solde est suffisant
+        if (solde != null && solde.getSoldeRestant() < d.getNombreJours()) {
+            return 1; // solde insuffisant
+        }
+
+        // Approuve la demande
         d.setStatut(DemandeConge.Statut.APPROUVE);
         update(d);
 
@@ -145,10 +139,10 @@ public class DemandeCongeService {
                 LocalDate.now().getYear(),
                 d.getNombreJours()
         );
-        return true;
+        return 0; // OK
     }
 
-    // ── REFUSER ──────────────────────────────────────────────────────────────
+    // ── REFUSER ───────────────────────────────────────────────────────────────
 
     public void refuser(DemandeConge d, String commentaire) {
         d.setStatut(DemandeConge.Statut.REFUSE);
@@ -156,40 +150,33 @@ public class DemandeCongeService {
         update(d);
     }
 
-    // ── ANNULER ──────────────────────────────────────────────────────────────
+    // ── ANNULER ───────────────────────────────────────────────────────────────
 
     public void annuler(DemandeConge d) {
-        // Si elle était approuvée, restituer le solde
         if (d.getStatut() == DemandeConge.Statut.APPROUVE) {
             soldeService.restituer(
-                    d.getEmploye().getId(),
-                    d.getTypeConge().name(),
-                    LocalDate.now().getYear(),
-                    d.getNombreJours()
-            );
+                    d.getEmploye().getId(), d.getTypeConge().name(),
+                    LocalDate.now().getYear(), d.getNombreJours());
         }
         d.setStatut(DemandeConge.Statut.ANNULE);
         update(d);
     }
 
-    // ── CALCULER JOURS ──────────────────────────────────────────────────────
+    // ── CALCUL JOURS OUVRABLES ────────────────────────────────────────────────
 
-    /**
-     * Calcule le nombre de jours ouvrables entre deux dates (sans week-ends).
-     */
     public static int calculerJoursOuvrables(LocalDate debut, LocalDate fin) {
         if (debut == null || fin == null || fin.isBefore(debut)) return 0;
         int count = 0;
-        LocalDate current = debut;
-        while (!current.isAfter(fin)) {
-            int dow = current.getDayOfWeek().getValue(); // 1=Lun ... 7=Dim
-            if (dow < 6) count++; // Exclut samedi(6) et dimanche(7)
-            current = current.plusDays(1);
+        LocalDate cur = debut;
+        while (!cur.isAfter(fin)) {
+            int dow = cur.getDayOfWeek().getValue();
+            if (dow < 6) count++;
+            cur = cur.plusDays(1);
         }
         return count;
     }
 
-    // ── MAP ResultSet ────────────────────────────────────────────────────────
+    // ── MAP ───────────────────────────────────────────────────────────────────
 
     private DemandeConge map(ResultSet rs) throws SQLException {
         DemandeConge d = new DemandeConge();
@@ -198,11 +185,8 @@ public class DemandeCongeService {
         Employe emp = employeService.findById(rs.getInt("employe_id"));
         d.setEmploye(emp);
 
-        try {
-            d.setTypeConge(DemandeConge.TypeConge.valueOf(rs.getString("type_conge")));
-        } catch (Exception e) {
-            d.setTypeConge(DemandeConge.TypeConge.ANNUEL);
-        }
+        try { d.setTypeConge(DemandeConge.TypeConge.valueOf(rs.getString("type_conge"))); }
+        catch (Exception e) { d.setTypeConge(DemandeConge.TypeConge.ANNUEL); }
 
         Date debut = rs.getDate("date_debut");
         Date fin   = rs.getDate("date_fin");
@@ -211,11 +195,8 @@ public class DemandeCongeService {
 
         d.setNombreJours(rs.getInt("nombre_jours"));
 
-        try {
-            d.setStatut(DemandeConge.Statut.valueOf(rs.getString("statut")));
-        } catch (Exception e) {
-            d.setStatut(DemandeConge.Statut.EN_ATTENTE);
-        }
+        try { d.setStatut(DemandeConge.Statut.valueOf(rs.getString("statut"))); }
+        catch (Exception e) { d.setStatut(DemandeConge.Statut.EN_ATTENTE); }
 
         d.setRemplacant(rs.getString("remplacant"));
         d.setCommentaire(rs.getString("commentaire"));
