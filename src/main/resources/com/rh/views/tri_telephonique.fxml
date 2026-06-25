@@ -1,68 +1,69 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<?import javafx.scene.layout.*?>
-<?import javafx.scene.control.*?>
-<?import javafx.geometry.Insets?>
 
-<ScrollPane fitToWidth="true" hbarPolicy="NEVER" styleClass="content-scroll"
-            xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1"
-            fx:controller="com.rh.contollers.TriTelephoniqueController">
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.ComboBox?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.control.Separator?>
+<?import javafx.scene.control.TableColumn?>
+<?import javafx.scene.control.TableView?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Region?>
+<?import javafx.scene.layout.VBox?>
 
-    <VBox styleClass="dashboard-root" spacing="20">
+<ScrollPane fitToWidth="true" hbarPolicy="NEVER" styleClass="content-scroll" xmlns="http://javafx.com/javafx/26" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.rh.contollers.TriTelephoniqueController">
+
+    <VBox spacing="20" styleClass="dashboard-root">
 
         <!-- ── En-tête ── -->
         <HBox alignment="CENTER_LEFT" spacing="12">
-            <Label text="📞  Tri Téléphonique" styleClass="welcome-label"/>
-            <Region HBox.hgrow="ALWAYS"/>
-            <Button text="＋  Ajouter un candidat" styleClass="btn-primary" onAction="#onAjouterCandidat"/>
-            <Button text="📥  Exporter" styleClass="btn-secondary" onAction="#onExporter"/>
+            <Label styleClass="welcome-label" text="📞  Tri Téléphonique" />
+            <Region HBox.hgrow="ALWAYS" />
+            <Button onAction="#onAjouterCandidat" styleClass="btn-primary" text="＋  Ajouter un candidat" />
+            <Button onAction="#onExporter" styleClass="btn-secondary" text="📥  Exporter" />
         </HBox>
 
         <!-- ── Filtres / Recherche ── -->
-        <HBox spacing="12" alignment="CENTER_LEFT">
-            <TextField fx:id="txtRecherche" promptText="🔍  Rechercher un candidat..."
-                       style="-fx-background-color: white; -fx-background-radius: 8; -fx-padding: 8 14; -fx-border-color: #F0E6DA; -fx-border-radius: 8;"
-                       prefWidth="350"/>
-            <ComboBox fx:id="comboFiltreStatut" promptText="Filtrer par statut"
-                      style="-fx-background-color: white; -fx-background-radius: 8; -fx-padding: 4 8; -fx-border-color: #F0E6DA; -fx-border-radius: 8; -fx-pref-height: 36;"
-                      prefWidth="180"/>
-            <Button text="Filtrer" styleClass="btn-secondary" onAction="#onFiltrer"/>
-            <Button text="Réinitialiser" styleClass="btn-back" onAction="#onReinitialiser"/>
+        <HBox alignment="CENTER_LEFT" spacing="12">
+            <TextField fx:id="txtRecherche" prefWidth="350" promptText="🔍  Rechercher un candidat..." style="-fx-background-color: white; -fx-background-radius: 8; -fx-padding: 8 14; -fx-border-color: #F0E6DA; -fx-border-radius: 8;" />
+            <ComboBox fx:id="comboFiltreStatut" prefWidth="180" promptText="Filtrer par statut" style="-fx-background-color: white; -fx-background-radius: 8; -fx-padding: 4 8; -fx-border-color: #F0E6DA; -fx-border-radius: 8; -fx-pref-height: 36;" />
+            <Button onAction="#onReinitialiser" styleClass="btn-back" text="Réinitialiser" />
         </HBox>
 
         <!-- ── Tableau ── -->
-        <VBox styleClass="chart-card" VBox.vgrow="ALWAYS" spacing="12">
+        <VBox spacing="12" styleClass="chart-card" VBox.vgrow="ALWAYS">
 
             <!-- En-tête de la table -->
             <HBox alignment="CENTER_LEFT">
-                <Label text="📋  Liste des candidats" styleClass="section-title"/>
-                <Region HBox.hgrow="ALWAYS"/>
-                <Label fx:id="lblTotalCandidats" text="0 candidat(s)" styleClass="depense-meta"/>
+                <Label styleClass="section-title" text="📋  Liste des candidats" />
+                <Region HBox.hgrow="ALWAYS" />
+                <Label fx:id="lblTotalCandidats" styleClass="depense-meta" text="0 candidat(s)" />
             </HBox>
 
-            <Separator/>
+            <Separator />
 
             <!-- TableView -->
-            <TableView fx:id="tableView" styleClass="activity-table" VBox.vgrow="ALWAYS" prefHeight="450">
+            <TableView fx:id="tableView" prefHeight="450" styleClass="activity-table" VBox.vgrow="ALWAYS">
                 <columns>
-                    <TableColumn fx:id="colNom" text="NOM &amp; PRÉNOM" prefWidth="190"/>
-                    <TableColumn fx:id="colTel" text="TÉLÉPHONE" prefWidth="120"/>
-                    <TableColumn fx:id="colExperience" text="EXPÉRIENCE" prefWidth="240"/>
-                    <TableColumn fx:id="colPoste" text="POSTE" prefWidth="130"/>
-                    <TableColumn fx:id="colCommentaire" text="COMMENTAIRE" prefWidth="100"/>
-                    <TableColumn fx:id="colStatut" text="STATUT" prefWidth="140" styleClass="column-statut"/>
-                    <TableColumn fx:id="colActions" text="ACTIONS" prefWidth="100" styleClass="column-statut"/>
+                    <TableColumn fx:id="colNom" prefWidth="190" text="NOM &amp; PRÉNOM" />
+                    <TableColumn fx:id="colTel" prefWidth="120" text="TÉLÉPHONE" />
+                    <TableColumn fx:id="colExperience" prefWidth="240" text="EXPÉRIENCE" />
+                    <TableColumn fx:id="colPoste" prefWidth="130" text="POSTE" />
+                    <TableColumn fx:id="colCommentaire" prefWidth="100" text="COMMENTAIRE" />
+                    <TableColumn fx:id="colStatut" prefWidth="140" styleClass="column-statut" text="STATUT" />
+                    <TableColumn fx:id="colActions" prefWidth="100" styleClass="column-statut" text="ACTIONS" />
                 </columns>
             </TableView>
 
             <!-- Pagination -->
             <HBox alignment="CENTER_RIGHT" spacing="8" style="-fx-padding: 8 0 0 0;">
-                <Label text="Lignes par page : " styleClass="depense-meta"/>
-                <ComboBox fx:id="comboLignesParPage" prefWidth="70"
-                          style="-fx-background-color: white; -fx-background-radius: 4; -fx-border-color: #F0E6DA; -fx-border-radius: 4;"/>
+                <Label styleClass="depense-meta" text="Lignes par page : " />
+                <ComboBox fx:id="comboLignesParPage" prefWidth="70" style="-fx-background-color: white; -fx-background-radius: 4; -fx-border-color: #F0E6DA; -fx-border-radius: 4;" />
                 <HBox spacing="4">
-                    <Button text="←" styleClass="btn-back" style="-fx-padding: 4 10;"/>
-                    <Label fx:id="lblPageActuelle" text="1" style="-fx-padding: 4 10; -fx-background-color: #4F6815; -fx-text-fill: white; -fx-background-radius: 4;"/>
-                    <Button text="→" styleClass="btn-back" style="-fx-padding: 4 10;"/>
+                    <Button style="-fx-padding: 4 10;" styleClass="btn-back" text="←" />
+                    <Label fx:id="lblPageActuelle" style="-fx-padding: 4 10; -fx-background-color: #4F6815; -fx-text-fill: white; -fx-background-radius: 4;" text="1" />
+                    <Button style="-fx-padding: 4 10;" styleClass="btn-back" text="→" />
                 </HBox>
             </HBox>
 
