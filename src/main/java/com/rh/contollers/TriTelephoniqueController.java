@@ -11,6 +11,7 @@ import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
+import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
@@ -215,6 +216,53 @@ public class TriTelephoniqueController {
         }
     }
 
+    // ── Actions sur les candidats ──
+
+    private void accepterCandidat(TriTelephonique candidat) {
+        Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
+        alert.setTitle("Confirmation");
+        alert.setHeaderText("Accepter le candidat");
+        alert.setContentText("Êtes-vous sûr de vouloir accepter " + candidat.getNomComplet() +
+                " ?\n\nIl sera automatiquement ajouté à la liste des entretiens physiques.");
+
+        Optional<ButtonType> result = alert.showAndWait();
+        if (result.isPresent() && result.get() == ButtonType.OK) {
+            try {
+                boolean success = service.accepterCandidat(candidat.getIdCand());
+                if (success) {
+                    afficherSucces("Candidat accepté ! Il a été ajouté à l'entretien physique.");
+                    chargerDonnees();
+                } else {
+                    afficherErreur("Erreur lors de l'acceptation du candidat.");
+                }
+            } catch (Exception e) {
+                afficherErreur("Erreur : " + e.getMessage());
+            }
+        }
+    }
+
+    private void refuserCandidat(TriTelephonique candidat) {
+        Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
+        alert.setTitle("Confirmation");
+        alert.setHeaderText("Refuser le candidat");
+        alert.setContentText("Êtes-vous sûr de vouloir refuser " + candidat.getNomComplet() + " ?");
+
+        Optional<ButtonType> result = alert.showAndWait();
+        if (result.isPresent() && result.get() == ButtonType.OK) {
+            try {
+                boolean success = service.refuserCandidat(candidat.getIdCand());
+                if (success) {
+                    afficherSucces("Candidat refusé.");
+                    chargerDonnees();
+                } else {
+                    afficherErreur("Erreur lors du refus du candidat.");
+                }
+            } catch (Exception e) {
+                afficherErreur("Erreur : " + e.getMessage());
+            }
+        }
+    }
+
     // ── Configuration de la colonne Statut ──
 
     private void configurerColonneStatut() {
@@ -259,11 +307,29 @@ public class TriTelephoniqueController {
 
     private void configurerColonneActions() {
         colActions.setCellFactory(column -> new TableCell<TriTelephonique, Void>() {
+            private final Button btnAccepter = new Button("✅");
+            private final Button btnRefuser = new Button("❌");
             private final Button btnSupprimer = new Button("🗑️");
+            private final HBox container = new HBox(5, btnAccepter, btnRefuser, btnSupprimer);
 
             {
-                btnSupprimer.setStyle("-fx-font-size: 14px; -fx-padding: 4 8; -fx-background-color: #fde8e9; -fx-background-radius: 6; -fx-cursor: hand;");
+                btnAccepter.setStyle("-fx-font-size: 14px; -fx-padding: 4 6; -fx-background-color: transparent; -fx-cursor: hand;");
+                btnRefuser.setStyle("-fx-font-size: 14px; -fx-padding: 4 6; -fx-background-color: transparent; -fx-cursor: hand;");
+                btnSupprimer.setStyle("-fx-font-size: 14px; -fx-padding: 4 6; -fx-background-color: transparent; -fx-cursor: hand;");
+
+                btnAccepter.setTooltip(new Tooltip("Accepter le candidat"));
+                btnRefuser.setTooltip(new Tooltip("Refuser le candidat"));
                 btnSupprimer.setTooltip(new Tooltip("Supprimer le candidat"));
+
+                btnAccepter.setOnAction(event -> {
+                    TriTelephonique candidat = getTableView().getItems().get(getIndex());
+                    accepterCandidat(candidat);
+                });
+
+                btnRefuser.setOnAction(event -> {
+                    TriTelephonique candidat = getTableView().getItems().get(getIndex());
+                    refuserCandidat(candidat);
+                });
 
                 btnSupprimer.setOnAction(event -> {
                     TriTelephonique candidat = getTableView().getItems().get(getIndex());
@@ -277,8 +343,8 @@ public class TriTelephoniqueController {
                 if (empty) {
                     setGraphic(null);
                 } else {
-                    setGraphic(btnSupprimer);
-                    setAlignment(Pos.CENTER);
+                    container.setAlignment(Pos.CENTER);
+                    setGraphic(container);
                 }
             }
         });

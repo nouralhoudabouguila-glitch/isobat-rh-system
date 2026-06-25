@@ -1,19 +1,24 @@
 package com.rh.services;
 
 import com.rh.interfaces.IServices;
+import com.rh.models.EntretienPhysique;
 import com.rh.models.TriTelephonique;
 import com.rh.utils.IsobatDB;
 
 import java.sql.*;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 
 public class ServiceTriTelephonique implements IServices<TriTelephonique> {
 
     private Connection cnx;
+    private ServiceEntretienPhysique serviceEntretien;
 
     public ServiceTriTelephonique() {
         cnx = IsobatDB.getInstance().getCnx();
+        serviceEntretien = new ServiceEntretienPhysique();
     }
 
     // ── CRUD ──
@@ -47,6 +52,100 @@ public class ServiceTriTelephonique implements IServices<TriTelephonique> {
         }
     }
 
+    // ── Méthodes d'acceptation et refus ──
+
+    public boolean accepterCandidat(int idCandidat) {
+        try {
+            // Récupérer le candidat
+            TriTelephonique candidat = findById(idCandidat);
+            if (candidat == null) {
+                System.err.println("Candidat non trouvé avec l'ID : " + idCandidat);
+                return false;
+            }
+
+            // Vérifier si le candidat est déjà dans entretien_physique
+            List<EntretienPhysique> existants = serviceEntretien.findByIdCandidat(idCandidat);
+            if (!existants.isEmpty()) {
+                System.err.println("Ce candidat est déjà dans la liste des entretiens physiques");
+                return false;
+            }
+
+            // Mettre à jour le statut du candidat
+            candidat.setStatut("Accepté");
+            update(candidat);
+
+            // Ajouter dans entretien_physique avec statut "En attente"
+            EntretienPhysique entretien = new EntretienPhysique();
+            entretien.setIdCandidat(candidat.getIdCand());
+            entretien.setNom(candidat.getNom());
+            entretien.setPrenom(candidat.getPrenom());
+            entretien.setPoste(candidat.getPoste());
+
+            // Date du RDV : maintenant + 7 jours
+            String dateRdv = LocalDateTime.now().plusDays(7)
+                    .format(DateTimeFormatter.ofPattern("dd-MM-yyyy à HH:mm"));
+            entretien.setDateRdv(dateRdv);
+            entretien.setStatut("En attente");
+
+            serviceEntretien.add(entretien);
+
+            System.out.println("Candidat accepté et ajouté à l'entretien physique : " + candidat.getNomComplet());
+            return true;
+
+        } catch (Exception e) {
+            System.err.println("Erreur lors de l'acceptation du candidat : " + e.getMessage());
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    public boolean refuserCandidat(int idCandidat) {
+        try {
+            TriTelephonique candidat = findById(idCandidat);
+            if (candidat == null) {
+                return false;
+            }
+
+            candidat.setStatut("Pas accepté");
+            update(candidat);
+
+            System.out.println("Candidat refusé : " + candidat.getNomComplet());
+            return true;
+
+        } catch (Exception e) {
+            System.err.println("Erreur lors du refus du candidat : " + e.getMessage());
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    // ── Méthode pour retenir un candidat (Entretien Physique → Formation) ──
+
+    public boolean retenirCandidat(int idCandidat) {
+        try {
+            TriTelephonique candidat = findById(idCandidat);
+            if (candidat == null) {
+                System.err.println("Candidat non trouvé avec l'ID : " + idCandidat);
+                return false;
+            }
+
+            // Mettre à jour le statut du candidat
+            candidat.setStatut("Retenu");
+            update(candidat);
+
+            // À ajouter dans participation_formation plus tard
+            // serviceParticipationFormation.add(...);
+
+            System.out.println("Candidat retenu : " + candidat.getNomComplet());
+            return true;
+
+        } catch (Exception e) {
+            System.err.println("Erreur lors du retenue du candidat : " + e.getMessage());
+            e.printStackTrace();
+            return false;
+        }
+    }
+
     @Override
     public List<TriTelephonique> getAll() {
         List<TriTelephonique> candidats = new ArrayList<>();
@@ -65,7 +164,6 @@ public class ServiceTriTelephonique implements IServices<TriTelephonique> {
                 candidat.setPoste(rs.getString("poste"));
                 candidat.setCommentaire(rs.getString("commentaire"));
 
-                // Gérer les valeurs NULL pour le statut
                 String statut = rs.getString("statut");
                 if (statut == null || statut.isEmpty()) {
                     statut = "En attente";
