@@ -58,12 +58,13 @@
 
             <!-- Pagination -->
             <HBox alignment="CENTER_RIGHT" spacing="8" style="-fx-padding: 8 0 0 0;">
-                <Label styleClass="depense-meta" text="Lignes par page : " />
-                <ComboBox fx:id="comboLignesParPage" prefWidth="70" style="-fx-background-color: white; -fx-background-radius: 4; -fx-border-color: #F0E6DA; -fx-border-radius: 4;" />
+                <Label text="Lignes par page : " styleClass="depense-meta"/>
+                <ComboBox fx:id="comboLignesParPage" prefWidth="70"
+                          style="-fx-background-color: white; -fx-background-radius: 4; -fx-border-color: #F0E6DA; -fx-border-radius: 4;"/>
                 <HBox spacing="4">
-                    <Button style="-fx-padding: 4 10;" styleClass="btn-back" text="←" />
-                    <Label fx:id="lblPageActuelle" style="-fx-padding: 4 10; -fx-background-color: #4F6815; -fx-text-fill: white; -fx-background-radius: 4;" text="1" />
-                    <Button style="-fx-padding: 4 10;" styleClass="btn-back" text="→" />
+                    <Button fx:id="btnPagePrecedente" text="←" styleClass="btn-back" style="-fx-padding: 4 10;" onAction="#onPagePrecedente"/>
+                    <Label fx:id="lblPageActuelle" text="1/1" style="-fx-padding: 4 10; -fx-background-color: #4F6815; -fx-text-fill: white; -fx-background-radius: 4;"/>
+                    <Button fx:id="btnPageSuivante" text="→" styleClass="btn-back" style="-fx-padding: 4 10;" onAction="#onPageSuivante"/>
                 </HBox>
             </HBox>
 

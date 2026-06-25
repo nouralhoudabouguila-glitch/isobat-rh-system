@@ -16,6 +16,8 @@ import javafx.stage.Modality;
 import javafx.stage.Stage;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 
 public class TriTelephoniqueController {
@@ -53,9 +55,21 @@ public class TriTelephoniqueController {
     @FXML
     private ComboBox<Integer> comboLignesParPage;
 
+    // ── Boutons de pagination ──
+    @FXML
+    private Button btnPagePrecedente;
+    @FXML
+    private Button btnPageSuivante;
+
     // ── Service ──
     private ServiceTriTelephonique service;
-    private ObservableList<TriTelephonique> candidats = FXCollections.observableArrayList();
+
+    // ── Données ──
+    private ObservableList<TriTelephonique> tousLesCandidats = FXCollections.observableArrayList();
+    private ObservableList<TriTelephonique> candidatsAffiches = FXCollections.observableArrayList();
+
+    private int pageActuelle = 0;
+    private int lignesParPage = 10;
 
     @FXML
     public void initialize() {
@@ -72,18 +86,26 @@ public class TriTelephoniqueController {
             colPoste.setCellValueFactory(new PropertyValueFactory<>("poste"));
             colCommentaire.setCellValueFactory(new PropertyValueFactory<>("commentaire"));
 
-            // IMPORTANT: Configurer la colonne Statut
+            // Configurer la colonne Statut
             configurerColonneStatut();
 
             // Configurer la colonne Actions
             configurerColonneActions();
 
+            // Ajouter le double-clic
             ajouterDoubleClic();
 
             // ── Configurer la combo de lignes par page ──
             if (comboLignesParPage != null) {
-                comboLignesParPage.setItems(FXCollections.observableArrayList(10, 25, 50, 100));
+                comboLignesParPage.setItems(FXCollections.observableArrayList(5, 10, 20, 50, 100));
                 comboLignesParPage.setValue(10);
+
+                // Écouteur pour changer le nombre de lignes par page
+                comboLignesParPage.setOnAction(e -> {
+                    lignesParPage = comboLignesParPage.getValue();
+                    pageActuelle = 0;
+                    appliquerPagination();
+                });
             }
 
             // ── Configurer le filtre par statut ──
@@ -96,7 +118,7 @@ public class TriTelephoniqueController {
             chargerDonnees();
 
             // ── Lier les données à la table ──
-            tableView.setItems(candidats);
+            tableView.setItems(candidatsAffiches);
 
             // ── Mettre à jour le compteur ──
             mettreAJourCompteur();
@@ -131,6 +153,68 @@ public class TriTelephoniqueController {
         }
     }
 
+    // ── Pagination ──
+
+    private void appliquerPagination() {
+        if (tousLesCandidats.isEmpty()) {
+            candidatsAffiches.clear();
+            mettreAJourCompteur();
+            return;
+        }
+
+        int total = tousLesCandidats.size();
+        int start = pageActuelle * lignesParPage;
+        int end = Math.min(start + lignesParPage, total);
+
+        if (start >= total && total > 0) {
+            pageActuelle = (total - 1) / lignesParPage;
+            start = pageActuelle * lignesParPage;
+            end = Math.min(start + lignesParPage, total);
+        }
+
+        List<TriTelephonique> sousListe = new ArrayList<>(tousLesCandidats.subList(start, end));
+        candidatsAffiches.setAll(sousListe);
+
+        mettreAJourCompteur();
+        mettreAJourPagination();
+        tableView.refresh();
+    }
+
+    private void mettreAJourPagination() {
+        int total = tousLesCandidats.size();
+        int totalPages = (total + lignesParPage - 1) / lignesParPage;
+
+        if (lblPageActuelle != null) {
+            lblPageActuelle.setText((pageActuelle + 1) + "/" + Math.max(1, totalPages));
+        }
+
+        if (btnPagePrecedente != null) {
+            btnPagePrecedente.setDisable(pageActuelle == 0);
+        }
+
+        if (btnPageSuivante != null) {
+            btnPageSuivante.setDisable(pageActuelle >= totalPages - 1 || totalPages == 0);
+        }
+    }
+
+    @FXML
+    private void onPagePrecedente() {
+        if (pageActuelle > 0) {
+            pageActuelle--;
+            appliquerPagination();
+        }
+    }
+
+    @FXML
+    private void onPageSuivante() {
+        int total = tousLesCandidats.size();
+        int totalPages = (total + lignesParPage - 1) / lignesParPage;
+        if (pageActuelle < totalPages - 1) {
+            pageActuelle++;
+            appliquerPagination();
+        }
+    }
+
     // ── Configuration de la colonne Statut ──
 
     private void configurerColonneStatut() {
@@ -149,7 +233,6 @@ public class TriTelephoniqueController {
                     setGraphic(null);
                     setText(null);
                 } else {
-                    // Récupérer le candidat pour avoir son statut
                     TriTelephonique candidat = getTableView().getItems().get(getIndex());
                     String statut = (candidat != null && candidat.getStatut() != null && !candidat.getStatut().isEmpty())
                             ? candidat.getStatut()
@@ -157,7 +240,6 @@ public class TriTelephoniqueController {
 
                     badge.setText(statut);
 
-                    // Appliquer le style selon le statut
                     if ("Accepté".equalsIgnoreCase(statut)) {
                         badge.setStyle("-fx-background-color: #4F6815; -fx-text-fill: white; -fx-font-weight: bold; -fx-padding: 4 14; -fx-background-radius: 12; -fx-font-size: 11px;");
                     } else if ("Pas accepté".equalsIgnoreCase(statut)) {
@@ -202,6 +284,50 @@ public class TriTelephoniqueController {
         });
     }
 
+    // ── Double-clic pour modifier ──
+
+    private void ajouterDoubleClic() {
+        tableView.setOnMouseClicked(event -> {
+            if (event.getClickCount() == 2) {
+                TriTelephonique candidat = tableView.getSelectionModel().getSelectedItem();
+                if (candidat != null) {
+                    ouvrirFormulaireModification(candidat);
+                }
+            }
+        });
+    }
+
+    private void ouvrirFormulaireModification(TriTelephonique candidat) {
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/rh/views/modifier_candidat.fxml"));
+            VBox root = loader.load();
+
+            ModifierCandidatController controller = loader.getController();
+            controller.setCandidat(candidat);
+            controller.setOnModificationReussie(() -> {
+                chargerDonnees();
+            });
+
+            Scene scene = new Scene(root);
+            String css = getClass().getResource("/com/rh/styles/main.css").toExternalForm();
+            if (css != null) {
+                scene.getStylesheets().add(css);
+            }
+
+            Stage stage = new Stage();
+            stage.setTitle("Modifier un candidat");
+            stage.setScene(scene);
+            stage.initModality(Modality.WINDOW_MODAL);
+            stage.initOwner(tableView.getScene().getWindow());
+            stage.setResizable(false);
+            stage.showAndWait();
+
+        } catch (IOException e) {
+            System.err.println("Erreur lors de l'ouverture du formulaire : " + e.getMessage());
+            afficherErreur("Impossible d'ouvrir le formulaire de modification.");
+        }
+    }
+
     // ── Chargement des données ──
 
     private void chargerDonnees() {
@@ -210,18 +336,11 @@ public class TriTelephoniqueController {
             java.util.List<TriTelephonique> liste = service.getAll();
             System.out.println("Nombre de candidats récupérés : " + liste.size());
 
-            candidats.clear();
-            candidats.addAll(liste);
+            tousLesCandidats.setAll(liste);
+            pageActuelle = 0;
+            appliquerPagination();
 
-            // Afficher les statuts pour déboguer
-            for (TriTelephonique c : candidats) {
-                System.out.println("Candidat: " + c.getNomComplet() + " - Statut: '" + c.getStatut() + "'");
-            }
-
-            System.out.println("Candidats dans l'ObservableList : " + candidats.size());
-
-            mettreAJourCompteur();
-            tableView.refresh();
+            System.out.println("Candidats dans l'ObservableList : " + tousLesCandidats.size());
 
         } catch (Exception e) {
             System.err.println("Erreur lors du chargement des données : " + e.getMessage());
@@ -232,8 +351,10 @@ public class TriTelephoniqueController {
 
     private void rechercherCandidats(String keyword) {
         try {
-            candidats.setAll(service.search(keyword));
-            mettreAJourCompteur();
+            java.util.List<TriTelephonique> liste = service.search(keyword);
+            tousLesCandidats.setAll(liste);
+            pageActuelle = 0;
+            appliquerPagination();
         } catch (Exception e) {
             System.err.println("Erreur lors de la recherche : " + e.getMessage());
             afficherErreur("Erreur lors de la recherche");
@@ -242,8 +363,10 @@ public class TriTelephoniqueController {
 
     private void filtrerParStatut(String statut) {
         try {
-            candidats.setAll(service.filterByStatut(statut));
-            mettreAJourCompteur();
+            java.util.List<TriTelephonique> liste = service.filterByStatut(statut);
+            tousLesCandidats.setAll(liste);
+            pageActuelle = 0;
+            appliquerPagination();
         } catch (Exception e) {
             System.err.println("Erreur lors du filtrage : " + e.getMessage());
             afficherErreur("Erreur lors du filtrage");
@@ -262,8 +385,8 @@ public class TriTelephoniqueController {
         if (result.isPresent() && result.get() == ButtonType.OK) {
             try {
                 service.delete(candidat);
-                candidats.remove(candidat);
-                mettreAJourCompteur();
+                tousLesCandidats.remove(candidat);
+                appliquerPagination();
                 afficherSucces("Candidat supprimé avec succès !");
             } catch (Exception e) {
                 afficherErreur("Erreur lors de la suppression : " + e.getMessage());
@@ -275,7 +398,9 @@ public class TriTelephoniqueController {
 
     private void mettreAJourCompteur() {
         if (lblTotalCandidats != null) {
-            lblTotalCandidats.setText(candidats.size() + " candidat(s)");
+            int total = tousLesCandidats.size();
+            int affiches = candidatsAffiches.size();
+            lblTotalCandidats.setText(affiches + " / " + total + " candidat(s)");
         }
     }
 
@@ -314,7 +439,7 @@ public class TriTelephoniqueController {
 
     @FXML
     private void onExporter() {
-        if (candidats.isEmpty()) {
+        if (tousLesCandidats.isEmpty()) {
             afficherAvertissement("Aucune donnée à exporter.");
             return;
         }
@@ -322,7 +447,7 @@ public class TriTelephoniqueController {
         try {
             ExportExcelService exportService = new ExportExcelService();
             Stage stage = (Stage) tableView.getScene().getWindow();
-            boolean success = exportService.exporterVersExcel(candidats, stage);
+            boolean success = exportService.exporterVersExcel(tousLesCandidats, stage);
 
             if (success) {
                 afficherSucces("Exportation réussie ! Le fichier va s'ouvrir automatiquement.");
@@ -391,55 +516,5 @@ public class TriTelephoniqueController {
         alert.setHeaderText(null);
         alert.setContentText(message);
         alert.showAndWait();
-    }
-
-    // ── Ajouter cette méthode pour gérer le double-clic sur la TableView ──
-
-    private void ajouterDoubleClic() {
-        tableView.setOnMouseClicked(event -> {
-            if (event.getClickCount() == 2) { // Double-clic
-                TriTelephonique candidat = tableView.getSelectionModel().getSelectedItem();
-                if (candidat != null) {
-                    ouvrirFormulaireModification(candidat);
-                }
-            }
-        });
-    }
-
-    private void ouvrirFormulaireModification(TriTelephonique candidat) {
-        try {
-            // Charger le formulaire
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/rh/views/modifier_candidat.fxml"));
-            VBox root = loader.load();
-
-            // Récupérer le contrôleur et passer le candidat
-            ModifierCandidatController controller = loader.getController();
-            controller.setCandidat(candidat);
-
-            // Définir le callback pour rafraîchir la liste après la modification
-            controller.setOnModificationReussie(() -> {
-                chargerDonnees();
-            });
-
-            // Créer la scène
-            Scene scene = new Scene(root);
-            String css = getClass().getResource("/com/rh/styles/main.css").toExternalForm();
-            if (css != null) {
-                scene.getStylesheets().add(css);
-            }
-
-            // Créer la fenêtre
-            Stage stage = new Stage();
-            stage.setTitle("Modifier un candidat");
-            stage.setScene(scene);
-            stage.initModality(Modality.WINDOW_MODAL);
-            stage.initOwner(tableView.getScene().getWindow());
-            stage.setResizable(false);
-            stage.showAndWait();
-
-        } catch (IOException e) {
-            System.err.println("Erreur lors de l'ouverture du formulaire : " + e.getMessage());
-            afficherErreur("Impossible d'ouvrir le formulaire de modification.");
-        }
     }
 }
