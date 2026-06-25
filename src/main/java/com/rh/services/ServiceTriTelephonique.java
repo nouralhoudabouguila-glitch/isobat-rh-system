@@ -82,7 +82,7 @@ public class ServiceTriTelephonique implements IServices<TriTelephonique> {
             e.printStackTrace();
         }
 
-        return candidat
+        return candidats;
     }
 
     @Override
