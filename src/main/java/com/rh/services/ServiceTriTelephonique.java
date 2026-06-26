@@ -2,10 +2,12 @@ package com.rh.services;
 
 import com.rh.interfaces.IServices;
 import com.rh.models.EntretienPhysique;
+import com.rh.models.ParticipationFormation;
 import com.rh.models.TriTelephonique;
 import com.rh.utils.IsobatDB;
 
 import java.sql.*;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
@@ -15,10 +17,12 @@ public class ServiceTriTelephonique implements IServices<TriTelephonique> {
 
     private Connection cnx;
     private ServiceEntretienPhysique serviceEntretien;
+    private ParticipationFormationService participationFormationService;
 
     public ServiceTriTelephonique() {
         cnx = IsobatDB.getInstance().getCnx();
         serviceEntretien = new ServiceEntretienPhysique();
+        participationFormationService = new ParticipationFormationService();
     }
 
     // ── CRUD ──
@@ -52,36 +56,88 @@ public class ServiceTriTelephonique implements IServices<TriTelephonique> {
         }
     }
 
+    // ── Méthode pour ajouter un candidat retenu à la formation ──
+
+    public boolean ajouterCandidatAFomation(TriTelephonique candidat, String dateFormation) {
+        try {
+            System.out.println("=== Ajout à la formation ===");
+            System.out.println("Candidat : " + candidat.getNomComplet());
+            System.out.println("Date formation : " + dateFormation);
+            System.out.println("ID Candidat : " + candidat.getIdCand());
+
+            // Récupérer l'entretien correspondant
+            List<EntretienPhysique> entretiens = serviceEntretien.findByIdCandidat(candidat.getIdCand());
+            if (entretiens.isEmpty()) {
+                System.err.println("Aucun entretien trouvé pour le candidat ID: " + candidat.getIdCand());
+                return false;
+            }
+
+            EntretienPhysique entretien = entretiens.get(0);
+            System.out.println("Entretien trouvé - ID: " + entretien.getIdEntretien());
+
+            // Créer une nouvelle participation
+            ParticipationFormation participation = new ParticipationFormation();
+            participation.setIdEntretien(entretien.getIdEntretien());
+            participation.setNom(candidat.getNom());
+            participation.setPrenom(candidat.getPrenom());
+            participation.setPoste(candidat.getPoste());
+            participation.setDateFormation(LocalDate.parse(dateFormation, DateTimeFormatter.ofPattern("dd-MM-yyyy")));
+            participation.setFormation("Formation initiale");
+            participation.setStatut("Présente");
+
+            System.out.println("Participation créée : " + participation.toString());
+
+            participationFormationService.add(participation);
+
+            System.out.println("Participation ajoutée avec ID : " + participation.getIdParticipation());
+            System.out.println("=== Fin de l'ajout à la formation ===");
+
+            return true;
+
+        } catch (Exception e) {
+            System.err.println("Erreur lors de l'ajout à la formation : " + e.getMessage());
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    public boolean ajouterCandidatAFomation(int idCandidat) {
+        TriTelephonique candidat = findById(idCandidat);
+        if (candidat == null) {
+            return false;
+        }
+
+        String dateFormation = LocalDate.now().plusDays(7)
+                .format(DateTimeFormatter.ofPattern("dd-MM-yyyy"));
+
+        return ajouterCandidatAFomation(candidat, dateFormation);
+    }
+
     // ── Méthodes d'acceptation et refus ──
 
     public boolean accepterCandidat(int idCandidat) {
         try {
-            // Récupérer le candidat
             TriTelephonique candidat = findById(idCandidat);
             if (candidat == null) {
                 System.err.println("Candidat non trouvé avec l'ID : " + idCandidat);
                 return false;
             }
 
-            // Vérifier si le candidat est déjà dans entretien_physique
             List<EntretienPhysique> existants = serviceEntretien.findByIdCandidat(idCandidat);
             if (!existants.isEmpty()) {
                 System.err.println("Ce candidat est déjà dans la liste des entretiens physiques");
                 return false;
             }
 
-            // Mettre à jour le statut du candidat
             candidat.setStatut("Accepté");
             update(candidat);
 
-            // Ajouter dans entretien_physique avec statut "En attente"
             EntretienPhysique entretien = new EntretienPhysique();
             entretien.setIdCandidat(candidat.getIdCand());
             entretien.setNom(candidat.getNom());
             entretien.setPrenom(candidat.getPrenom());
             entretien.setPoste(candidat.getPoste());
 
-            // Date du RDV : maintenant + 7 jours
             String dateRdv = LocalDateTime.now().plusDays(7)
                     .format(DateTimeFormatter.ofPattern("dd-MM-yyyy à HH:mm"));
             entretien.setDateRdv(dateRdv);
@@ -129,14 +185,46 @@ public class ServiceTriTelephonique implements IServices<TriTelephonique> {
                 return false;
             }
 
-            // Mettre à jour le statut du candidat
+            System.out.println("=== Début retenirCandidat ===");
+            System.out.println("Candidat : " + candidat.getNomComplet());
+
+            // 1. Mettre à jour le statut du candidat dans tri_telephonique
             candidat.setStatut("Retenu");
             update(candidat);
+            System.out.println("Statut mis à jour dans tri_telephonique : Retenu");
 
-            // À ajouter dans participation_formation plus tard
-            // serviceParticipationFormation.add(...);
+            // 2. Récupérer l'entretien correspondant
+            List<EntretienPhysique> entretiens = serviceEntretien.findByIdCandidat(idCandidat);
+            if (entretiens.isEmpty()) {
+                System.err.println("Aucun entretien trouvé pour le candidat ID: " + idCandidat);
+                return false;
+            }
+            EntretienPhysique entretien = entretiens.get(0);
+            System.out.println("Entretien trouvé - ID: " + entretien.getIdEntretien());
 
-            System.out.println("Candidat retenu : " + candidat.getNomComplet());
+            // 3. Mettre à jour le statut dans entretien_physique
+            entretien.setStatut("Retenue");
+            serviceEntretien.update(entretien);
+            System.out.println("Statut mis à jour dans entretien_physique : Retenue");
+
+            // 4. Ajouter à la formation
+            String dateFormation = LocalDate.now().plusDays(7)
+                    .format(DateTimeFormatter.ofPattern("dd-MM-yyyy"));
+            System.out.println("Date de formation : " + dateFormation);
+
+            ParticipationFormation participation = new ParticipationFormation();
+            participation.setIdEntretien(entretien.getIdEntretien());
+            participation.setNom(candidat.getNom());
+            participation.setPrenom(candidat.getPrenom());
+            participation.setPoste(candidat.getPoste());
+            participation.setDateFormation(LocalDate.parse(dateFormation, DateTimeFormatter.ofPattern("dd-MM-yyyy")));
+            participation.setFormation("Formation initiale");
+            participation.setStatut("Présente");
+
+            participationFormationService.add(participation);
+            System.out.println("Participation ajoutée avec ID : " + participation.getIdParticipation());
+
+            System.out.println("=== Fin retenirCandidat ===");
             return true;
 
         } catch (Exception e) {
@@ -145,6 +233,8 @@ public class ServiceTriTelephonique implements IServices<TriTelephonique> {
             return false;
         }
     }
+
+    // ── Méthodes CRUD existantes ──
 
     @Override
     public List<TriTelephonique> getAll() {
@@ -219,8 +309,6 @@ public class ServiceTriTelephonique implements IServices<TriTelephonique> {
             e.printStackTrace();
         }
     }
-
-    // ── Méthodes supplémentaires ──
 
     public TriTelephonique findById(int id) {
         String query = "SELECT * FROM tri_telephonique WHERE id_cand = ?";

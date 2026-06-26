@@ -1,71 +1,42 @@
 package com.rh.models;
 
 import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.Objects;
 
 public class ParticipationFormation {
 
     private int idParticipation;
-    private Employe employe;          // Référence à l'employé
-    private int idEmploye;            // ID de l'employé (pour la base de données)
+    private int idEntretien;
+    private String nom;
+    private String prenom;
+    private String poste;
     private LocalDate dateFormation;
     private String formation;
-    private StatutFormation statut;
-
-    // ── Enum pour les statuts de formation ──
-    public enum StatutFormation {
-        PRESENTE("Présente"),
-        ABSENTE("Absente"),
-        FPF("FPF");  // Formation Professionnelle Financée
-
-        private final String label;
-
-        StatutFormation(String label) {
-            this.label = label;
-        }
-
-        @Override
-        public String toString() {
-            return label;
-        }
-
-        public static StatutFormation fromString(String text) {
-            for (StatutFormation statut : StatutFormation.values()) {
-                if (statut.label.equalsIgnoreCase(text)) {
-                    return statut;
-                }
-            }
-            return PRESENTE; // Valeur par défaut
-        }
-    }
+    private String statut;
 
     // ── Constructeurs ──
 
     public ParticipationFormation() {}
 
-    public ParticipationFormation(int idParticipation, Employe employe, LocalDate dateFormation,
-                                  String formation, StatutFormation statut) {
+    public ParticipationFormation(int idParticipation, int idEntretien, String nom, String prenom,
+                                  String poste, LocalDate dateFormation, String formation, String statut) {
         this.idParticipation = idParticipation;
-        this.employe = employe;
-        this.idEmploye = (employe != null) ? employe.getId() : 0;
+        this.idEntretien = idEntretien;
+        this.nom = nom;
+        this.prenom = prenom;
+        this.poste = poste;
         this.dateFormation = dateFormation;
         this.formation = formation;
         this.statut = statut;
     }
 
-    public ParticipationFormation(int idParticipation, int idEmploye, LocalDate dateFormation,
-                                  String formation, StatutFormation statut) {
-        this.idParticipation = idParticipation;
-        this.idEmploye = idEmploye;
-        this.dateFormation = dateFormation;
-        this.formation = formation;
-        this.statut = statut;
-    }
-
-    public ParticipationFormation(Employe employe, LocalDate dateFormation,
-                                  String formation, StatutFormation statut) {
-        this.employe = employe;
-        this.idEmploye = (employe != null) ? employe.getId() : 0;
+    public ParticipationFormation(int idEntretien, String nom, String prenom, String poste,
+                                  LocalDate dateFormation, String formation, String statut) {
+        this.idEntretien = idEntretien;
+        this.nom = nom;
+        this.prenom = prenom;
+        this.poste = poste;
         this.dateFormation = dateFormation;
         this.formation = formation;
         this.statut = statut;
@@ -81,23 +52,36 @@ public class ParticipationFormation {
         this.idParticipation = idParticipation;
     }
 
-    public Employe getEmploye() {
-        return employe;
+    public int getIdEntretien() {
+        return idEntretien;
     }
 
-    public void setEmploye(Employe employe) {
-        this.employe = employe;
-        if (employe != null) {
-            this.idEmploye = employe.getId();
-        }
+    public void setIdEntretien(int idEntretien) {
+        this.idEntretien = idEntretien;
     }
 
-    public int getIdEmploye() {
-        return idEmploye;
+    public String getNom() {
+        return nom;
     }
 
-    public void setIdEmploye(int idEmploye) {
-        this.idEmploye = idEmploye;
+    public void setNom(String nom) {
+        this.nom = nom;
+    }
+
+    public String getPrenom() {
+        return prenom;
+    }
+
+    public void setPrenom(String prenom) {
+        this.prenom = prenom;
+    }
+
+    public String getPoste() {
+        return poste;
+    }
+
+    public void setPoste(String poste) {
+        this.poste = poste;
     }
 
     public LocalDate getDateFormation() {
@@ -116,34 +100,23 @@ public class ParticipationFormation {
         this.formation = formation;
     }
 
-    public StatutFormation getStatut() {
+    public String getStatut() {
         return statut;
     }
 
-    public void setStatut(StatutFormation statut) {
-        this.statut = statut;
-    }
-
     public void setStatut(String statut) {
-        this.statut = StatutFormation.fromString(statut);
+        this.statut = statut;
     }
 
     // ── Méthodes utilitaires ──
 
-    public String getNomCompletEmploye() {
-        if (employe != null) {
-            return employe.getNom() + " " + employe.getPrenom();
-        }
-        return "Employé inconnu";
+    public String getNomComplet() {
+        return (nom != null ? nom : "") + " " + (prenom != null ? prenom : "");
     }
 
-    public String getStatutLabel() {
-        return (statut != null) ? statut.toString() : "";
-    }
-
-    public String getDepartementEmploye() {
-        if (employe != null && employe.getDepartement() != null) {
-            return employe.getDepartement().toString();
+    public String getDateFormationFormatee() {
+        if (dateFormation != null) {
+            return dateFormation.format(DateTimeFormatter.ofPattern("dd-MM-yyyy"));
         }
         return "";
     }
@@ -152,10 +125,13 @@ public class ParticipationFormation {
     public String toString() {
         return "ParticipationFormation{" +
                 "idParticipation=" + idParticipation +
-                ", idEmploye=" + idEmploye +
+                ", idEntretien=" + idEntretien +
+                ", nom='" + nom + '\'' +
+                ", prenom='" + prenom + '\'' +
+                ", poste='" + poste + '\'' +
                 ", dateFormation=" + dateFormation +
                 ", formation='" + formation + '\'' +
-                ", statut=" + statut +
+                ", statut='" + statut + '\'' +
                 '}';
     }
 

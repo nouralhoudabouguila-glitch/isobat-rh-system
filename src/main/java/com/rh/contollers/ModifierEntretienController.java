@@ -65,16 +65,36 @@ public class ModifierEntretienController {
         }
 
         try {
+            String ancienStatut = entretienActuel.getStatut();
+            String nouveauStatut = comboStatut.getValue();
+
+            System.out.println("=== Modification de l'entretien ===");
+            System.out.println("Ancien statut : " + ancienStatut);
+            System.out.println("Nouveau statut : " + nouveauStatut);
+            System.out.println("ID Entretien : " + entretienActuel.getIdEntretien());
+            System.out.println("ID Candidat : " + entretienActuel.getIdCandidat());
+
             // Mettre à jour l'entretien
             entretienActuel.setDateRdv(txtDateRdv.getText().trim());
-            entretienActuel.setStatut(comboStatut.getValue());
+            entretienActuel.setStatut(nouveauStatut);
 
             // Mettre à jour dans la base de données
             service.update(entretienActuel);
+            System.out.println("Entretien mis à jour dans la BD");
 
-            // Si le statut est "Retenue", mettre à jour dans tri_telephonique
-            if ("Retenue".equals(comboStatut.getValue())) {
-                serviceTriTelephonique.retenirCandidat(entretienActuel.getIdCandidat());
+            // Si le statut est "Retenue" et qu'il a changé, ajouter à la formation
+            if ("Retenue".equals(nouveauStatut) && !"Retenue".equals(ancienStatut)) {
+                System.out.println("Le statut est passé à Retenue - Ajout à la formation...");
+                boolean success = serviceTriTelephonique.retenirCandidat(entretienActuel.getIdCandidat());
+                if (success) {
+                    System.out.println("Candidat ajouté à la formation avec succès !");
+                    showAlert("Succès", "Candidat retenu et ajouté à la formation !", Alert.AlertType.INFORMATION);
+                } else {
+                    System.err.println("Erreur lors de l'ajout à la formation");
+                    showAlert("Erreur", "Erreur lors de l'ajout à la formation.", Alert.AlertType.ERROR);
+                }
+            } else {
+                System.out.println("Aucun changement de statut vers Retenue");
             }
 
             // Afficher un message de succès
@@ -89,6 +109,7 @@ public class ModifierEntretienController {
 
         } catch (Exception e) {
             System.err.println("Erreur lors de la modification : " + e.getMessage());
+            e.printStackTrace();
             showAlert("Erreur", "Erreur lors de la modification : " + e.getMessage(), Alert.AlertType.ERROR);
         }
     }

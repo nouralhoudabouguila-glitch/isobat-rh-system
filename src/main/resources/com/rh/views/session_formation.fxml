@@ -1,98 +1,101 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<?import javafx.scene.layout.*?>
-<?import javafx.scene.control.*?>
-<?import javafx.collections.FXCollections?>
 
 <?import java.lang.Integer?>
-<ScrollPane fitToWidth="true" hbarPolicy="NEVER" styleClass="content-scroll"
-            xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1"
-            fx:controller="com.rh.contollers.SessionFormationController">
+<?import javafx.collections.FXCollections?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.ComboBox?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.control.Separator?>
+<?import javafx.scene.control.TableColumn?>
+<?import javafx.scene.control.TableView?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Region?>
+<?import javafx.scene.layout.VBox?>
 
-    <VBox styleClass="dashboard-root" spacing="20">
+<ScrollPane fitToWidth="true" hbarPolicy="NEVER" styleClass="content-scroll" xmlns="http://javafx.com/javafx/26" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.rh.contollers.SessionFormationController">
+
+    <VBox spacing="20" styleClass="dashboard-root">
 
         <!-- ── En-tête ── -->
         <HBox alignment="CENTER_LEFT" spacing="8">
-            <Label text="🎓  Session de Formation" styleClass="welcome-label"/>
-            <Region HBox.hgrow="ALWAYS"/>
-            <Button text="＋  Ajouter une session" styleClass="btn-primary"/>
-            <Button text="📥  Exporter" styleClass="btn-secondary"/>
+            <Label styleClass="welcome-label" text="🎓  Session de Formation" />
+            <Region HBox.hgrow="ALWAYS" />
+            <Button onAction="#onExporter" styleClass="btn-secondary" text="📥  Exporter" />
         </HBox>
 
         <!-- ── Filtres / Recherche ── -->
-        <HBox spacing="12" alignment="CENTER_LEFT">
-            <TextField promptText="🔍  Rechercher un candidat..."
-                       style="-fx-background-color: white; -fx-background-radius: 8; -fx-padding: 8 14; -fx-border-color: #F0E6DA; -fx-border-radius: 8;"
-                       prefWidth="300"/>
-            <ComboBox promptText="Filtrer par statut"
-                      style="-fx-background-color: white; -fx-background-radius: 8; -fx-padding: 4 8; -fx-border-color: #F0E6DA; -fx-border-radius: 8; -fx-pref-height: 36;"/>
-            <Button text="Filtrer" styleClass="btn-secondary"/>
-            <Button text="Réinitialiser" styleClass="btn-back"/>
+        <HBox alignment="CENTER_LEFT" spacing="12">
+            <TextField fx:id="txtRecherche" prefWidth="300" promptText="🔍  Rechercher un employé..." style="-fx-background-color: white; -fx-background-radius: 8; -fx-padding: 8 14; -fx-border-color: #F0E6DA; -fx-border-radius: 8;" />
+            <ComboBox fx:id="comboFiltreStatut" promptText="Filtrer par statut" style="-fx-background-color: white; -fx-background-radius: 8; -fx-padding: 4 8; -fx-border-color: #F0E6DA; -fx-border-radius: 8; -fx-pref-height: 36;" />
+            <Button onAction="#onReinitialiser" styleClass="btn-back" text="Réinitialiser" />
         </HBox>
 
         <!-- ── Statistiques rapides ── -->
         <HBox spacing="15">
-            <VBox styleClass="stat-card" HBox.hgrow="ALWAYS" spacing="5" style="-fx-padding: 12 18;">
-                <Label text="Total des sessions" styleClass="card-label"/>
-                <Label fx:id="lblTotalCandidats" text="0" styleClass="card-value" style="-fx-font-size: 22px;"/>
+            <VBox spacing="5" style="-fx-padding: 12 18;" styleClass="stat-card" HBox.hgrow="ALWAYS">
+                <Label styleClass="card-label" text="Total des sessions" />
+                <Label fx:id="lblTotalCandidats" style="-fx-font-size: 22px;" styleClass="card-value" text="0" />
             </VBox>
-            <VBox styleClass="stat-card" HBox.hgrow="ALWAYS" spacing="5" style="-fx-padding: 12 18; -fx-border-color: #4F6815; -fx-border-width: 2;">
-                <Label text="En cours" styleClass="card-label"/>
-                <Label fx:id="lblEnCours" text="0" styleClass="card-value" style="-fx-font-size: 22px; -fx-text-fill: #4F6815;"/>
+            <VBox spacing="5" style="-fx-padding: 12 18; -fx-border-color: #4F6815; -fx-border-width: 2;" styleClass="stat-card" HBox.hgrow="ALWAYS">
+                <Label styleClass="card-label" text="Présente" />
+                <Label fx:id="lblEnCours" style="-fx-font-size: 22px; -fx-text-fill: #4F6815;" styleClass="card-value" text="0" />
             </VBox>
-            <VBox styleClass="stat-card" HBox.hgrow="ALWAYS" spacing="5" style="-fx-padding: 12 18; -fx-border-color: #FFEDAB; -fx-border-width: 2;">
-                <Label text="Terminé" styleClass="card-label"/>
-                <Label fx:id="lblTermine" text="0" styleClass="card-value" style="-fx-font-size: 22px; -fx-text-fill: #7a5c00;"/>
+            <VBox spacing="5" style="-fx-padding: 12 18; -fx-border-color: #FFEDAB; -fx-border-width: 2;" styleClass="stat-card" HBox.hgrow="ALWAYS">
+                <Label styleClass="card-label" text="FPF" />
+                <Label fx:id="lblTermine" style="-fx-font-size: 22px; -fx-text-fill: #7a5c00;" styleClass="card-value" text="0" />
             </VBox>
-            <VBox styleClass="stat-card" HBox.hgrow="ALWAYS" spacing="5" style="-fx-padding: 12 18; -fx-border-color: #75070C; -fx-border-width: 2;">
-                <Label text="Annulé" styleClass="card-label"/>
-                <Label fx:id="lblAnnule" text="0" styleClass="card-value" style="-fx-font-size: 22px; -fx-text-fill: #75070C;"/>
+            <VBox spacing="5" style="-fx-padding: 12 18; -fx-border-color: #75070C; -fx-border-width: 2;" styleClass="stat-card" HBox.hgrow="ALWAYS">
+                <Label styleClass="card-label" text="Absente" />
+                <Label fx:id="lblAnnule" style="-fx-font-size: 22px; -fx-text-fill: #75070C;" styleClass="card-value" text="0" />
             </VBox>
         </HBox>
 
         <!-- ── Tableau ── -->
-        <VBox styleClass="chart-card" VBox.vgrow="ALWAYS" spacing="12">
+        <VBox spacing="12" styleClass="chart-card" VBox.vgrow="ALWAYS">
 
             <!-- En-tête de la table -->
             <HBox alignment="CENTER_LEFT">
-                <Label text="📋  Liste des sessions de formation" styleClass="section-title"/>
-                <Region HBox.hgrow="ALWAYS"/>
-                <Label text="12 session(s)" styleClass="depense-meta"/>
+                <Label styleClass="section-title" text="📋  Liste des sessions de formation" />
+                <Region HBox.hgrow="ALWAYS" />
+                <Label styleClass="depense-meta" text="session(s)" />
             </HBox>
 
-            <Separator/>
+            <Separator />
 
             <!-- TableView -->
-            <TableView fx:id="tableView" styleClass="activity-table" VBox.vgrow="ALWAYS" prefHeight="450">
+            <TableView fx:id="tableView" prefHeight="450" styleClass="activity-table" VBox.vgrow="ALWAYS">
                 <columns>
-                    <TableColumn fx:id="colNom" text="NOM &amp; PRÉNOM" prefWidth="250"/>
-                    <TableColumn fx:id="colDateFormation" text="DATE DE FORMATION" prefWidth="200"/>
-                    <TableColumn fx:id="colPoste" text="POSTE" prefWidth="200"/>
-                    <TableColumn fx:id="colStatut" text="STATUT" prefWidth="200" styleClass="column-statut"/>
+                    <TableColumn fx:id="colNom" prefWidth="230" text="NOM &amp; PRÉNOM" />
+                    <TableColumn fx:id="colDateFormation" prefWidth="180" text="DATE DE FORMATION" />
+                    <TableColumn fx:id="colPoste" prefWidth="200" text="FORMATION" />
+                    <TableColumn fx:id="colStatut" prefWidth="150" styleClass="column-statut" text="STATUT" />
+                    <TableColumn fx:id="colActions" prefWidth="80" styleClass="column-statut" text="ACTIONS" />
                 </columns>
             </TableView>
 
             <!-- Pagination -->
             <HBox alignment="CENTER_RIGHT" spacing="8" style="-fx-padding: 8 0 0 0;">
-                <Label text="Lignes par page : " styleClass="depense-meta"/>
-                <ComboBox prefWidth="70"
-                          style="-fx-background-color: white; -fx-background-radius: 4; -fx-border-color: #F0E6DA; -fx-border-radius: 4;">
+                <Label styleClass="depense-meta" text="Lignes par page : " />
+                <ComboBox prefWidth="70" style="-fx-background-color: white; -fx-background-radius: 4; -fx-border-color: #F0E6DA; -fx-border-radius: 4;">
                     <items>
                         <FXCollections fx:factory="observableArrayList">
-                            <Integer fx:value="10"/>
-                            <Integer fx:value="25"/>
-                            <Integer fx:value="50"/>
-                            <Integer fx:value="100"/>
+                            <Integer fx:value="10" />
+                            <Integer fx:value="25" />
+                            <Integer fx:value="50" />
+                            <Integer fx:value="100" />
                         </FXCollections>
                     </items>
                     <value>
-                        <Integer fx:value="10"/>
+                        <Integer fx:value="10" />
                     </value>
                 </ComboBox>
                 <HBox spacing="4">
-                    <Button text="←" styleClass="btn-back" style="-fx-padding: 4 10;"/>
-                    <Label text="1" style="-fx-padding: 4 10; -fx-background-color: #4F6815; -fx-text-fill: white; -fx-background-radius: 4;"/>
-                    <Button text="2" style="-fx-padding: 4 10; -fx-background-color: transparent; -fx-text-fill: #333; -fx-cursor: hand; -fx-border-color: #F0E6DA; -fx-border-radius: 4;"/>
-                    <Button text="→" styleClass="btn-back" style="-fx-padding: 4 10;"/>
+                    <Button style="-fx-padding: 4 10;" styleClass="btn-back" text="←" />
+                    <Label style="-fx-padding: 4 10; -fx-background-color: #4F6815; -fx-text-fill: white; -fx-background-radius: 4;" text="1" />
+                    <Button style="-fx-padding: 4 10; -fx-background-color: transparent; -fx-text-fill: #333; -fx-cursor: hand; -fx-border-color: #F0E6DA; -fx-border-radius: 4;" text="2" />
+                    <Button style="-fx-padding: 4 10;" styleClass="btn-back" text="→" />
                 </HBox>
             </HBox>
 
