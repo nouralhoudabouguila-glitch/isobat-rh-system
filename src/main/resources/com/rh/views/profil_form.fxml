@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<BorderPane xmlns="http://javafx.com/javafx/17"
+            xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="com.rh.contollers.ProfilFormController"
+            style="-fx-background-color:#FFFFFF;">
+
+    <top>
+        <VBox spacing="8" style="-fx-padding:20 24 16 24;-fx-background-color:#F0E6DA;-fx-background-radius:0 0 20 20;">
+            <Label text="✏️  Modifier mon profil"
+                   style="-fx-font-family:'Poppins';-fx-font-size:18;-fx-font-weight:bold;-fx-text-fill:#1A1A1A;"/>
+            <Label text="Modifiez vos informations personnelles"
+                   style="-fx-font-family:'Poppins';-fx-font-size:12;-fx-text-fill:#888888;"/>
+        </VBox>
+    </top>
+
+    <center>
+        <VBox spacing="14" style="-fx-padding:24 28 20 28;">
+
+            <!-- Nom -->
+            <VBox spacing="4">
+                <Label text="Nom *" style="-fx-font-family:'Poppins';-fx-font-size:12;-fx-font-weight:600;-fx-text-fill:#555555;"/>
+                <TextField fx:id="tfNom" promptText="Nom"
+                           style="-fx-font-family:'Poppins';-fx-font-size:13;-fx-padding:10 12 10 12;-fx-background-color:#FFFFFF;-fx-border-color:#E0D0BE;-fx-border-radius:8;-fx-background-radius:8;-fx-border-width:1.5;"/>
+                <Label fx:id="errNom" style="-fx-font-family:'Poppins';-fx-font-size:11;-fx-text-fill:#75070C;" text="" managed="false"/>
+            </VBox>
+
+            <!-- Prénom -->
+            <VBox spacing="4">
+                <Label text="Prénom *" style="-fx-font-family:'Poppins';-fx-font-size:12;-fx-font-weight:600;-fx-text-fill:#555555;"/>
+                <TextField fx:id="tfPrenom" promptText="Prénom"
+                           style="-fx-font-family:'Poppins';-fx-font-size:13;-fx-padding:10 12 10 12;-fx-background-color:#FFFFFF;-fx-border-color:#E0D0BE;-fx-border-radius:8;-fx-background-radius:8;-fx-border-width:1.5;"/>
+                <Label fx:id="errPrenom" style="-fx-font-family:'Poppins';-fx-font-size:11;-fx-text-fill:#75070C;" text="" managed="false"/>
+            </VBox>
+
+            <!-- Email -->
+            <VBox spacing="4">
+                <Label text="Email *" style="-fx-font-family:'Poppins';-fx-font-size:12;-fx-font-weight:600;-fx-text-fill:#555555;"/>
+                <TextField fx:id="tfEmail" promptText="exemple@domaine.com"
+                           style="-fx-font-family:'Poppins';-fx-font-size:13;-fx-padding:10 12 10 12;-fx-background-color:#FFFFFF;-fx-border-color:#E0D0BE;-fx-border-radius:8;-fx-background-radius:8;-fx-border-width:1.5;"/>
+                <Label fx:id="errEmail" style="-fx-font-family:'Poppins';-fx-font-size:11;-fx-text-fill:#75070C;" text="" managed="false"/>
+            </VBox>
+
+            <!-- Téléphone -->
+            <VBox spacing="4">
+                <Label text="Téléphone" style="-fx-font-family:'Poppins';-fx-font-size:12;-fx-font-weight:600;-fx-text-fill:#555555;"/>
+                <TextField fx:id="tfTelephone" promptText="06 12 34 56 78"
+                           style="-fx-font-family:'Poppins';-fx-font-size:13;-fx-padding:10 12 10 12;-fx-background-color:#FFFFFF;-fx-border-color:#E0D0BE;-fx-border-radius:8;-fx-background-radius:8;-fx-border-width:1.5;"/>
+            </VBox>
+
+        </VBox>
+    </center>
+
+    <bottom>
+        <HBox spacing="12" alignment="CENTER_RIGHT" style="-fx-padding:16 28 24 28;-fx-background-color:#FAF6F0;-fx-background-radius:20 20 0 0;">
+            <Button text="Annuler" onAction="#handleCancel"
+                    style="-fx-font-family:'Poppins';-fx-font-size:13;-fx-font-weight:600;-fx-background-color:#FFFFFF;-fx-border-color:#E0D0BE;-fx-text-fill:#555555;-fx-border-radius:8;-fx-background-radius:8;-fx-padding:10 24 10 24;-fx-cursor:hand;"/>
+            <Button text="Enregistrer" onAction="#handleSave"
+                    style="-fx-font-family:'Poppins';-fx-font-size:13;-fx-font-weight:bold;-fx-background-color:#4F6815;-fx-text-fill:#FFFFFF;-fx-background-radius:8;-fx-padding:10 30 10 30;-fx-cursor:hand;"/>
+        </HBox>
+    </bottom>
+
+</BorderPane>

@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<BorderPane xmlns="http://javafx.com/javafx/17"
+            xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="com.rh.contollers.UserFormController"
+            style="-fx-background-color:#FFFFFF;">
+
+    <top>
+        <VBox spacing="12" style="-fx-padding:24 28 16 28;-fx-background-color:#F0E6DA;-fx-background-radius:0 0 20 20;">
+            <Label fx:id="lblTitle" text="Nouvel utilisateur"
+                   style="-fx-font-family:'Poppins';-fx-font-size:20;-fx-font-weight:bold;-fx-text-fill:#1A1A1A;"/>
+            <Label text="Remplissez les informations pour créer un compte utilisateur"
+                   style="-fx-font-family:'Poppins';-fx-font-size:12;-fx-text-fill:#888888;"/>
+        </VBox>
+    </top>
+
+    <center>
+        <VBox spacing="14" style="-fx-padding:24 28 20 28;">
+
+            <!-- Nom et Prénom -->
+            <HBox spacing="12">
+                <VBox spacing="4" HBox.hgrow="ALWAYS">
+                    <Label text="Nom *" style="-fx-font-family:'Poppins';-fx-font-size:12;-fx-font-weight:600;-fx-text-fill:#555555;"/>
+                    <TextField fx:id="tfNom" promptText="Nom"
+                               style="-fx-font-family:'Poppins';-fx-font-size:13;-fx-padding:10 12 10 12;-fx-background-color:#FFFFFF;-fx-border-color:#E0D0BE;-fx-border-radius:8;-fx-background-radius:8;-fx-border-width:1.5;"/>
+                    <Label fx:id="errNom" styleClass="error-label" text="" managed="false"/>
+                </VBox>
+                <VBox spacing="4" HBox.hgrow="ALWAYS">
+                    <Label text="Prénom *" style="-fx-font-family:'Poppins';-fx-font-size:12;-fx-font-weight:600;-fx-text-fill:#555555;"/>
+                    <TextField fx:id="tfPrenom" promptText="Prénom"
+                               style="-fx-font-family:'Poppins';-fx-font-size:13;-fx-padding:10 12 10 12;-fx-background-color:#FFFFFF;-fx-border-color:#E0D0BE;-fx-border-radius:8;-fx-background-radius:8;-fx-border-width:1.5;"/>
+                    <Label fx:id="errPrenom" styleClass="error-label" text="" managed="false"/>
+                </VBox>
+            </HBox>
+
+            <!-- Email -->
+            <VBox spacing="4">
+                <Label text="Email *" style="-fx-font-family:'Poppins';-fx-font-size:12;-fx-font-weight:600;-fx-text-fill:#555555;"/>
+                <TextField fx:id="tfEmail" promptText="exemple@domaine.com"
+                           style="-fx-font-family:'Poppins';-fx-font-size:13;-fx-padding:10 12 10 12;-fx-background-color:#FFFFFF;-fx-border-color:#E0D0BE;-fx-border-radius:8;-fx-background-radius:8;-fx-border-width:1.5;"/>
+                <Label fx:id="errEmail" styleClass="error-label" text="" managed="false"/>
+            </VBox>
+
+            <!-- Téléphone -->
+            <VBox spacing="4">
+                <Label text="Téléphone" style="-fx-font-family:'Poppins';-fx-font-size:12;-fx-font-weight:600;-fx-text-fill:#555555;"/>
+                <TextField fx:id="tfTelephone" promptText="06 12 34 56 78"
+                           style="-fx-font-family:'Poppins';-fx-font-size:13;-fx-padding:10 12 10 12;-fx-background-color:#FFFFFF;-fx-border-color:#E0D0BE;-fx-border-radius:8;-fx-background-radius:8;-fx-border-width:1.5;"/>
+            </VBox>
+
+            <!-- Mot de passe (visible uniquement en création) -->
+            <VBox spacing="4">
+                <Label text="Mot de passe *" style="-fx-font-family:'Poppins';-fx-font-size:12;-fx-font-weight:600;-fx-text-fill:#555555;"/>
+                <PasswordField fx:id="pfPassword" promptText="Minimum 6 caractères"
+                               style="-fx-font-family:'Poppins';-fx-font-size:13;-fx-padding:10 12 10 12;-fx-background-color:#FFFFFF;-fx-border-color:#E0D0BE;-fx-border-radius:8;-fx-background-radius:8;-fx-border-width:1.5;"/>
+            </VBox>
+
+            <!-- Rôle -->
+            <VBox spacing="4">
+                <Label text="Rôle *" style="-fx-font-family:'Poppins';-fx-font-size:12;-fx-font-weight:600;-fx-text-fill:#555555;"/>
+                <ComboBox fx:id="cbRole" promptText="Sélectionner un rôle"
+                          style="-fx-font-family:'Poppins';-fx-font-size:13;-fx-padding:8 12 8 12;-fx-background-color:#FFFFFF;-fx-border-color:#E0D0BE;-fx-border-radius:8;-fx-background-radius:8;-fx-border-width:1.5;"/>
+                <Label fx:id="errRole" styleClass="error-label" text="" managed="false"/>
+            </VBox>
+
+            <!-- Statut -->
+            <VBox spacing="4">
+                <Label text="Statut" style="-fx-font-family:'Poppins';-fx-font-size:12;-fx-font-weight:600;-fx-text-fill:#555555;"/>
+                <HBox spacing="8">
+                    <ToggleButton fx:id="tbActif" text="🟢 Actif"
+                                  style="-fx-background-color:#4F6815;-fx-text-fill:#FFFFFF;-fx-border-color:#4F6815;-fx-border-radius:8;-fx-background-radius:8;-fx-border-width:1.5;-fx-padding:8 20 8 20;-fx-font-family:'Poppins';-fx-font-size:12;-fx-cursor:hand;"/>
+                    <ToggleButton fx:id="tbInactif" text="🔴 Inactif"
+                                  style="-fx-background-color:#FFFFFF;-fx-text-fill:#555555;-fx-border-color:#E0D0BE;-fx-border-radius:8;-fx-background-radius:8;-fx-border-width:1.5;-fx-padding:8 20 8 20;-fx-font-family:'Poppins';-fx-font-size:12;-fx-cursor:hand;"/>
+                </HBox>
+            </VBox>
+
+        </VBox>
+    </center>
+
+    <bottom>
+        <HBox spacing="12" alignment="CENTER_RIGHT" style="-fx-padding:16 28 24 28;-fx-background-color:#FAF6F0;-fx-background-radius:20 20 0 0;">
+            <Button fx:id="btnCancel" text="Annuler" onAction="#handleCancel"
+                    style="-fx-font-family:'Poppins';-fx-font-size:13;-fx-font-weight:600;-fx-background-color:#FFFFFF;-fx-border-color:#E0D0BE;-fx-text-fill:#555555;-fx-border-radius:8;-fx-background-radius:8;-fx-padding:10 24 10 24;-fx-cursor:hand;"/>
+            <Button fx:id="btnSave" text="Enregistrer" onAction="#handleSave"
+                    style="-fx-font-family:'Poppins';-fx-font-size:13;-fx-font-weight:bold;-fx-background-color:#4F6815;-fx-text-fill:#FFFFFF;-fx-background-radius:8;-fx-padding:10 30 10 30;-fx-cursor:hand;"/>
+        </HBox>
+    </bottom>
+
+</BorderPane>

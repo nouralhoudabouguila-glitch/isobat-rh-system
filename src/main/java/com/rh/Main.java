@@ -2,6 +2,7 @@ package com.rh;
 
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
+import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
 
@@ -9,14 +10,25 @@ public class Main extends Application {
 
     @Override
     public void start(Stage primaryStage) throws Exception {
-        FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/rh/views/main.fxml"));
-        Scene scene = new Scene(loader.load(), 1300, 820);
-        String css = Main.class.getResource("/com/rh/styles/main.css").toExternalForm();
-        scene.getStylesheets().add(css);
-        primaryStage.setTitle("ISOBAT — Gestion des Ressources Humaines");
+        // Charger la page de connexion en premier
+        FXMLLoader loader = new FXMLLoader(
+                getClass().getResource("/com/rh/views/Login.fxml")
+        );
+        Parent root = loader.load();
+
+        Scene scene = new Scene(root, 800, 600);
+
+        // 🔥 CORRECTION : Utiliser "/com/rh/styles/main.css" au lieu de "/com.rh/styles/main.css"
+        String cssPath = "/com/rh/styles/main.css";
+        // Vérifier si le fichier existe avant de l'ajouter
+        if (getClass().getResource(cssPath) != null) {
+            scene.getStylesheets().add(getClass().getResource(cssPath).toExternalForm());
+        } else {
+            System.err.println("CSS non trouvé: " + cssPath);
+        }
+
+        primaryStage.setTitle("ISOBAT — Connexion");
         primaryStage.setScene(scene);
-        primaryStage.setMinWidth(1100);
-        primaryStage.setMinHeight(700);
         primaryStage.show();
     }
 

@@ -1,13 +1,15 @@
 <?xml version="1.0" encoding="UTF-8"?>
+
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.control.*?>
 <?import javafx.scene.image.*?>
 <?import javafx.geometry.*?>
-
+  <!-- 🔥 AJOUT ICI -->
 <BorderPane xmlns="http://javafx.com/javafx/17"
             xmlns:fx="http://javafx.com/fxml/1"
             fx:controller="com.rh.contollers.MainController"
-            prefWidth="1300" prefHeight="820">
+            prefWidth="1300" prefHeight="820"
+            stylesheets="/com/rh/styles/main.css">
 
     <!-- ═══════════════════ SIDEBAR ═══════════════════ -->
     <left>
@@ -20,7 +22,7 @@
                            preserveRatio="true" smooth="true"/>
             </VBox>
 
-            <!-- Navigation buttons (avec padding horizontal pour l'effet rounded) -->
+            <!-- Navigation buttons -->
             <VBox styleClass="nav-container" VBox.vgrow="ALWAYS" spacing="2">
 
                 <Button fx:id="btnDashboard"   text="🏠   Tableau de bord"  styleClass="sidebar-btn" maxWidth="Infinity" onAction="#onDashboard"/>
@@ -70,9 +72,12 @@
                         <Label text="3" styleClass="notif-badge" StackPane.alignment="TOP_RIGHT"/>
                     </StackPane>
 
-                    <!-- Avatar -->
-                    <Label text="A" styleClass="avatar-circle"/>
-                </HBox>
+                    <!-- Nom utilisateur -->
+                    <Label fx:id="userNameLabel" style="-fx-font-family:'Poppins';-fx-font-size:13;-fx-text-fill:#555555;-fx-font-weight:600;"/>
+
+                    <!-- Avatar (clic pour accéder à la gestion des utilisateurs) -->
+                    <!-- Avatar avec clic pour ouvrir le menu -->
+                    <Label fx:id="avatarLabel" text="A" styleClass="avatar-circle" onMouseClicked="#showAvatarMenu"/>                </HBox>
             </top>
 
             <!-- Dynamic Content Area -->

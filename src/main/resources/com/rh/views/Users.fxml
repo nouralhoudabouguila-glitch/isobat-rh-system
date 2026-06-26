@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<BorderPane xmlns="http://javafx.com/javafx/17"
+            xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="com.rh.contollers.UsersController"
+            style="-fx-background-color:#FAF6F0;">
+
+    <top>
+        <VBox spacing="14" style="-fx-padding:20 28 14 28;">
+
+            <!-- Titre -->
+            <VBox spacing="2">
+                <Label text="Gestion des Utilisateurs"
+                       style="-fx-font-family:'Poppins';-fx-font-size:22;-fx-font-weight:bold;-fx-text-fill:#2A2A2A;"/>
+                <Label text="Gérez les comptes utilisateurs — Administrateurs et Responsables RH"
+                       style="-fx-font-family:'Poppins';-fx-font-size:12;-fx-text-fill:#999999;"/>
+            </VBox>
+
+            <!-- Barre d'outils -->
+            <HBox spacing="12" alignment="CENTER_LEFT">
+                <TextField fx:id="tfSearch" promptText="🔍 Rechercher un utilisateur..."
+                           prefWidth="280"
+                           style="-fx-font-family:'Poppins';-fx-font-size:12;-fx-background-radius:8;-fx-border-radius:8;-fx-border-color:#E0D0BE;-fx-padding:8 12 8 12;"/>
+
+                <ComboBox fx:id="cbFilterRole" prefWidth="150"
+                          style="-fx-font-family:'Poppins';-fx-font-size:12;-fx-background-radius:8;"/>
+
+                <ComboBox fx:id="cbFilterStatus" prefWidth="140"
+                          style="-fx-font-family:'Poppins';-fx-font-size:12;-fx-background-radius:8;"/>
+
+                <Region HBox.hgrow="ALWAYS"/>
+
+                <Label fx:id="lblCount" text="0 utilisateur(s)"
+                       style="-fx-font-family:'Poppins';-fx-font-size:11;-fx-text-fill:#999999;"/>
+
+                <Button text="＋ Nouvel utilisateur" onAction="#handleAdd"
+                        style="-fx-font-family:'Poppins';-fx-font-size:12;-fx-font-weight:bold;-fx-background-color:#75070C;-fx-text-fill:#FFFFFF;-fx-background-radius:8;-fx-padding:9 18 9 18;-fx-cursor:hand;"/>
+            </HBox>
+
+        </VBox>
+    </top>
+
+    <center>
+        <VBox style="-fx-padding:0 28 24 28;">
+            <TableView fx:id="tableUsers" VBox.vgrow="ALWAYS"
+                       style="-fx-background-color:transparent;-fx-font-family:'Poppins';">
+                <columns>
+                    <TableColumn fx:id="colNom" text="Nom" prefWidth="140"/>
+                    <TableColumn fx:id="colEmail" text="Email" prefWidth="220"/>
+                    <TableColumn fx:id="colTelephone" text="Téléphone" prefWidth="130"/>
+                    <TableColumn fx:id="colRole" text="Rôle" prefWidth="150"/>
+                    <TableColumn fx:id="colStatut" text="Statut" prefWidth="100"/>
+                    <TableColumn fx:id="colActions" text="Actions" prefWidth="140"/>
+                </columns>
+            </TableView>
+        </VBox>
+    </center>
+
+</BorderPane>

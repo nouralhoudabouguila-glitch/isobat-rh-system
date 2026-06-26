@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<BorderPane xmlns="http://javafx.com/javafx/17"
+            xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="com.rh.contollers.ProfilController"
+            style="-fx-background-color:#FAF6F0;">
+
+    <top>
+        <VBox spacing="8" style="-fx-padding:20 28 14 28;">
+            <Label text="👤  Mon Profil"
+                   style="-fx-font-family:'Poppins';-fx-font-size:22;-fx-font-weight:bold;-fx-text-fill:#2A2A2A;"/>
+            <Label text="Consultez et modifiez vos informations personnelles"
+                   style="-fx-font-family:'Poppins';-fx-font-size:12;-fx-text-fill:#999999;"/>
+        </VBox>
+    </top>
+
+    <center>
+        <ScrollPane style="-fx-background-color:#FAF6F0;-fx-background:transparent;-fx-border-color:transparent;"
+                    fitToWidth="true">
+            <VBox spacing="20" style="-fx-padding:0 28 24 28;">
+
+                <!-- Carte de profil -->
+                <VBox spacing="16" style="-fx-background-color:#FFFFFF;-fx-background-radius:14;-fx-padding:30 35 30 35;-fx-effect:dropshadow(gaussian, rgba(0,0,0,0.06), 12, 0, 0, 3);">
+
+                    <!-- Avatar avec initiales -->
+                    <HBox alignment="CENTER">
+                        <Label fx:id="avatarBig" style="-fx-font-family:'Poppins';-fx-font-size:48px;-fx-font-weight:bold;-fx-text-fill:#FFFFFF;-fx-background-color:#4F6815;-fx-background-radius:50px;-fx-padding:15 20 15 20;"/>
+                    </HBox>
+
+                    <!-- Nom complet -->
+                    <Label fx:id="lblNomComplet" style="-fx-font-family:'Poppins';-fx-font-size:20;-fx-font-weight:bold;-fx-text-fill:#1A1A1A;text-align:center;" alignment="CENTER" maxWidth="Infinity"/>
+
+                    <!-- Rôle -->
+                    <Label fx:id="lblRole" style="-fx-font-family:'Poppins';-fx-font-size:13;-fx-text-fill:#FFFFFF;-fx-background-color:#4F6815;-fx-background-radius:12px;-fx-padding:4 16 4 16;" alignment="CENTER" maxWidth="Infinity"/>
+
+                    <Separator style="-fx-background-color:#F0E6DA;"/>
+
+                    <!-- Informations -->
+                    <GridPane hgap="14" vgap="12">
+                        <columnConstraints>
+                            <ColumnConstraints percentWidth="25"/>
+                            <ColumnConstraints percentWidth="75"/>
+                        </columnConstraints>
+
+                        <Label text="📧 Email" style="-fx-font-family:'Poppins';-fx-font-size:13;-fx-font-weight:600;-fx-text-fill:#555555;" GridPane.rowIndex="0" GridPane.columnIndex="0"/>
+                        <Label fx:id="lblEmail" style="-fx-font-family:'Poppins';-fx-font-size:13;-fx-text-fill:#333333;" GridPane.rowIndex="0" GridPane.columnIndex="1"/>
+
+                        <Label text="📱 Téléphone" style="-fx-font-family:'Poppins';-fx-font-size:13;-fx-font-weight:600;-fx-text-fill:#555555;" GridPane.rowIndex="1" GridPane.columnIndex="0"/>
+                        <Label fx:id="lblTelephone" style="-fx-font-family:'Poppins';-fx-font-size:13;-fx-text-fill:#333333;" GridPane.rowIndex="1" GridPane.columnIndex="1"/>
+
+                        <Label text="🟢 Statut" style="-fx-font-family:'Poppins';-fx-font-size:13;-fx-font-weight:600;-fx-text-fill:#555555;" GridPane.rowIndex="2" GridPane.columnIndex="0"/>
+                        <Label fx:id="lblStatut" style="-fx-font-family:'Poppins';-fx-font-size:13;-fx-font-weight:bold;" GridPane.rowIndex="2" GridPane.columnIndex="1"/>
+                    </GridPane>
+
+                    <!-- Boutons -->
+                    <HBox spacing="12" alignment="CENTER">
+                        <Button text="✏️  Modifier" onAction="#handleModifier"
+                                style="-fx-font-family:'Poppins';-fx-font-size:13;-fx-font-weight:bold;-fx-background-color:#4F6815;-fx-text-fill:#FFFFFF;-fx-background-radius:8;-fx-padding:10 30 10 30;-fx-cursor:hand;"/>
+                        <Button text="🗑️  Supprimer le compte" onAction="#handleSupprimer"
+                                style="-fx-font-family:'Poppins';-fx-font-size:13;-fx-font-weight:bold;-fx-background-color:#75070C;-fx-text-fill:#FFFFFF;-fx-background-radius:8;-fx-padding:10 30 10 30;-fx-cursor:hand;"/>
+                    </HBox>
+                </VBox>
+
+            </VBox>
+        </ScrollPane>
+    </center>
+
+</BorderPane>
