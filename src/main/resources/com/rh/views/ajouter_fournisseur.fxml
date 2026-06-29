@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.geometry.Insets?>
+
+<VBox xmlns="http://javafx.com/javafx/17"
+      xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="com.rh.contollers.AjouterFournisseurController"
+      spacing="20" style="-fx-background-color: #F0E6DA; -fx-padding: 25 30 25 30;"
+      prefWidth="550" prefHeight="650">
+
+    <Label text="➕  Ajouter un fournisseur" style="-fx-font-size: 20px; -fx-font-weight: bold; -fx-text-fill: #1A1A1A;"/>
+    <Separator/>
+
+    <VBox spacing="15">
+        <VBox spacing="5">
+            <Label text="Nom *" style="-fx-font-weight: bold; -fx-text-fill: #333333;"/>
+            <TextField fx:id="txtNom" promptText="Nom du fournisseur"
+                       style="-fx-background-color: white; -fx-background-radius: 8; -fx-padding: 10 14; -fx-border-color: #F0E6DA; -fx-border-radius: 8;"/>
+        </VBox>
+
+        <HBox spacing="20">
+            <VBox spacing="5" HBox.hgrow="ALWAYS">
+                <Label text="Email" style="-fx-font-weight: bold; -fx-text-fill: #333333;"/>
+                <TextField fx:id="txtEmail" promptText="exemple@email.com"
+                           style="-fx-background-color: white; -fx-background-radius: 8; -fx-padding: 10 14; -fx-border-color: #F0E6DA; -fx-border-radius: 8;"/>
+            </VBox>
+            <VBox spacing="5" HBox.hgrow="ALWAYS">
+                <Label text="Téléphone" style="-fx-font-weight: bold; -fx-text-fill: #333333;"/>
+                <TextField fx:id="txtTelephone" promptText="Ex: 12345678"
+                           style="-fx-background-color: white; -fx-background-radius: 8; -fx-padding: 10 14; -fx-border-color: #F0E6DA; -fx-border-radius: 8;"/>
+            </VBox>
+        </HBox>
+
+        <VBox spacing="5">
+            <Label text="Adresse" style="-fx-font-weight: bold; -fx-text-fill: #333333;"/>
+            <TextArea fx:id="txtAdresse" promptText="Adresse complète..." prefHeight="60" wrapText="true"
+                      style="-fx-background-color: white; -fx-background-radius: 8; -fx-padding: 10 14; -fx-border-color: #F0E6DA; -fx-border-radius: 8;"/>
+        </VBox>
+
+        <HBox spacing="20">
+            <VBox spacing="5" HBox.hgrow="ALWAYS">
+                <Label text="Ville" style="-fx-font-weight: bold; -fx-text-fill: #333333;"/>
+                <TextField fx:id="txtVille" promptText="Ville"
+                           style="-fx-background-color: white; -fx-background-radius: 8; -fx-padding: 10 14; -fx-border-color: #F0E6DA; -fx-border-radius: 8;"/>
+            </VBox>
+            <VBox spacing="5" HBox.hgrow="ALWAYS">
+                <Label text="Pays" style="-fx-font-weight: bold; -fx-text-fill: #333333;"/>
+                <TextField fx:id="txtPays" promptText="Pays"
+                           style="-fx-background-color: white; -fx-background-radius: 8; -fx-padding: 10 14; -fx-border-color: #F0E6DA; -fx-border-radius: 8;"/>
+            </VBox>
+        </HBox>
+
+        <VBox spacing="5">
+            <Label text="Matricule fiscal" style="-fx-font-weight: bold; -fx-text-fill: #333333;"/>
+            <TextField fx:id="txtMatriculeFiscal" promptText="Matricule fiscal"
+                       style="-fx-background-color: white; -fx-background-radius: 8; -fx-padding: 10 14; -fx-border-color: #F0E6DA; -fx-border-radius: 8;"/>
+        </VBox>
+
+        <Label text="* Champs obligatoires" style="-fx-font-size: 11px; -fx-text-fill: #888888;"/>
+    </VBox>
+
+    <HBox spacing="15" alignment="CENTER_RIGHT" style="-fx-padding: 20 0 0 0;">
+        <Button fx:id="btnAnnuler" text="Annuler" styleClass="btn-back" onAction="#onAnnuler"/>
+        <Button fx:id="btnAjouter" text="Ajouter" styleClass="btn-primary" onAction="#onAjouter"/>
+    </HBox>
+</VBox>
