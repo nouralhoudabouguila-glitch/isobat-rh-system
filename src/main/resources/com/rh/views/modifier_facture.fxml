@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.geometry.Insets?>
+
+<VBox xmlns="http://javafx.com/javafx/17"
+      xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="com.rh.contollers.ModifierFactureController"
+      spacing="20" style="-fx-background-color: #F0E6DA; -fx-padding: 25 30 25 30;"
+      prefWidth="600" prefHeight="700">
+
+    <Label text="✏️  Modifier une facture" style="-fx-font-size: 20px; -fx-font-weight: bold; -fx-text-fill: #1A1A1A;"/>
+    <Separator/>
+
+    <VBox spacing="15">
+        <!-- Numéro facture -->
+        <VBox spacing="5">
+            <Label text="Numéro de facture *" style="-fx-font-weight: bold; -fx-text-fill: #333333;"/>
+            <TextField fx:id="txtNumeroFacture" promptText="Ex: FAC-2026-001"
+                       style="-fx-background-color: white; -fx-background-radius: 8; -fx-padding: 10 14; -fx-border-color: #F0E6DA; -fx-border-radius: 8;"/>
+        </VBox>
+
+        <!-- Fournisseur -->
+        <VBox spacing="5">
+            <Label text="Fournisseur *" style="-fx-font-weight: bold; -fx-text-fill: #333333;"/>
+            <ComboBox fx:id="comboFournisseur" promptText="Sélectionner un fournisseur"
+                      style="-fx-background-color: white; -fx-background-radius: 8; -fx-padding: 8 12; -fx-border-color: #F0E6DA; -fx-border-radius: 8; -fx-pref-height: 40;"/>
+        </VBox>
+
+        <HBox spacing="20">
+            <!-- Montant HT -->
+            <VBox spacing="5" HBox.hgrow="ALWAYS">
+                <Label text="Montant HT *" style="-fx-font-weight: bold; -fx-text-fill: #333333;"/>
+                <TextField fx:id="txtMontantHt" promptText="0.00"
+                           style="-fx-background-color: white; -fx-background-radius: 8; -fx-padding: 10 14; -fx-border-color: #F0E6DA; -fx-border-radius: 8;"/>
+            </VBox>
+            <!-- Montant TVA -->
+            <VBox spacing="5" HBox.hgrow="ALWAYS">
+                <Label text="TVA" style="-fx-font-weight: bold; -fx-text-fill: #333333;"/>
+                <TextField fx:id="txtMontantTva" promptText="0.00"
+                           style="-fx-background-color: white; -fx-background-radius: 8; -fx-padding: 10 14; -fx-border-color: #F0E6DA; -fx-border-radius: 8;"/>
+            </VBox>
+            <!-- Montant TTC -->
+            <VBox spacing="5" HBox.hgrow="ALWAYS">
+                <Label text="Montant TTC" style="-fx-font-weight: bold; -fx-text-fill: #333333;"/>
+                <TextField fx:id="txtMontantTtc" editable="false"
+                           style="-fx-background-color: #f0f0f0; -fx-background-radius: 8; -fx-padding: 10 14; -fx-border-color: #E0D8D0; -fx-border-radius: 8;"/>
+            </VBox>
+        </HBox>
+
+        <HBox spacing="20">
+            <!-- Date facture -->
+            <VBox spacing="5" HBox.hgrow="ALWAYS">
+                <Label text="Date facture *" style="-fx-font-weight: bold; -fx-text-fill: #333333;"/>
+                <DatePicker fx:id="datePickerFacture" style="-fx-background-color: white; -fx-background-radius: 8; -fx-padding: 8 12; -fx-border-color: #F0E6DA; -fx-border-radius: 8; -fx-pref-height: 40;"/>
+            </VBox>
+            <!-- Date échéance -->
+            <VBox spacing="5" HBox.hgrow="ALWAYS">
+                <Label text="Date échéance" style="-fx-font-weight: bold; -fx-text-fill: #333333;"/>
+                <DatePicker fx:id="datePickerEcheance" style="-fx-background-color: white; -fx-background-radius: 8; -fx-padding: 8 12; -fx-border-color: #F0E6DA; -fx-border-radius: 8; -fx-pref-height: 40;"/>
+            </VBox>
+        </HBox>
+
+        <HBox spacing="20">
+            <!-- Statut -->
+            <VBox spacing="5" HBox.hgrow="ALWAYS">
+                <Label text="Statut" style="-fx-font-weight: bold; -fx-text-fill: #333333;"/>
+                <ComboBox fx:id="comboStatut" style="-fx-background-color: white; -fx-background-radius: 8; -fx-padding: 8 12; -fx-border-color: #F0E6DA; -fx-border-radius: 8; -fx-pref-height: 40;"/>
+            </VBox>
+            <!-- Mode paiement -->
+            <VBox spacing="5" HBox.hgrow="ALWAYS">
+                <Label text="Mode paiement" style="-fx-font-weight: bold; -fx-text-fill: #333333;"/>
+                <ComboBox fx:id="comboModePaiement" style="-fx-background-color: white; -fx-background-radius: 8; -fx-padding: 8 12; -fx-border-color: #F0E6DA; -fx-border-radius: 8; -fx-pref-height: 40;"/>
+            </VBox>
+        </HBox>
+
+        <!-- Commentaire -->
+        <VBox spacing="5">
+            <Label text="Commentaire" style="-fx-font-weight: bold; -fx-text-fill: #333333;"/>
+            <TextArea fx:id="txtCommentaire" promptText="Ajoutez un commentaire..." prefHeight="60" wrapText="true"
+                      style="-fx-background-color: white; -fx-background-radius: 8; -fx-padding: 10 14; -fx-border-color: #F0E6DA; -fx-border-radius: 8;"/>
+        </VBox>
+
+        <Label text="* Champs obligatoires" style="-fx-font-size: 11px; -fx-text-fill: #888888;"/>
+    </VBox>
+
+    <HBox spacing="15" alignment="CENTER_RIGHT" style="-fx-padding: 20 0 0 0;">
+        <Button fx:id="btnAnnuler" text="Annuler" styleClass="btn-back" onAction="#onAnnuler"/>
+        <Button fx:id="btnModifier" text="Modifier" styleClass="btn-primary" onAction="#onModifier"/>
+    </HBox>
+</VBox>
