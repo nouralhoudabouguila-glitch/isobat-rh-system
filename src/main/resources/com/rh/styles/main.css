@@ -1,18 +1,23 @@
-/* ═══════════════════════════════════════════════════════
+/* ═══════════════════════════════════════════════════════════
    ISOBAT — Charte graphique
    Cherry   : #75070C   Olive  : #4F6815
    Butter   : #FFEDAB   Oat    : #F0E6DA
-   ═══════════════════════════════════════════════════════ */
+   ═══════════════════════════════════════════════════════════ */
 
-/* ── Root ──────────────────────────────────────────────── */
+/* ═══════════════════════════════════════════════════════════
+   IMPORT DES POLICES GOOGLE
+   ═══════════════════════════════════════════════════════════ */
+@import url('https://fonts.googleapis.com/css2?family=Manrope:wght@200;300;400;500;600;700;800&display=swap');
+
+/* ── Root ────────────────────────────────────────────────── */
 .root {
-    -fx-font-family: 'Segoe UI', 'Arial', sans-serif;
+    -fx-font-family: 'Manrope', 'Segoe UI', 'Arial', sans-serif;
     -fx-background-color: #F0E6DA;
 }
 
-/* ════════════════════════════════════
+/* ═══════════════════════════════════════════════════════════
    SIDEBAR
-   ════════════════════════════════════ */
+   ═══════════════════════════════════════════════════════════ */
 .sidebar {
     -fx-background-color: #75070C;
     -fx-min-width: 245px;
@@ -45,7 +50,6 @@
     -fx-letter-spacing: 1.2px;
 }
 
-/* Container nav avec padding horizontal pour l'effet de marges */
 .nav-container {
     -fx-padding: 10 10 10 10;
     -fx-background-color: transparent;
@@ -86,7 +90,6 @@
     -fx-background-color: #3E5210;
 }
 
-/* Bouton Déconnexion */
 .sidebar-btn-logout {
     -fx-background-color: transparent;
     -fx-text-fill: rgba(255,255,255,0.70);
@@ -120,9 +123,9 @@
     -fx-font-size: 11px;
 }
 
-/* ════════════════════════════════════
+/* ═══════════════════════════════════════════════════════════
    HEADER
-   ════════════════════════════════════ */
+   ═══════════════════════════════════════════════════════════ */
 .header {
     -fx-background-color: #FFFFFF;
     -fx-padding: 14 24 14 24;
@@ -132,6 +135,7 @@
 }
 
 .header-title {
+    -fx-font-family: 'Manrope';
     -fx-font-size: 20px;
     -fx-font-weight: bold;
     -fx-text-fill: #1A1A1A;
@@ -175,9 +179,183 @@
     -fx-cursor: hand;
 }
 
-/* ════════════════════════════════════
+/* ═══════════════════════════════════════════════════════════
+   LOGIN - STYLES SPÉCIFIQUES
+   ═══════════════════════════════════════════════════════════ */
+.login-root {
+    -fx-background-color: #F0E6DA;
+}
+
+.login-container {
+    -fx-background-color: #F0E6DA;
+}
+
+.login-card {
+    -fx-background-color: #FFFFFF;
+    -fx-background-radius: 24px;
+    -fx-padding: 40 45 35 45;
+    -fx-effect: dropshadow(gaussian, rgba(117,7,12,0.12), 24, 0, 0, 6);
+}
+
+.login-logo-text {
+    -fx-font-family: 'Manrope';
+    -fx-font-size: 10px;
+    -fx-font-weight: 500;
+    -fx-text-fill: #888888;
+    -fx-letter-spacing: 1.5px;
+}
+
+.login-separator {
+    -fx-background-color: #F0E6DA;
+}
+
+.login-title {
+    -fx-font-family: 'Manrope';
+    -fx-font-size: 26px;
+    -fx-font-weight: 300;
+    -fx-text-fill: #1A1A1A;
+}
+
+.login-subtitle {
+    -fx-font-family: 'Manrope';
+    -fx-font-size: 13px;
+    -fx-font-weight: 400;
+    -fx-text-fill: #AAAAAA;
+}
+
+.login-label {
+    -fx-font-family: 'Manrope';
+    -fx-font-size: 10px;
+    -fx-font-weight: 700;
+    -fx-text-fill: #75070C;
+    -fx-letter-spacing: 1px;
+}
+
+.login-text-muted {
+    -fx-font-family: 'Manrope';
+    -fx-font-size: 13px;
+    -fx-font-weight: 400;
+    -fx-text-fill: #888888;
+}
+
+.login-field {
+    -fx-font-family: 'Manrope';
+    -fx-font-size: 14px;
+    -fx-font-weight: 400;
+    -fx-padding: 12 16 12 16;
+    -fx-background-color: #FFFBEE;
+    -fx-border-color: #E8DDD0;
+    -fx-border-radius: 10px;
+    -fx-background-radius: 10px;
+    -fx-border-width: 1.5px;
+    -fx-prompt-text-fill: #CCCCCC;
+}
+
+.login-field:focused {
+    -fx-border-color: #75070C;
+    -fx-border-width: 2px;
+    -fx-effect: dropshadow(gaussian, rgba(117,7,12,0.15), 8, 0, 0, 2);
+}
+
+.login-field:hover {
+    -fx-background-color: #FFF8E8;
+    -fx-border-color: #75070C;
+    -fx-border-width: 2px;
+}
+
+.login-field-error {
+    -fx-border-color: #75070C !important;
+    -fx-border-width: 2px !important;
+    -fx-background-color: #FFF5F5 !important;
+}
+
+.login-button {
+    -fx-font-family: 'Manrope';
+    -fx-font-size: 14px;
+    -fx-font-weight: 700;
+    -fx-background-color: #75070C;
+    -fx-text-fill: #FFFFFF;
+    -fx-background-radius: 10px;
+    -fx-padding: 14 0 14 0;
+    -fx-cursor: hand;
+    -fx-letter-spacing: 1.5px;
+    -fx-effect: dropshadow(gaussian, rgba(117,7,12,0.25), 12, 0, 0, 3);
+}
+
+.login-button:hover {
+    -fx-background-color: #5C0509;
+    -fx-effect: dropshadow(gaussian, rgba(117,7,12,0.4), 16, 0, 0, 4);
+}
+
+.login-button:pressed {
+    -fx-background-color: #4A0407;
+    -fx-effect: dropshadow(gaussian, rgba(117,7,12,0.2), 8, 0, 0, 2);
+}
+
+.login-link {
+    -fx-font-family: 'Manrope';
+    -fx-font-size: 13px;
+    -fx-font-weight: 700;
+    -fx-text-fill: #4F6815;
+    -fx-underline: false;
+}
+
+.login-link:hover {
+    -fx-text-fill: #3E5210;
+    -fx-underline: true;
+}
+
+.login-forgot-link {
+    -fx-font-family: 'Manrope';
+    -fx-font-size: 12px;
+    -fx-font-weight: 600;
+    -fx-text-fill: #75070C;
+    -fx-underline: false;
+}
+
+.login-forgot-link:hover {
+    -fx-text-fill: #5C0509;
+    -fx-underline: true;
+}
+
+.login-checkbox {
+    -fx-font-family: 'Manrope';
+    -fx-font-size: 12px;
+    -fx-font-weight: 500;
+    -fx-text-fill: #666666;
+}
+
+.login-checkbox .box {
+    -fx-background-color: #FFFFFF;
+    -fx-border-color: #E8DDD0;
+    -fx-border-radius: 4px;
+}
+
+.login-checkbox:selected .box {
+    -fx-background-color: #75070C;
+    -fx-border-color: #75070C;
+}
+
+.login-error {
+    -fx-font-family: 'Manrope';
+    -fx-font-size: 13px;
+    -fx-font-weight: 500;
+    -fx-text-fill: #75070C;
+    -fx-background-color: #FFF0F0;
+    -fx-padding: 10 14 10 14;
+    -fx-background-radius: 8px;
+}
+
+.login-version {
+    -fx-font-family: 'Manrope';
+    -fx-font-size: 10px;
+    -fx-font-weight: 400;
+    -fx-text-fill: #DDDDDD;
+}
+
+/* ═══════════════════════════════════════════════════════════
    DASHBOARD CONTENT
-   ════════════════════════════════════ */
+   ═══════════════════════════════════════════════════════════ */
 .content-scroll {
     -fx-background: #F0E6DA;
     -fx-background-color: #F0E6DA;
@@ -193,14 +371,15 @@
     -fx-padding: 24 28 28 28;
 }
 
-/* Welcome bar */
 .welcome-label {
+    -fx-font-family: 'Manrope';
     -fx-font-size: 16px;
     -fx-font-weight: bold;
     -fx-text-fill: #1A1A1A;
 }
 
 .date-label {
+    -fx-font-family: 'Manrope';
     -fx-font-size: 12px;
     -fx-text-fill: #888;
     -fx-background-color: white;
@@ -211,7 +390,7 @@
     -fx-border-width: 1;
 }
 
-/* ── KPI Cards ───────────────────────────────────────── */
+/* ── KPI Cards ─────────────────────────────────────────── */
 .stat-card {
     -fx-background-color: #FFFFFF;
     -fx-background-radius: 14px;
@@ -223,12 +402,14 @@
 }
 
 .card-label {
+    -fx-font-family: 'Manrope';
     -fx-font-size: 12px;
     -fx-text-fill: #888888;
     -fx-font-weight: normal;
 }
 
 .card-value {
+    -fx-font-family: 'Manrope';
     -fx-font-size: 30px;
     -fx-font-weight: bold;
     -fx-text-fill: #1A1A1A;
@@ -253,18 +434,20 @@
 }
 
 .trend-positive {
+    -fx-font-family: 'Manrope';
     -fx-text-fill: #4F6815;
     -fx-font-size: 11.5px;
     -fx-font-weight: bold;
 }
 
 .trend-negative {
+    -fx-font-family: 'Manrope';
     -fx-text-fill: #75070C;
     -fx-font-size: 11.5px;
     -fx-font-weight: bold;
 }
 
-/* ── Chart Cards ─────────────────────────────────────── */
+/* ── Chart Cards ────────────────────────────────────────── */
 .chart-card {
     -fx-background-color: #FFFFFF;
     -fx-background-radius: 14px;
@@ -276,12 +459,13 @@
 }
 
 .section-title {
+    -fx-font-family: 'Manrope';
     -fx-font-size: 14.5px;
     -fx-font-weight: bold;
     -fx-text-fill: #1A1A1A;
 }
 
-/* ── Bar Chart colors ────────────────────────────────── */
+/* ── Bar Chart colors ──────────────────────────────────── */
 .default-color0.chart-bar { -fx-bar-fill: #4F6815; }
 .default-color1.chart-bar { -fx-bar-fill: #75070C; }
 
@@ -297,14 +481,14 @@
     -fx-stroke: #eeeeee;
 }
 
-/* ── Pie Chart colors ────────────────────────────────── */
+/* ── Pie Chart colors ──────────────────────────────────── */
 .default-color0.chart-pie { -fx-pie-color: #4F6815; }
 .default-color1.chart-pie { -fx-pie-color: #75070C; }
 .default-color2.chart-pie { -fx-pie-color: #FFEDAB; }
 .default-color3.chart-pie { -fx-pie-color: #8aad4a; }
 .default-color4.chart-pie { -fx-pie-color: #c8a96e; }
 
-/* ── Table ───────────────────────────────────────────── */
+/* ── Table ──────────────────────────────────────────────── */
 .activity-table {
     -fx-background-color: transparent;
     -fx-border-color: #EDE4D8;
@@ -318,6 +502,7 @@
 }
 
 .activity-table .column-header .label {
+    -fx-font-family: 'Manrope';
     -fx-font-weight: bold;
     -fx-font-size: 12px;
     -fx-text-fill: #4F6815;
@@ -338,15 +523,17 @@
 }
 
 .activity-table .table-cell {
+    -fx-font-family: 'Manrope';
     -fx-font-size: 12.5px;
     -fx-text-fill: #333333;
     -fx-padding: 8 10 8 10;
 }
 
-/* ── Misc buttons ────────────────────────────────────── */
+/* ── Misc buttons ───────────────────────────────────────── */
 .btn-link {
     -fx-background-color: transparent;
     -fx-text-fill: #4F6815;
+    -fx-font-family: 'Manrope';
     -fx-font-size: 12.5px;
     -fx-cursor: hand;
     -fx-border-color: transparent;
@@ -358,8 +545,7 @@
     -fx-underline: true;
 }
 
-
-/* ── Employee cards ───────────────────────────────────── */
+/* ── Employee cards ────────────────────────────────────── */
 .employee-card {
     -fx-background-color: #FFFFFF;
     -fx-background-radius: 10px;
@@ -372,17 +558,18 @@
 }
 
 .employee-name {
+    -fx-font-family: 'Manrope';
     -fx-font-size: 13px;
     -fx-font-weight: bold;
     -fx-text-fill: #1A1A1A;
 }
 
 .employee-dept {
+    -fx-font-family: 'Manrope';
     -fx-font-size: 11px;
     -fx-text-fill: #6b6b6b;
 }
 
-/* colored variants */
 .employee-color-1 { -fx-border-color: #E8F5E9; }
 .employee-color-2 { -fx-border-color: #FFF3E0; }
 .employee-color-3 { -fx-border-color: #EDE7F6; }
@@ -393,62 +580,67 @@
     -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.12), 12, 0, 0, 6);
 }
 
-/* Form helpers requested */
+/* ── Form helpers ───────────────────────────────────────── */
 .section-title-label {
-    -fx-font-family: "Poppins";
+    -fx-font-family: 'Manrope';
     -fx-font-size: 10px;
     -fx-font-weight: bold;
     -fx-text-fill: #75070C;
 }
+
 .auto-id-badge {
     -fx-background-color: #FFF0F0;
     -fx-border-color: #F5C0C0;
     -fx-border-radius: 6px;
     -fx-background-radius: 6px;
     -fx-border-width: 1px;
-    -fx-font-family: "Poppins";
+    -fx-font-family: 'Manrope';
     -fx-font-size: 12px;
     -fx-text-fill: #75070C;
     -fx-font-weight: bold;
     -fx-padding: 6 10 6 10;
 }
+
 .field-error {
-    -fx-border-color: #75070C ;
-    -fx-border-width: 1.5px ;
-    -fx-border-radius: 6px ;
+    -fx-border-color: #75070C !important;
+    -fx-border-width: 1.5px !important;
+    -fx-border-radius: 6px !important;
 }
 
-/* Toggle styles (basic) */
+/* ── Toggle styles ──────────────────────────────────────── */
 .toggle-dept {
     -fx-background-color: #FFFFFF;
     -fx-border-color: #E0D0BE;
     -fx-border-radius: 8px;
     -fx-background-radius: 8px;
     -fx-border-width: 1.5px;
-    -fx-font-family: "Poppins";
+    -fx-font-family: 'Manrope';
     -fx-font-size: 12px;
     -fx-text-fill: #555555;
     -fx-cursor: hand;
     -fx-padding: 10 16 10 16;
 }
+
 .toggle-dept:selected {
     -fx-background-color: #75070C;
     -fx-border-color: #75070C;
     -fx-text-fill: #FFFFFF;
     -fx-font-weight: bold;
 }
+
 .toggle-contrat {
     -fx-background-color: #FFFFFF;
     -fx-border-color: #E0D0BE;
     -fx-border-radius: 8px;
     -fx-background-radius: 8px;
     -fx-border-width: 1.5px;
-    -fx-font-family: "Poppins";
+    -fx-font-family: 'Manrope';
     -fx-font-size: 12px;
     -fx-text-fill: #555555;
     -fx-cursor: hand;
     -fx-padding: 8 20 8 20;
 }
+
 .toggle-contrat:selected {
     -fx-background-color: #4F6815;
     -fx-border-color: #4F6815;
@@ -456,29 +648,126 @@
     -fx-font-weight: bold;
 }
 
-/* ═══════════════════════════════════════════════════════
-   FORM STYLES - Nouvel Employé
-   ═══════════════════════════════════════════════════════ */
-
-.form-title {
-    -fx-font-family: "Segoe UI", "Arial", sans-serif;
-    -fx-font-size: 22px;
-    -fx-font-weight: bold;
-    -fx-text-fill: #FFFFFF;
+.toggle-sit {
+    -fx-background-color: #FFFFFF;
+    -fx-border-color: #E0D0BE;
+    -fx-border-radius: 6px;
+    -fx-background-radius: 6px;
+    -fx-border-width: 1.5px;
+    -fx-font-family: 'Manrope';
+    -fx-font-size: 11px;
+    -fx-text-fill: #555555;
+    -fx-cursor: hand;
+    -fx-padding: 6 10 6 10;
 }
 
+.toggle-sit:hover {
+    -fx-border-color: #75070C;
+    -fx-background-color: #FFF5F5;
+}
+
+.toggle-sit:selected {
+    -fx-background-color: #FFF0F0;
+    -fx-border-color: #75070C;
+    -fx-text-fill: #75070C;
+    -fx-font-weight: bold;
+}
+
+.toggle-statut-actif {
+    -fx-background-color: #FFFFFF;
+    -fx-border-color: #E0D0BE;
+    -fx-border-radius: 8px;
+    -fx-background-radius: 8px;
+    -fx-border-width: 1.5px;
+    -fx-cursor: hand;
+    -fx-padding: 8 16 8 16;
+    -fx-graphic-text-gap: 8;
+}
+
+.toggle-statut-actif:hover {
+    -fx-border-color: #4F6815;
+    -fx-background-color: #F0F5E8;
+}
+
+.toggle-statut-actif:selected {
+    -fx-background-color: #4F6815;
+    -fx-border-color: #4F6815;
+}
+
+.toggle-statut-inactif {
+    -fx-background-color: #FFFFFF;
+    -fx-border-color: #E0D0BE;
+    -fx-border-radius: 8px;
+    -fx-background-radius: 8px;
+    -fx-border-width: 1.5px;
+    -fx-cursor: hand;
+    -fx-padding: 8 16 8 16;
+    -fx-graphic-text-gap: 8;
+}
+
+.toggle-statut-inactif:hover {
+    -fx-border-color: #75070C;
+    -fx-background-color: #FFF0F0;
+}
+
+.toggle-statut-inactif:selected {
+    -fx-background-color: #75070C;
+    -fx-border-color: #75070C;
+}
+
+/* ── TableView style ───────────────────────────────────── */
+.table-view .column-header {
+    -fx-background-color: #F0E6DA;
+    -fx-font-family: 'Manrope';
+    -fx-font-size: 11px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #666666;
+    -fx-padding: 10 12 10 12;
+}
+
+.table-view .column-header-background {
+    -fx-background-color: #F0E6DA;
+    -fx-background-radius: 12 12 0 0;
+}
+
+.table-view .table-row-cell {
+    -fx-background-color: #FFFFFF;
+    -fx-border-color: #F5F0EA;
+    -fx-border-width: 0 0 1 0;
+    -fx-cell-size: 48px;
+}
+
+.table-view .table-row-cell:odd {
+    -fx-background-color: #FDFAF7;
+}
+
+.table-view .table-row-cell:selected {
+    -fx-background-color: #FFF5F5;
+}
+
+.table-view .table-row-cell:hover {
+    -fx-background-color: #FFF8F0;
+}
+
+.table-view .table-cell {
+    -fx-padding: 8 12 8 12;
+    -fx-font-family: 'Manrope';
+    -fx-font-size: 12px;
+    -fx-text-fill: #333333;
+}
+
+/* ── Form card section ─────────────────────────────────── */
 .form-card {
     -fx-background-color: #FFFFFF;
-    -fx-background-radius: 10px;
-    -fx-border-color: #E8DDD0;
-    -fx-border-radius: 10px;
-    -fx-border-width: 1;
+    -fx-background-radius: 12px;
+    -fx-border-color: #E0D0BE;
+    -fx-border-radius: 12px;
+    -fx-border-width: 1px;
     -fx-padding: 18 20 18 20;
-    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.06), 8, 0, 0, 2);
 }
 
 .form-label {
-    -fx-font-family: "Segoe UI";
+    -fx-font-family: 'Manrope';
     -fx-font-size: 12px;
     -fx-font-weight: 600;
     -fx-text-fill: #333333;
@@ -491,7 +780,7 @@
     -fx-background-radius: 6px;
     -fx-border-width: 1.5px;
     -fx-padding: 10 14 10 14;
-    -fx-font-family: "Segoe UI";
+    -fx-font-family: 'Manrope';
     -fx-font-size: 13px;
     -fx-text-fill: #333333;
     -fx-min-height: 38px;
@@ -501,17 +790,6 @@
     -fx-border-color: #75070C;
     -fx-border-width: 2px;
     -fx-effect: dropshadow(gaussian, rgba(117,7,12,0.2), 8, 0, 0, 1);
-}
-
-.form-field:error,
-.field-error {
-    -fx-border-color: #D32F2F !important;
-    -fx-border-width: 2px !important;
-    -fx-effect: dropshadow(gaussian, rgba(211,47,47,0.3), 8, 0, 0, 1);
-}
-
-.form-field:prompt-text-visible {
-    -fx-text-fill: #AAAAAA;
 }
 
 /* DatePicker */
@@ -544,7 +822,7 @@
     -fx-border-width: 1.5px;
     -fx-padding: 0;
     -fx-min-height: 38px;
-    -fx-font-family: "Segoe UI";
+    -fx-font-family: 'Manrope';
     -fx-font-size: 13px;
     -fx-text-fill: #333333;
 }
@@ -566,7 +844,7 @@
 
 .combo-box-popup .list-view .list-cell {
     -fx-padding: 8 12 8 12;
-    -fx-font-family: "Segoe UI";
+    -fx-font-family: 'Manrope';
     -fx-font-size: 13px;
 }
 
@@ -583,7 +861,7 @@
     -fx-background-radius: 6px;
     -fx-border-width: 1.5px;
     -fx-padding: 10 20 10 20;
-    -fx-font-family: "Segoe UI";
+    -fx-font-family: 'Manrope';
     -fx-font-size: 13px;
     -fx-font-weight: 600;
     -fx-text-fill: #555555;
@@ -610,7 +888,7 @@
     -fx-background-radius: 6px;
     -fx-border-width: 0;
     -fx-padding: 11 24 11 24;
-    -fx-font-family: "Segoe UI";
+    -fx-font-family: 'Manrope';
     -fx-font-size: 13px;
     -fx-font-weight: 600;
     -fx-text-fill: #FFFFFF;
@@ -638,7 +916,7 @@
     -fx-background-radius: 6px;
     -fx-border-width: 0;
     -fx-padding: 11 24 11 24;
-    -fx-font-family: "Segoe UI";
+    -fx-font-family: 'Manrope';
     -fx-font-size: 13px;
     -fx-font-weight: 600;
     -fx-text-fill: #FFFFFF;
@@ -659,25 +937,9 @@
     -fx-translate-y: 0px;
 }
 
-/* Toggle buttons with animations */
-.toggle-dept,
-.toggle-contrat {
-    -fx-transition: all 0.2s ease;
-}
-
-.toggle-dept:hover {
-    -fx-border-color: #75070C;
-    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.08), 6, 0, 0, 1);
-}
-
-.toggle-contrat:hover {
-    -fx-border-color: #4F6815;
-    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.08), 6, 0, 0, 1);
-}
-
 /* Error Messages */
 .error-label {
-    -fx-font-family: "Segoe UI";
+    -fx-font-family: 'Manrope';
     -fx-font-size: 10px;
     -fx-text-fill: #D32F2F;
     -fx-font-weight: 500;
@@ -687,170 +949,4 @@
 .form-grid {
     -fx-hgap: 14;
     -fx-vgap: 12;
-}
-/* ══ À AJOUTER dans style.css ══════════════════════════════════════════════ */
-
-/* ── Toggle département (grand bouton avec icône) */
-.toggle-dept {
-    -fx-background-color: #FFFFFF;
-    -fx-border-color: #E0D0BE;
-    -fx-border-radius: 8px;
-    -fx-background-radius: 8px;
-    -fx-border-width: 1.5px;
-    -fx-font-family: "Poppins";
-    -fx-font-size: 12px;
-    -fx-text-fill: #555555;
-    -fx-cursor: hand;
-    -fx-padding: 12 16 12 16;
-    -fx-alignment: center;
-    -fx-min-height: 70px;
-}
-.toggle-dept:hover {
-    -fx-border-color: #75070C;
-    -fx-background-color: #FFF5F5;
-}
-.toggle-dept:selected {
-    -fx-background-color: #75070C;
-    -fx-border-color: #75070C;
-    -fx-text-fill: #FFFFFF;
-    -fx-font-weight: bold;
-}
-
-/* ── Toggle situation familiale (petit) */
-.toggle-sit {
-    -fx-background-color: #FFFFFF;
-    -fx-border-color: #E0D0BE;
-    -fx-border-radius: 6px;
-    -fx-background-radius: 6px;
-    -fx-border-width: 1.5px;
-    -fx-font-family: "Poppins";
-    -fx-font-size: 11px;
-    -fx-text-fill: #555555;
-    -fx-cursor: hand;
-    -fx-padding: 6 10 6 10;
-}
-.toggle-sit:hover {
-    -fx-border-color: #75070C;
-    -fx-background-color: #FFF5F5;
-}
-.toggle-sit:selected {
-    -fx-background-color: #FFF0F0;
-    -fx-border-color: #75070C;
-    -fx-text-fill: #75070C;
-    -fx-font-weight: bold;
-}
-
-/* ── Toggle contrat */
-.toggle-contrat {
-    -fx-background-color: #FFFFFF;
-    -fx-border-color: #E0D0BE;
-    -fx-border-radius: 8px;
-    -fx-background-radius: 8px;
-    -fx-border-width: 1.5px;
-    -fx-font-family: "Poppins";
-    -fx-font-size: 12px;
-    -fx-text-fill: #555555;
-    -fx-cursor: hand;
-    -fx-padding: 8 18 8 18;
-}
-.toggle-contrat:hover {
-    -fx-border-color: #4F6815;
-    -fx-background-color: #F0F5E8;
-}
-.toggle-contrat:selected {
-    -fx-background-color: #4F6815;
-    -fx-border-color: #4F6815;
-    -fx-text-fill: #FFFFFF;
-    -fx-font-weight: bold;
-}
-
-/* ── Toggle statut actif */
-.toggle-statut-actif {
-    -fx-background-color: #FFFFFF;
-    -fx-border-color: #E0D0BE;
-    -fx-border-radius: 8px;
-    -fx-background-radius: 8px;
-    -fx-border-width: 1.5px;
-    -fx-cursor: hand;
-    -fx-padding: 8 16 8 16;
-    -fx-graphic-text-gap: 8;
-}
-.toggle-statut-actif:hover {
-    -fx-border-color: #4F6815;
-    -fx-background-color: #F0F5E8;
-}
-.toggle-statut-actif:selected {
-    -fx-background-color: #4F6815;
-    -fx-border-color: #4F6815;
-}
-
-/* ── Toggle statut inactif */
-.toggle-statut-inactif {
-    -fx-background-color: #FFFFFF;
-    -fx-border-color: #E0D0BE;
-    -fx-border-radius: 8px;
-    -fx-background-radius: 8px;
-    -fx-border-width: 1.5px;
-    -fx-cursor: hand;
-    -fx-padding: 8 16 8 16;
-    -fx-graphic-text-gap: 8;
-}
-.toggle-statut-inactif:hover {
-    -fx-border-color: #75070C;
-    -fx-background-color: #FFF0F0;
-}
-.toggle-statut-inactif:selected {
-    -fx-background-color: #75070C;
-    -fx-border-color: #75070C;
-}
-
-/* ── TableView style ── */
-.table-view .column-header {
-    -fx-background-color: #F0E6DA;
-    -fx-font-family: "Poppins";
-    -fx-font-size: 11px;
-    -fx-font-weight: bold;
-    -fx-text-fill: #666666;
-    -fx-padding: 10 12 10 12;
-}
-.table-view .column-header-background {
-    -fx-background-color: #F0E6DA;
-    -fx-background-radius: 12 12 0 0;
-}
-.table-view .table-row-cell {
-    -fx-background-color: #FFFFFF;
-    -fx-border-color: #F5F0EA;
-    -fx-border-width: 0 0 1 0;
-    -fx-cell-size: 48px;
-}
-.table-view .table-row-cell:odd {
-    -fx-background-color: #FDFAF7;
-}
-.table-view .table-row-cell:selected {
-    -fx-background-color: #FFF5F5;
-}
-.table-view .table-row-cell:hover {
-    -fx-background-color: #FFF8F0;
-}
-.table-view .table-cell {
-    -fx-padding: 8 12 8 12;
-    -fx-font-family: "Poppins";
-    -fx-font-size: 12px;
-    -fx-text-fill: #333333;
-}
-
-/* ── Champ erreur ── */
-.field-error {
-    -fx-border-color: #75070C !important;
-    -fx-border-width: 1.5px;
-}
-
-/* ── Form card section ── */
-.form-card {
-    -fx-background-color: #FFFFFF;
-    -fx-background-radius: 12px;
-    -fx-border-color: #E0D0BE;
-    -fx-border-radius: 12px;
-    -fx-border-width: 1px;
-    -fx-padding: 18 20 18 20;
 }

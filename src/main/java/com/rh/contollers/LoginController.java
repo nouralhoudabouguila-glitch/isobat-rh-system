@@ -92,54 +92,6 @@ public class LoginController implements Initializable {
         });
     }
 
-    // ── Effets de survol ────────────────────────────────────────────────────
-
-    @FXML
-    private void handleLoginHover() {
-        btnLogin.setStyle("-fx-font-family:'Poppins';-fx-font-size:14;-fx-font-weight:600;-fx-background-color:#5C0509;-fx-text-fill:#FFFFFF;-fx-background-radius:10;-fx-padding:13 0 13 0;-fx-cursor:hand;-fx-letter-spacing:1px;-fx-effect: dropshadow(gaussian, rgba(117,7,12,0.4), 16, 0, 0, 4);");
-    }
-
-    @FXML
-    private void handleLoginExit() {
-        btnLogin.setStyle("-fx-font-family:'Poppins';-fx-font-size:14;-fx-font-weight:600;-fx-background-color:#75070C;-fx-text-fill:#FFFFFF;-fx-background-radius:10;-fx-padding:13 0 13 0;-fx-cursor:hand;-fx-letter-spacing:1px;-fx-effect: dropshadow(gaussian, rgba(117,7,12,0.25), 12, 0, 0, 3);");
-    }
-
-    @FXML
-    private void handleFieldHover() {
-        String hoverStyle = "-fx-font-family:'Poppins';-fx-font-size:14;-fx-padding:12 16 12 16;-fx-background-color:#FFF8E8;-fx-border-color:#75070C;-fx-border-radius:10;-fx-background-radius:10;-fx-border-width:1.5;-fx-prompt-text-fill:#CCCCCC;-fx-effect: dropshadow(gaussian, rgba(117,7,12,0.08), 8, 0, 0, 2);";
-        tfEmail.setStyle(hoverStyle);
-        pfPassword.setStyle(hoverStyle);
-    }
-
-    @FXML
-    private void handleFieldExit() {
-        String baseStyle = "-fx-font-family:'Poppins';-fx-font-size:14;-fx-padding:12 16 12 16;-fx-background-color:#FFFBEE;-fx-border-color:#E8DDD0;-fx-border-radius:10;-fx-background-radius:10;-fx-border-width:1.5;-fx-prompt-text-fill:#CCCCCC;";
-        tfEmail.setStyle(baseStyle);
-        pfPassword.setStyle(baseStyle);
-    }
-
-    @FXML
-    private void handleSignupHover() {
-        // Effet de survol pour le lien "Créer un compte"
-    }
-
-    @FXML
-    private void handleSignupExit() {
-        // Effet de sortie pour le lien "Créer un compte"
-    }
-
-    @FXML
-    private void handleForgotHover() {
-        // Effet de survol pour "Mot de passe oublié"
-    }
-
-    @FXML
-    private void handleForgotExit() {
-        // Effet de sortie pour "Mot de passe oublié"
-    }
-
-    // ── Navigation ──────────────────────────────────────────────────────────
-
     private void navigateToMain() {
         try {
             String fxmlFile = "/com/rh/views/Main.fxml";
@@ -175,9 +127,8 @@ public class LoginController implements Initializable {
         errSpacer.setVisible(true);
         errSpacer.setManaged(true);
 
-        String errStyle = "-fx-font-family:'Poppins';-fx-font-size:14;-fx-padding:12 16 12 16;-fx-background-color:#FFF5F5;-fx-border-color:#75070C;-fx-border-radius:10;-fx-background-radius:10;-fx-border-width:1.5;-fx-prompt-text-fill:#CCCCCC;";
-        tfEmail.setStyle(errStyle);
-        pfPassword.setStyle(errStyle);
+        tfEmail.getStyleClass().add("login-field-error");
+        pfPassword.getStyleClass().add("login-field-error");
     }
 
     private void clearError() {
@@ -186,9 +137,8 @@ public class LoginController implements Initializable {
         errSpacer.setVisible(false);
         errSpacer.setManaged(false);
 
-        String base = "-fx-font-family:'Poppins';-fx-font-size:14;-fx-padding:12 16 12 16;-fx-background-color:#FFFBEE;-fx-border-color:#E8DDD0;-fx-border-radius:10;-fx-background-radius:10;-fx-border-width:1.5;-fx-prompt-text-fill:#CCCCCC;";
-        tfEmail.setStyle(base);
-        pfPassword.setStyle(base);
+        tfEmail.getStyleClass().remove("login-field-error");
+        pfPassword.getStyleClass().remove("login-field-error");
     }
 
     private void showInfo(String msg) {

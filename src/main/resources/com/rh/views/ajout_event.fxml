@@ -92,6 +92,12 @@
                     </VBox>
                 </GridPane>
 
+                <!-- 🔥 AJOUT : CheckBox Google Calendar -->
+                <HBox spacing="12" alignment="CENTER_LEFT">
+                    <CheckBox fx:id="cbSynchroGoogle" text="Synchroniser avec Google Calendar" selected="true"
+                              style="-fx-font-family:'Poppins';-fx-font-size:12;-fx-text-fill:#555555;"/>
+                </HBox>
+
                 <!-- Message erreur -->
                 <Label fx:id="errForm" text="" style="-fx-font-family:'Poppins';-fx-font-size:12;-fx-text-fill:#75070C;" wrapText="true" visible="false" managed="false"/>
 

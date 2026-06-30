@@ -3,10 +3,15 @@ package com.rh.contollers;
 import com.rh.models.Planning;
 import com.rh.models.Planning.PrioritePlanning;
 import com.rh.models.Planning.TypePlanning;
+import com.rh.services.EmailService;
+import com.rh.services.GoogleCalendarService;
 import com.rh.services.PlanningService;
+import com.rh.utils.EmailConfig;
+import com.rh.utils.SessionManager;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.*;
+import javafx.scene.layout.StackPane;
 import javafx.stage.Stage;
 
 import java.net.URL;
@@ -28,11 +33,16 @@ public class AjoutEventController implements Initializable {
     @FXML private Label errTitre;
     @FXML private Label errDate;
     @FXML private Label errForm;
+    @FXML private CheckBox cbSynchroGoogle;  // 🔥 AJOUTÉ
 
     private final PlanningService service = new PlanningService();
+    private final EmailService emailService = new EmailService();
+    private final GoogleCalendarService googleCalendarService = new GoogleCalendarService();
+
     private Planning planning;
     private PlanningController parent;
     private Stage stage;
+    private StackPane rootStackPane;
 
     @Override
     public void initialize(URL url, ResourceBundle rb) {
@@ -41,10 +51,19 @@ public class AjoutEventController implements Initializable {
         cbType.setValue(TypePlanning.AUTRE);
         cbPriorite.setValue(PrioritePlanning.MOYENNE);
         dpDate.setValue(LocalDate.now());
+
+        // 🔥 Vérifier que cbSynchroGoogle n'est pas null
+        if (cbSynchroGoogle != null) {
+            cbSynchroGoogle.setSelected(true);
+        }
     }
 
     public void setParent(PlanningController parent) {
         this.parent = parent;
+    }
+
+    public void setRootStackPane(StackPane rootStackPane) {
+        this.rootStackPane = rootStackPane;
     }
 
     public void setStage(Stage stage) {
@@ -101,10 +120,34 @@ public class AjoutEventController implements Initializable {
         p.setType(cbType.getValue());
         p.setPriorite(cbPriorite.getValue());
 
-        if (planning == null) {
+        boolean isNew = planning == null;
+
+        if (isNew) {
             service.add(p);
         } else {
             service.update(p);
+        }
+
+        // ── Synchronisation avec Google Calendar ──────────────────────────
+        if (cbSynchroGoogle != null && cbSynchroGoogle.isSelected()) {
+            // Exécuter dans un thread séparé pour ne pas bloquer l'UI
+            new Thread(() -> {
+                boolean synchroOK = googleCalendarService.ajouterEvenement(p);
+                if (synchroOK) {
+                    System.out.println("✅ Événement synchronisé avec Google Calendar");
+                } else {
+                    System.out.println("⚠️ Échec de la synchronisation Google Calendar");
+                }
+            }).start();
+        }
+
+        // ── Email de confirmation ──────────────────────────────────────────
+        if (EmailConfig.EMAIL_ENABLED && isNew) {
+            String destinataire = EmailConfig.DESTINATAIRE_DEFAUT;
+            if (SessionManager.getInstance().getCurrentUser() != null) {
+                destinataire = SessionManager.getInstance().getCurrentUser().getEmail();
+            }
+            emailService.envoyerConfirmation(destinataire, p);
         }
 
         if (parent != null) {

@@ -10,14 +10,14 @@
 <BorderPane xmlns="http://javafx.com/javafx/17"
             xmlns:fx="http://javafx.com/fxml/1"
             fx:controller="com.rh.contollers.LoginController"
-            style="-fx-background-color:#F0E6DA;">
+            stylesheets="@../styles/main.css"
+            styleClass="login-root">
 
     <center>
-        <HBox alignment="CENTER" style="-fx-background-color:#F0E6DA;">
+        <HBox alignment="CENTER" styleClass="login-container">
 
             <!-- Card de login -->
-            <VBox spacing="22" alignment="CENTER"
-                  style="-fx-background-color:#FFFFFF;-fx-background-radius:24;-fx-padding:40 45 35 45;-fx-effect: dropshadow(gaussian, rgba(117,7,12,0.12), 24, 0, 0, 6);"
+            <VBox spacing="22" alignment="CENTER" styleClass="login-card"
                   prefWidth="420" maxWidth="420">
 
                 <!-- Logo -->
@@ -25,18 +25,15 @@
                     <ImageView fitWidth="170" fitHeight="64" preserveRatio="true">
                         <Image url="@../images/logo-Isobat.png"/>
                     </ImageView>
-                    <Label text="Gestion RH &amp; Finance"
-                           style="-fx-font-family:'Poppins';-fx-font-size:11;-fx-font-weight:400;-fx-text-fill:#888888;-fx-letter-spacing:1px;"/>
+                    <Label text="Gestion RH &amp; Finance" styleClass="login-logo-text"/>
                 </VBox>
 
-                <Separator style="-fx-background-color:#F0E6DA;"/>
+                <Separator styleClass="login-separator"/>
 
                 <!-- Titre -->
-                <VBox alignment="CENTER" spacing="2">
-                    <Label text="Bienvenue"
-                           style="-fx-font-family:'Poppins';-fx-font-size:24;-fx-font-weight:300;-fx-text-fill:#1A1A1A;"/>
-                    <Label text="Connectez-vous à votre compte"
-                           style="-fx-font-family:'Poppins';-fx-font-size:13;-fx-text-fill:#AAAAAA;"/>
+                <VBox alignment="CENTER" spacing="4">
+                    <Label text="Bienvenue" styleClass="login-title"/>
+                    <Label text="Connectez-vous à votre compte" styleClass="login-subtitle"/>
                 </VBox>
 
                 <!-- Champs -->
@@ -44,60 +41,41 @@
 
                     <!-- Email -->
                     <VBox spacing="4">
-                        <Label text="ADRESSE EMAIL"
-                               style="-fx-font-family:'Poppins';-fx-font-size:10;-fx-font-weight:600;-fx-text-fill:#75070C;-fx-letter-spacing:0.8px;"/>
-                        <TextField fx:id="tfEmail" promptText="exemple@domaine.com"
-                                   style="-fx-font-family:'Poppins';-fx-font-size:14;-fx-padding:12 16 12 16;-fx-background-color:#FFFBEE;-fx-border-color:#E8DDD0;-fx-border-radius:10;-fx-background-radius:10;-fx-border-width:1.5;-fx-prompt-text-fill:#CCCCCC;"
-                                   onMouseEntered="#handleFieldHover" onMouseExited="#handleFieldExit"/>
+                        <Label text="ADRESSE EMAIL" styleClass="login-label"/>
+                        <TextField fx:id="tfEmail" promptText="exemple@domaine.com" styleClass="login-field"/>
                     </VBox>
 
                     <!-- Mot de passe -->
                     <VBox spacing="4">
-                        <Label text="MOT DE PASSE"
-                               style="-fx-font-family:'Poppins';-fx-font-size:10;-fx-font-weight:600;-fx-text-fill:#75070C;-fx-letter-spacing:0.8px;"/>
-                        <PasswordField fx:id="pfPassword" promptText="••••••••"
-                                       style="-fx-font-family:'Poppins';-fx-font-size:14;-fx-padding:12 16 12 16;-fx-background-color:#FFFBEE;-fx-border-color:#E8DDD0;-fx-border-radius:10;-fx-background-radius:10;-fx-border-width:1.5;-fx-prompt-text-fill:#CCCCCC;"
-                                       onMouseEntered="#handleFieldHover" onMouseExited="#handleFieldExit"/>
+                        <Label text="MOT DE PASSE" styleClass="login-label"/>
+                        <PasswordField fx:id="pfPassword" promptText="••••••••" styleClass="login-field"/>
                     </VBox>
                 </VBox>
 
                 <!-- Options -->
                 <HBox alignment="CENTER_LEFT" spacing="12" fillHeight="true">
-                    <CheckBox fx:id="cbSouvenir" text="Se souvenir de moi"
-                              style="-fx-font-family:'Poppins';-fx-font-size:12;-fx-text-fill:#666666;"/>
+                    <CheckBox fx:id="cbSouvenir" text="Se souvenir de moi" styleClass="login-checkbox"/>
                     <Region HBox.hgrow="ALWAYS"/>
-                    <Hyperlink text="Mot de passe oublié ?" onAction="#handleMdpOublie"
-                               style="-fx-font-family:'Poppins';-fx-font-size:12;-fx-text-fill:#75070C;-fx-underline:false;"
-                               onMouseEntered="#handleForgotHover" onMouseExited="#handleForgotExit"/>
+                    <Hyperlink text="Mot de passe oublié ?" onAction="#handleMdpOublie" styleClass="login-forgot-link"/>
                 </HBox>
 
                 <!-- Message erreur -->
                 <VBox spacing="6" fillWidth="true">
-                    <Label fx:id="lblErreur" text="" visible="false" managed="false"
-                           style="-fx-font-family:'Poppins';-fx-font-size:13;-fx-text-fill:#75070C;-fx-background-color:#FFF0F0;-fx-padding:10 14 10 14;-fx-background-radius:8;"
-                           wrapText="true" maxWidth="Infinity"/>
+                    <Label fx:id="lblErreur" text="" visible="false" managed="false" styleClass="login-error" wrapText="true" maxWidth="Infinity"/>
                     <Region fx:id="errSpacer" prefHeight="0" managed="false"/>
                 </VBox>
 
                 <!-- Bouton Connexion -->
-                <Button fx:id="btnLogin" text="SE CONNECTER" onAction="#handleLogin"
-                        style="-fx-font-family:'Poppins';-fx-font-size:14;-fx-font-weight:600;-fx-background-color:#75070C;-fx-text-fill:#FFFFFF;-fx-background-radius:10;-fx-padding:13 0 13 0;-fx-cursor:hand;-fx-letter-spacing:1px;-fx-effect: dropshadow(gaussian, rgba(117,7,12,0.25), 12, 0, 0, 3);"
-                        maxWidth="Infinity"
-                        onMouseEntered="#handleLoginHover" onMouseExited="#handleLoginExit"/>
+                <Button fx:id="btnLogin" text="SE CONNECTER" onAction="#handleLogin" styleClass="login-button" maxWidth="Infinity"/>
 
                 <!-- Lien inscription -->
                 <HBox alignment="CENTER" spacing="6">
-                    <Label text="Pas encore de compte ?"
-                           style="-fx-font-family:'Poppins';-fx-font-size:13;-fx-text-fill:#888888;"/>
-                    <Hyperlink text="Créer un compte" onAction="#handleSignup"
-                               style="-fx-font-family:'Poppins';-fx-font-size:13;-fx-font-weight:600;-fx-text-fill:#4F6815;-fx-underline:false;"
-                               onMouseEntered="#handleSignupHover" onMouseExited="#handleSignupExit"/>
+                    <Label text="Pas encore de compte ?" styleClass="login-text-muted"/>
+                    <Hyperlink text="Créer un compte" onAction="#handleSignup" styleClass="login-link"/>
                 </HBox>
 
                 <!-- Version -->
-                <Label text="v1.0.0"
-                       style="-fx-font-family:'Poppins';-fx-font-size:10;-fx-text-fill:#DDDDDD;"
-                       alignment="CENTER" maxWidth="Infinity"/>
+                <Label text="v1.0.0" styleClass="login-version"/>
 
             </VBox>
         </HBox>

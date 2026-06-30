@@ -64,28 +64,27 @@
     </top>
 
     <center>
-        <VBox style="-fx-padding:0 28 14 28;">
+        <!-- 🔥 UN SEUL ScrollPane pour TOUTE la page -->
+        <ScrollPane fx:id="mainScrollPane" fitToWidth="true"
+                    style="-fx-background-color:transparent;-fx-border-color:transparent;-fx-background:#FAF6F0;"
+                    VBox.vgrow="ALWAYS">
 
-            <!-- Calendrier -->
-            <ScrollPane fx:id="scrollCalendrier" VBox.vgrow="ALWAYS"
-                        style="-fx-background-color:transparent;-fx-border-color:transparent;-fx-background:#FAF6F0;"
-                        fitToWidth="true" fitToHeight="true">
+            <VBox style="-fx-padding:0 28 14 28;" spacing="10">
+
+                <!-- Calendrier -->
                 <GridPane fx:id="calendrierGrid" hgap="4" vgap="4"
                           style="-fx-background-color:#FFFFFF;-fx-background-radius:12;-fx-border-color:#E8DDD0;-fx-border-radius:12;-fx-border-width:1;-fx-padding:10;"/>
-            </ScrollPane>
 
-            <!-- Événements du jour -->
-            <VBox spacing="4" style="-fx-padding:10 0 0 0;" minHeight="80">
-                <Label fx:id="lblJourSelectionne" text="📅 Aucun événement ce jour"
-                       style="-fx-font-family:'Poppins';-fx-font-size:14;-fx-font-weight:bold;-fx-text-fill:#1A1A1A;"/>
+                <!-- Événements du jour -->
+                <VBox spacing="4" style="-fx-padding:10 0 0 0;" minHeight="80">
+                    <Label fx:id="lblJourSelectionne" text="📅 Aucun événement ce jour"
+                           style="-fx-font-family:'Poppins';-fx-font-size:14;-fx-font-weight:bold;-fx-text-fill:#1A1A1A;"/>
 
-                <ScrollPane fx:id="scrollEvents" fitToWidth="true" prefHeight="70"
-                            style="-fx-background-color:transparent;-fx-border-color:transparent;">
                     <VBox fx:id="eventListContainer" spacing="2" style="-fx-padding:2 0 0 0;"/>
-                </ScrollPane>
-            </VBox>
+                </VBox>
 
-        </VBox>
+            </VBox>
+        </ScrollPane>
     </center>
 
 </BorderPane>

@@ -1,9 +1,15 @@
 package com.rh.contollers;
 
+import com.rh.components.NotificationToast;
 import com.rh.models.Planning;
 import com.rh.models.Planning.PrioritePlanning;
 import com.rh.models.Planning.TypePlanning;
+import com.rh.services.EmailService;
+import com.rh.services.GoogleCalendarService;
 import com.rh.services.PlanningService;
+import com.rh.services.TimerService;
+import com.rh.utils.EmailConfig;
+import com.rh.utils.SessionManager;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
@@ -11,13 +17,7 @@ import javafx.geometry.Pos;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
-import javafx.scene.layout.GridPane;
-import javafx.scene.layout.VBox;
-import javafx.scene.layout.HBox;
-import javafx.scene.layout.Region;
-import javafx.scene.layout.Priority;
-import javafx.scene.layout.RowConstraints;
-import javafx.scene.layout.ColumnConstraints;
+import javafx.scene.layout.*;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 
@@ -37,8 +37,13 @@ public class PlanningController implements Initializable {
     @FXML private Label lblJourSelectionne;
     @FXML private VBox eventListContainer;
     @FXML private Button btnNouveau;
+    @FXML private StackPane rootStackPane;
+    @FXML private ScrollPane mainScrollPane;
 
     private final PlanningService service = new PlanningService();
+    private final EmailService emailService = new EmailService();
+    private final GoogleCalendarService googleCalendarService = new GoogleCalendarService();
+
     private YearMonth currentMonth;
     private LocalDate selectedDate;
     private List<Planning> allEvents;
@@ -49,9 +54,15 @@ public class PlanningController implements Initializable {
     public void initialize(URL url, ResourceBundle rb) {
         currentMonth = YearMonth.now();
         selectedDate = LocalDate.now();
+
+        // 🔥 Configuration du ScrollPane principal
+        mainScrollPane.setFitToWidth(true);
+        mainScrollPane.setVbarPolicy(ScrollPane.ScrollBarPolicy.AS_NEEDED);
+        mainScrollPane.setHbarPolicy(ScrollPane.ScrollBarPolicy.NEVER);
+
         loadMonth();
         updateEventList();
-        checkRappels();
+        startRappelTimer();
     }
 
     // ── Chargement du mois ──────────────────────────────────────────────────
@@ -61,6 +72,7 @@ public class PlanningController implements Initializable {
         calendrierGrid.getChildren().clear();
         calendrierGrid.getColumnConstraints().clear();
 
+        // 7 colonnes de taille égale
         for (int i = 0; i < 7; i++) {
             ColumnConstraints cc = new ColumnConstraints();
             cc.setPercentWidth(100.0 / 7);
@@ -79,12 +91,14 @@ public class PlanningController implements Initializable {
         int row = 0;
         int col = 0;
 
+        // Jours vides
         for (int i = 0; i < startOffset; i++) {
             VBox emptyCell = createDayCell(null);
             calendrierGrid.add(emptyCell, col, row);
             col++;
         }
 
+        // Jours du mois
         for (int day = 1; day <= daysInMonth; day++) {
             if (col == 7) {
                 col = 0;
@@ -98,13 +112,21 @@ public class PlanningController implements Initializable {
             col++;
         }
 
+        // RowConstraints pour que les cellules s'agrandissent
         calendrierGrid.getRowConstraints().clear();
         for (int r = 0; r <= row; r++) {
             RowConstraints rc = new RowConstraints();
             rc.setVgrow(Priority.ALWAYS);
             rc.setFillHeight(true);
+            rc.setMinHeight(80);
             calendrierGrid.getRowConstraints().add(rc);
         }
+
+        // 🔥 Hauteur minimale du GridPane pour le scroll
+        int totalRows = row + 1;
+        double minHeight = totalRows * 85;
+        calendrierGrid.setMinHeight(minHeight);
+        calendrierGrid.setPrefHeight(minHeight);
     }
 
     // ── Création d'une cellule jour ─────────────────────────────────────────
@@ -114,7 +136,7 @@ public class PlanningController implements Initializable {
         cell.setAlignment(Pos.TOP_LEFT);
         cell.setStyle("-fx-background-color:#FFFFFF;-fx-border-color:#F0EAE4;-fx-border-width:1;-fx-background-radius:8;-fx-border-radius:8;");
         cell.setMinHeight(70);
-        cell.setPrefHeight(90);
+        cell.setPrefHeight(85);
         cell.setMaxHeight(Double.MAX_VALUE);
         cell.setFillWidth(true);
         cell.setMaxWidth(Double.MAX_VALUE);
@@ -252,7 +274,11 @@ public class PlanningController implements Initializable {
         btnDelete.setStyle("-fx-font-size:10;-fx-background-color:transparent;-fx-text-fill:#888888;-fx-cursor:hand;");
         btnDelete.setOnAction(e -> deleteEvent(p));
 
-        item.getChildren().addAll(colorDot, heure, titre, new Region(), type, btnEdit, btnDelete);
+        Label syncLabel = new Label("☁️");
+        syncLabel.setStyle("-fx-font-size:10;-fx-text-fill:#4285F4;");
+        Tooltip.install(syncLabel, new Tooltip("Synchronisé avec Google Calendar"));
+
+        item.getChildren().addAll(colorDot, heure, titre, new Region(), type, syncLabel, btnEdit, btnDelete);
         HBox.setHgrow(titre, Priority.ALWAYS);
 
         return item;
@@ -277,6 +303,7 @@ public class PlanningController implements Initializable {
 
             AjoutEventController ctrl = loader.getController();
             ctrl.setParent(this);
+            ctrl.setRootStackPane(rootStackPane);
 
             if (p != null) {
                 ctrl.setPlanning(p);
@@ -289,7 +316,6 @@ public class PlanningController implements Initializable {
             stage.setScene(new Scene(root, 520, 620));
             stage.initModality(Modality.APPLICATION_MODAL);
 
-            // Centrer par rapport à la fenêtre principale
             if (calendrierGrid.getScene() != null) {
                 stage.initOwner(calendrierGrid.getScene().getWindow());
             }
@@ -299,6 +325,46 @@ public class PlanningController implements Initializable {
 
         } catch (Exception e) {
             e.printStackTrace();
+        }
+    }
+
+    // ── Timer pour les rappels ─────────────────────────────────────────────
+
+    private void startRappelTimer() {
+        TimerService.startTimer(() -> {
+            checkRappels();
+        }, 60000);
+    }
+
+    // ── Vérification des rappels ───────────────────────────────────────────
+
+    private void checkRappels() {
+        List<Planning> soonEvents = service.getSoon();
+
+        for (Planning p : soonEvents) {
+            if (!p.isRappelEnvoye()) {
+                p.setRappelEnvoye(true);
+                service.update(p);
+
+                if (EmailConfig.EMAIL_ENABLED) {
+                    String destinataire = EmailConfig.DESTINATAIRE_DEFAUT;
+                    if (SessionManager.getInstance().getCurrentUser() != null) {
+                        destinataire = SessionManager.getInstance().getCurrentUser().getEmail();
+                    }
+                    emailService.envoyerRappel(destinataire, p);
+                }
+
+                if (rootStackPane != null) {
+                    String titre = "🔔 " + p.getTitre();
+                    String message = "Dans 15 minutes ! 📅 " + p.getDateStr() + " ⏰ " + p.getHeureStr();
+                    NotificationToast.show(
+                            rootStackPane,
+                            titre,
+                            message,
+                            p.getPriorite() == PrioritePlanning.URGENTE ? "urgent" : "normal"
+                    );
+                }
+            }
         }
     }
 
@@ -344,36 +410,8 @@ public class PlanningController implements Initializable {
                 service.delete(p.getId());
                 loadMonth();
                 updateEventList();
-                checkRappels();
             }
         });
-    }
-
-    // ── Rappels ──────────────────────────────────────────────────────────────
-
-    private void checkRappels() {
-        List<Planning> soonEvents = service.getSoon();
-        for (Planning p : soonEvents) {
-            if (!p.isRappelEnvoye()) {
-                p.setRappelEnvoye(true);
-                service.update(p);
-                showRappelPopup(p);
-            }
-        }
-    }
-
-    private void showRappelPopup(Planning p) {
-        Alert alert = new Alert(Alert.AlertType.INFORMATION);
-        alert.setTitle("🔔 Rappel");
-        alert.setHeaderText("Événement à venir !");
-        alert.setContentText(
-                "📌 " + p.getTitre() + "\n" +
-                        "📅 " + p.getDateStr() + "\n" +
-                        "⏰ " + p.getHeureStr() + "\n" +
-                        "📍 " + (p.getLieu() != null ? p.getLieu() : "Lieu non spécifié")
-        );
-        alert.getDialogPane().setStyle("-fx-background-color:#FFF8F0;-fx-border-color:#C8A000;-fx-border-width:2;-fx-border-radius:8;");
-        alert.showAndWait();
     }
 
     // ── Refresh ──────────────────────────────────────────────────────────────
@@ -381,6 +419,9 @@ public class PlanningController implements Initializable {
     public void refresh() {
         loadMonth();
         updateEventList();
-        checkRappels();
+    }
+
+    public void stop() {
+        TimerService.stopTimer();
     }
 }
