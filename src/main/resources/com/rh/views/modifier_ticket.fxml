@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.geometry.Insets?>
+
+<VBox xmlns="http://javafx.com/javafx/17"
+      xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="com.rh.contollers.ModifierTicketController"
+      spacing="20" style="-fx-background-color: #F0E6DA; -fx-padding: 25 30 25 30;"
+      prefWidth="450" prefHeight="450">
+
+    <Label text="✏️  Modifier le ticket restaurant" style="-fx-font-size: 20px; -fx-font-weight: bold; -fx-text-fill: #1A1A1A;"/>
+    <Separator/>
+
+    <VBox spacing="15">
+        <!-- Employé (lecture seule) -->
+        <VBox spacing="5">
+            <Label text="Employé" style="-fx-font-weight: bold; -fx-text-fill: #333333;"/>
+            <TextField fx:id="txtEmploye" editable="false"
+                       style="-fx-background-color: #f0f0f0; -fx-background-radius: 8; -fx-padding: 10 14; -fx-border-color: #E0D8D0; -fx-border-radius: 8;"/>
+        </VBox>
+
+        <!-- Département (lecture seule) -->
+        <VBox spacing="5">
+            <Label text="Département" style="-fx-font-weight: bold; -fx-text-fill: #333333;"/>
+            <TextField fx:id="txtDepartement" editable="false"
+                       style="-fx-background-color: #f0f0f0; -fx-background-radius: 8; -fx-padding: 10 14; -fx-border-color: #E0D8D0; -fx-border-radius: 8;"/>
+        </VBox>
+
+        <!-- Période -->
+        <HBox spacing="15">
+            <VBox spacing="5" HBox.hgrow="ALWAYS">
+                <Label text="Mois" style="-fx-font-weight: bold; -fx-text-fill: #333333;"/>
+                <TextField fx:id="txtMois" editable="false"
+                           style="-fx-background-color: #f0f0f0; -fx-background-radius: 8; -fx-padding: 10 14; -fx-border-color: #E0D8D0; -fx-border-radius: 8;"/>
+            </VBox>
+            <VBox spacing="5" HBox.hgrow="ALWAYS">
+                <Label text="Année" style="-fx-font-weight: bold; -fx-text-fill: #333333;"/>
+                <TextField fx:id="txtAnnee" editable="false"
+                           style="-fx-background-color: #f0f0f0; -fx-background-radius: 8; -fx-padding: 10 14; -fx-border-color: #E0D8D0; -fx-border-radius: 8;"/>
+            </VBox>
+        </HBox>
+
+        <!-- Montant par ticket -->
+        <VBox spacing="5">
+            <Label text="Montant par ticket (DT)" style="-fx-font-weight: bold; -fx-text-fill: #333333;"/>
+            <TextField fx:id="txtMontantParTicket"
+                       style="-fx-background-color: white; -fx-background-radius: 8; -fx-padding: 10 14; -fx-border-color: #F0E6DA; -fx-border-radius: 8;"/>
+        </VBox>
+
+        <!-- Nombre de jours -->
+        <VBox spacing="5">
+            <Label text="Nombre de jours" style="-fx-font-weight: bold; -fx-text-fill: #333333;"/>
+            <TextField fx:id="txtNbJours"
+                       style="-fx-background-color: white; -fx-background-radius: 8; -fx-padding: 10 14; -fx-border-color: #F0E6DA; -fx-border-radius: 8;"/>
+        </VBox>
+
+        <!-- Total (calculé automatiquement) -->
+        <VBox spacing="5">
+            <Label text="Total" style="-fx-font-weight: bold; -fx-text-fill: #333333;"/>
+            <TextField fx:id="txtTotal" editable="false"
+                       style="-fx-background-color: #f0f0f0; -fx-background-radius: 8; -fx-padding: 10 14; -fx-border-color: #E0D8D0; -fx-border-radius: 8;"/>
+        </VBox>
+
+        <Label text="* Le total est calculé automatiquement" style="-fx-font-size: 11px; -fx-text-fill: #888888;"/>
+    </VBox>
+
+    <HBox spacing="15" alignment="CENTER_RIGHT" style="-fx-padding: 20 0 0 0;">
+        <Button fx:id="btnAnnuler" text="Annuler" styleClass="btn-back" onAction="#onAnnuler"/>
+        <Button fx:id="btnModifier" text="Modifier" styleClass="btn-primary" onAction="#onModifier"/>
+    </HBox>
+</VBox>
