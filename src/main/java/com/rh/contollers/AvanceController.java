@@ -1,33 +1,50 @@
 package com.rh.contollers;
 
+import com.rh.models.Avance;
+import com.rh.services.ServiceAvance;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
-import javafx.scene.control.Label;
-import javafx.scene.control.TableCell;
-import javafx.scene.control.TableColumn;
-import javafx.scene.control.TableView;
+import javafx.fxml.FXMLLoader;
+import javafx.geometry.Pos;
+import javafx.scene.Scene;
+import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
+import javafx.scene.layout.HBox;
+import javafx.scene.layout.VBox;
+import javafx.stage.Modality;
+import javafx.stage.Stage;
+
+import java.io.IOException;
+import java.text.NumberFormat;
+import java.util.List;
+import java.util.Locale;
+import java.util.Optional;
 
 public class AvanceController {
 
+    // ── TableView ──
     @FXML
-    private TableView<DemandeAvance> tableView;
+    private TableView<Avance> tableView;
 
     @FXML
-    private TableColumn<DemandeAvance, String> colEmploye;
+    private TableColumn<Avance, String> colEmploye;
     @FXML
-    private TableColumn<DemandeAvance, Double> colMontant;
+    private TableColumn<Avance, String> colDepartement;
     @FXML
-    private TableColumn<DemandeAvance, String> colMotif;
+    private TableColumn<Avance, Double> colMontant;
     @FXML
-    private TableColumn<DemandeAvance, String> colDate;
+    private TableColumn<Avance, String> colMotif;
     @FXML
-    private TableColumn<DemandeAvance, String> colStatut;
+    private TableColumn<Avance, String> colDate;
     @FXML
-    private TableColumn<DemandeAvance, Void> colActions;
+    private TableColumn<Avance, String> colStatut;
+    @FXML
+    private TableColumn<Avance, String> colCommentaire;
+    @FXML
+    private TableColumn<Avance, Void> colActions;
 
-    // Labels des statistiques
+    // ── Labels des statistiques ──
     @FXML
     private Label lblEnAttente;
     @FXML
@@ -39,117 +56,200 @@ public class AvanceController {
     @FXML
     private Label lblTotalDemandes;
 
-    private ObservableList<DemandeAvance> demandes = FXCollections.observableArrayList();
+    // ── Champs de recherche et filtres ──
+    @FXML
+    private TextField txtRecherche;
+    @FXML
+    private ComboBox<String> comboFiltreStatut;
+
+    // ── Services et données ──
+    private ServiceAvance service;
+    private ObservableList<Avance> avances = FXCollections.observableArrayList();
+    private NumberFormat format = NumberFormat.getInstance(Locale.FRENCH);
 
     @FXML
     public void initialize() {
-        // Configurer les colonnes
-        colEmploye.setCellValueFactory(new PropertyValueFactory<>("employe"));
-        colMontant.setCellValueFactory(new PropertyValueFactory<>("montant"));
-        colMotif.setCellValueFactory(new PropertyValueFactory<>("motif"));
-        colDate.setCellValueFactory(new PropertyValueFactory<>("date"));
-        colStatut.setCellValueFactory(new PropertyValueFactory<>("statut"));
+        try {
+            System.out.println("=== Initialisation du contrôleur Avance ===");
 
-        // Styliser la colonne statut
-        styliserStatuts();
+            service = new ServiceAvance();
 
-        // Ajouter les boutons d'action
-        ajouterBoutonsActions();
+            // ── Configurer les colonnes ──
+            // Colonne EMPLOYÉ
+            colEmploye.setCellValueFactory(cellData -> {
+                Avance a = cellData.getValue();
+                if (a.getEmploye() != null) {
+                    return new javafx.beans.property.SimpleStringProperty(
+                            a.getEmploye().getPrenom() + " " + a.getEmploye().getNom()
+                    );
+                }
+                return new javafx.beans.property.SimpleStringProperty("");
+            });
 
-        // Charger les données d'exemple
-        chargerDonneesExemple();
+            // Colonne DÉPARTEMENT
+            colDepartement.setCellValueFactory(cellData -> {
+                Avance a = cellData.getValue();
+                if (a.getEmploye() != null && a.getEmploye().getDepartement() != null) {
+                    // Afficher le label (ex: "Centre d'appel B2B") au lieu du nom enum
+                    return new javafx.beans.property.SimpleStringProperty(
+                            a.getEmploye().getDepartement().toString()
+                    );
+                }
+                return new javafx.beans.property.SimpleStringProperty("");
+            });
 
-        // Lier les données à la table
-        tableView.setItems(demandes);
+            // Colonne MONTANT
+            colMontant.setCellValueFactory(new PropertyValueFactory<>("montant"));
+            colMontant.setCellFactory(column -> new TableCell<Avance, Double>() {
+                @Override
+                protected void updateItem(Double item, boolean empty) {
+                    super.updateItem(item, empty);
+                    if (empty || item == null) {
+                        setText(null);
+                    } else {
+                        setText(format.format(item) + " DT");
+                        setAlignment(Pos.CENTER_RIGHT);
+                    }
+                }
+            });
 
-        // Mettre à jour les statistiques
-        mettreAJourStatistiques();
+            // Colonne MOTIF
+            colMotif.setCellValueFactory(new PropertyValueFactory<>("motif"));
+
+            // Colonne DATE
+            colDate.setCellValueFactory(new PropertyValueFactory<>("dateDemandeFormatee"));
+
+            // Colonne STATUT
+            colStatut.setCellValueFactory(new PropertyValueFactory<>("statutLabel"));
+
+            // Colonne COMMENTAIRE
+            colCommentaire.setCellValueFactory(new PropertyValueFactory<>("commentaire"));
+
+            // Styliser la colonne statut
+            styliserStatuts();
+
+            // Ajouter les boutons d'action (uniquement Valider, Refuser, Supprimer - pas Modifier)
+            ajouterBoutonsActions();
+
+            // ── Configurer le filtre par statut ──
+            if (comboFiltreStatut != null) {
+                comboFiltreStatut.setItems(FXCollections.observableArrayList(
+                        "Tous", "En attente", "Validée", "Refusée"
+                ));
+                comboFiltreStatut.setValue("Tous");
+            }
+
+            // ── Charger les données ──
+            chargerDonnees();
+
+            // ── Lier les données à la table ──
+            tableView.setItems(avances);
+
+            // ── Mettre à jour les statistiques ──
+            mettreAJourStatistiques();
+
+            // ── Écouteurs ──
+
+            // Recherche en temps réel
+            if (txtRecherche != null) {
+                txtRecherche.textProperty().addListener((observable, oldValue, newValue) -> {
+                    if (newValue == null || newValue.isEmpty()) {
+                        chargerDonnees();
+                    } else {
+                        rechercherAvances(newValue);
+                    }
+                });
+            }
+
+            // Filtre par statut
+            if (comboFiltreStatut != null) {
+                comboFiltreStatut.setOnAction(e -> {
+                    String statut = comboFiltreStatut.getValue();
+                    if ("Tous".equals(statut)) {
+                        chargerDonnees();
+                    } else {
+                        filtrerParStatut(statut);
+                    }
+                });
+            }
+
+            System.out.println("=== Initialisation terminée ===");
+
+        } catch (Exception e) {
+            System.err.println("Erreur lors de l'initialisation : " + e.getMessage());
+            e.printStackTrace();
+        }
     }
 
-    private void chargerDonneesExemple() {
-        demandes.addAll(
-                new DemandeAvance("Mohamed Bouzid", 250.00, "Frais médicaux", "18/06/2026", "En attente"),
-                new DemandeAvance("Lina Trabelsi", 500.00, "Urgence familiale", "20/06/2026", "En attente"),
-                new DemandeAvance("Ahmed Ben Ali", 800.00, "Rentrée scolaire", "21/06/2026", "En attente"),
-                new DemandeAvance("Sara Chaabane", 200.00, "Réparation voiture", "12/06/2026", "Validée"),
-                new DemandeAvance("Mohamed Bouzid", 300.00, "Voyage personnel", "03/03/2026", "Refusée"),
-                new DemandeAvance("Nadia Chaoui", 450.00, "Achat mobilier", "15/06/2026", "Validée"),
-                new DemandeAvance("Youssef Hamdi", 600.00, "Formation professionnelle", "10/06/2026", "En attente"),
-                new DemandeAvance("Imane Mokded", 350.00, "Frais de santé", "08/06/2026", "Validée"),
-                new DemandeAvance("Ichraf Karoui", 150.00, "Transport", "05/06/2026", "Refusée"),
-                new DemandeAvance("Feriel Touati", 400.00, "Urgence familiale", "02/06/2026", "Validée"),
-                new DemandeAvance("Hannachi Hanen", 275.00, "Fournitures scolaires", "28/05/2026", "Validée"),
-                new DemandeAvance("Khadhraoui Olfa", 520.00, "Réparation maison", "25/05/2026", "En attente"),
-                new DemandeAvance("Zeineb Alibi", 180.00, "Frais médicaux", "20/05/2026", "Validée"),
-                new DemandeAvance("Wided Bouali", 320.00, "Achat ordinateur", "18/05/2026", "Refusée"),
-                new DemandeAvance("Ahmed Karim", 750.00, "Voyage familial", "15/05/2026", "Validée"),
-                new DemandeAvance("Sara Benali", 280.00, "Formation", "12/05/2026", "En attente"),
-                new DemandeAvance("Mohamed Amine", 430.00, "Frais de santé", "10/05/2026", "Validée"),
-                new DemandeAvance("Nadia Chaoui", 190.00, "Transport", "08/05/2026", "Validée"),
-                new DemandeAvance("Youssef Hamdi", 560.00, "Urgence familiale", "05/05/2026", "Refusée")
-        );
-    }
+    // ── Style des statuts ──
 
     private void styliserStatuts() {
-        colStatut.setCellFactory(column -> new TableCell<DemandeAvance, String>() {
+        colStatut.setCellFactory(column -> new TableCell<Avance, String>() {
+            private final Label badge = new Label();
+
+            {
+                badge.setAlignment(Pos.CENTER);
+                badge.setMaxWidth(Double.MAX_VALUE);
+            }
+
             @Override
             protected void updateItem(String item, boolean empty) {
                 super.updateItem(item, empty);
                 if (empty || item == null) {
-                    setText(null);
                     setGraphic(null);
-                    setStyle("");
+                    setText(null);
                 } else {
-                    setText(item);
-                    setAlignment(javafx.geometry.Pos.CENTER);
+                    badge.setText(item);
 
-                    String styleClass = "";
-                    String statutLower = item.toLowerCase();
-
-                    if (statutLower.contains("en attente")) {
-                        styleClass = "statut-en-attente";
-                    } else if (statutLower.contains("validée") || statutLower.contains("validee")) {
-                        styleClass = "statut-validee";
-                    } else if (statutLower.contains("refusée") || statutLower.contains("refusee")) {
-                        styleClass = "statut-refusee";
-                    }
-
-                    if (!styleClass.isEmpty()) {
-                        Label label = new Label(item);
-                        label.getStyleClass().add(styleClass);
-                        label.setAlignment(javafx.geometry.Pos.CENTER);
-                        setGraphic(label);
-                        setText(null);
+                    if ("Validée".equalsIgnoreCase(item)) {
+                        badge.setStyle("-fx-background-color: #4F6815; -fx-text-fill: white; -fx-font-weight: bold; -fx-padding: 4 14; -fx-background-radius: 12; -fx-font-size: 11px;");
+                    } else if ("En attente".equalsIgnoreCase(item)) {
+                        badge.setStyle("-fx-background-color: #FFEDAB; -fx-text-fill: #7a5c00; -fx-font-weight: bold; -fx-padding: 4 14; -fx-background-radius: 12; -fx-font-size: 11px;");
+                    } else if ("Refusée".equalsIgnoreCase(item)) {
+                        badge.setStyle("-fx-background-color: #75070C; -fx-text-fill: white; -fx-font-weight: bold; -fx-padding: 4 14; -fx-background-radius: 12; -fx-font-size: 11px;");
                     } else {
-                        setGraphic(null);
+                        badge.setStyle("-fx-background-color: #F0E6DA; -fx-text-fill: #333333; -fx-font-weight: bold; -fx-padding: 4 14; -fx-background-radius: 12; -fx-font-size: 11px;");
                     }
+
+                    setGraphic(badge);
+                    setText(null);
                 }
             }
         });
     }
 
+    // ── Boutons d'action (uniquement Valider, Refuser, Supprimer) ──
+
     private void ajouterBoutonsActions() {
-        colActions.setCellFactory(param -> new TableCell<DemandeAvance, Void>() {
-            private final javafx.scene.control.Button btnValider = new javafx.scene.control.Button("✅ Valider");
-            private final javafx.scene.control.Button btnRefuser = new javafx.scene.control.Button("❌ Refuser");
+        colActions.setCellFactory(param -> new TableCell<Avance, Void>() {
+            private final Button btnValider = new Button("✅");
+            private final Button btnRefuser = new Button("❌");
+            private final Button btnSupprimer = new Button("🗑️");
+            private final HBox container = new HBox(4, btnValider, btnRefuser, btnSupprimer);
 
             {
-                btnValider.getStyleClass().add("btn-secondary");
-                btnValider.setStyle("-fx-font-size: 10px; -fx-padding: 2 8;");
+                btnValider.setStyle("-fx-font-size: 13px; -fx-padding: 2 5; -fx-background-color: #e8f0d8; -fx-background-radius: 4; -fx-cursor: hand;");
+                btnValider.setTooltip(new Tooltip("Valider la demande"));
+
+                btnRefuser.setStyle("-fx-font-size: 13px; -fx-padding: 2 5; -fx-background-color: #fde8e9; -fx-background-radius: 4; -fx-cursor: hand;");
+                btnRefuser.setTooltip(new Tooltip("Refuser la demande"));
+
+                btnSupprimer.setStyle("-fx-font-size: 13px; -fx-padding: 2 5; -fx-background-color: #fde8e9; -fx-background-radius: 4; -fx-cursor: hand;");
+                btnSupprimer.setTooltip(new Tooltip("Supprimer la demande"));
+
                 btnValider.setOnAction(event -> {
-                    DemandeAvance demande = getTableView().getItems().get(getIndex());
-                    demande.setStatut("Validée");
-                    tableView.refresh();
-                    mettreAJourStatistiques();
+                    Avance avance = getTableView().getItems().get(getIndex());
+                    validerAvance(avance);
                 });
 
-                btnRefuser.getStyleClass().add("btn-back");
-                btnRefuser.setStyle("-fx-font-size: 10px; -fx-padding: 2 8; -fx-text-fill: #75070C;");
                 btnRefuser.setOnAction(event -> {
-                    DemandeAvance demande = getTableView().getItems().get(getIndex());
-                    demande.setStatut("Refusée");
-                    tableView.refresh();
-                    mettreAJourStatistiques();
+                    Avance avance = getTableView().getItems().get(getIndex());
+                    refuserAvance(avance);
+                });
+
+                btnSupprimer.setOnAction(event -> {
+                    Avance avance = getTableView().getItems().get(getIndex());
+                    supprimerAvance(avance);
                 });
             }
 
@@ -159,23 +259,165 @@ public class AvanceController {
                 if (empty) {
                     setGraphic(null);
                 } else {
-                    DemandeAvance demande = getTableView().getItems().get(getIndex());
-                    String statut = demande.getStatut();
+                    Avance avance = getTableView().getItems().get(getIndex());
+                    String statut = avance.getStatutLabel();
 
+                    // Afficher les boutons selon le statut
                     if ("En attente".equals(statut)) {
-                        javafx.scene.layout.HBox hbox = new javafx.scene.layout.HBox(5, btnValider, btnRefuser);
-                        hbox.setAlignment(javafx.geometry.Pos.CENTER);
-                        setGraphic(hbox);
+                        btnValider.setVisible(true);
+                        btnRefuser.setVisible(true);
                     } else {
-                        Label label = new Label("✔ Traité");
-                        label.setStyle("-fx-text-fill: #888; -fx-font-size: 11px; -fx-font-style: italic;");
-                        label.setAlignment(javafx.geometry.Pos.CENTER);
-                        setGraphic(label);
+                        btnValider.setVisible(false);
+                        btnRefuser.setVisible(false);
                     }
+
+                    container.setAlignment(Pos.CENTER);
+                    setGraphic(container);
                 }
             }
         });
     }
+
+    // ── Ouvrir formulaire d'ajout ──
+
+    @FXML
+    private void onNouvelleDemande() {
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/rh/views/ajouter_avance.fxml"));
+            VBox root = loader.load();
+
+            AjouterAvanceController controller = loader.getController();
+            controller.setOnAjoutReussi(() -> {
+                chargerDonnees();
+            });
+
+            Scene scene = new Scene(root);
+            String css = getClass().getResource("/com/rh/styles/main.css").toExternalForm();
+            if (css != null) {
+                scene.getStylesheets().add(css);
+            }
+
+            Stage stage = new Stage();
+            stage.setTitle("Nouvelle demande d'avance");
+            stage.setScene(scene);
+            stage.initModality(Modality.WINDOW_MODAL);
+            stage.initOwner(tableView.getScene().getWindow());
+            stage.setResizable(false);
+            stage.showAndWait();
+
+        } catch (IOException e) {
+            System.err.println("Erreur lors de l'ouverture du formulaire : " + e.getMessage());
+            showAlert("Erreur", "Impossible d'ouvrir le formulaire d'ajout.", Alert.AlertType.ERROR);
+        }
+    }
+
+    // ── Actions sur les avances ──
+
+    private void validerAvance(Avance avance) {
+        Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
+        alert.setTitle("Confirmation");
+        alert.setHeaderText("Valider la demande d'avance");
+        alert.setContentText("Êtes-vous sûr de vouloir valider cette demande d'avance ?");
+
+        Optional<ButtonType> result = alert.showAndWait();
+        if (result.isPresent() && result.get() == ButtonType.OK) {
+            try {
+                boolean success = service.validerAvance(avance.getIdAvance());
+                if (success) {
+                    avance.setStatut("Validée");
+                    avance.setDateValidation(java.time.LocalDate.now());
+                    tableView.refresh();
+                    mettreAJourStatistiques();
+                    showAlert("Succès", "Demande validée avec succès !", Alert.AlertType.INFORMATION);
+                }
+            } catch (Exception e) {
+                showAlert("Erreur", "Erreur lors de la validation : " + e.getMessage(), Alert.AlertType.ERROR);
+            }
+        }
+    }
+
+    private void refuserAvance(Avance avance) {
+        Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
+        alert.setTitle("Confirmation");
+        alert.setHeaderText("Refuser la demande d'avance");
+        alert.setContentText("Êtes-vous sûr de vouloir refuser cette demande d'avance ?");
+
+        Optional<ButtonType> result = alert.showAndWait();
+        if (result.isPresent() && result.get() == ButtonType.OK) {
+            try {
+                boolean success = service.refuserAvance(avance.getIdAvance());
+                if (success) {
+                    avance.setStatut("Refusée");
+                    avance.setDateValidation(java.time.LocalDate.now());
+                    tableView.refresh();
+                    mettreAJourStatistiques();
+                    showAlert("Succès", "Demande refusée avec succès !", Alert.AlertType.INFORMATION);
+                }
+            } catch (Exception e) {
+                showAlert("Erreur", "Erreur lors du refus : " + e.getMessage(), Alert.AlertType.ERROR);
+            }
+        }
+    }
+
+    private void supprimerAvance(Avance avance) {
+        Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
+        alert.setTitle("Confirmation de suppression");
+        alert.setHeaderText("Supprimer la demande d'avance");
+        alert.setContentText("Êtes-vous sûr de vouloir supprimer cette demande d'avance ?");
+
+        Optional<ButtonType> result = alert.showAndWait();
+        if (result.isPresent() && result.get() == ButtonType.OK) {
+            try {
+                service.delete(avance);
+                chargerDonnees();
+                showAlert("Succès", "Demande supprimée avec succès !", Alert.AlertType.INFORMATION);
+            } catch (Exception e) {
+                System.err.println("Erreur lors de la suppression : " + e.getMessage());
+                showAlert("Erreur", "Erreur lors de la suppression.", Alert.AlertType.ERROR);
+            }
+        }
+    }
+
+    // ── Chargement des données ──
+
+    private void chargerDonnees() {
+        try {
+            System.out.println("Chargement des données depuis la BD...");
+            List<Avance> liste = service.getAll();
+            System.out.println("Nombre d'avances récupérées : " + liste.size());
+
+            avances.setAll(liste);
+            mettreAJourStatistiques();
+            tableView.refresh();
+
+        } catch (Exception e) {
+            System.err.println("Erreur lors du chargement : " + e.getMessage());
+            e.printStackTrace();
+            showAlert("Erreur", "Impossible de charger les données depuis la base de données.", Alert.AlertType.ERROR);
+        }
+    }
+
+    private void rechercherAvances(String keyword) {
+        try {
+            avances.setAll(service.search(keyword));
+            mettreAJourStatistiques();
+        } catch (Exception e) {
+            System.err.println("Erreur lors de la recherche : " + e.getMessage());
+            showAlert("Erreur", "Erreur lors de la recherche", Alert.AlertType.ERROR);
+        }
+    }
+
+    private void filtrerParStatut(String statut) {
+        try {
+            avances.setAll(service.filterByStatut(statut));
+            mettreAJourStatistiques();
+        } catch (Exception e) {
+            System.err.println("Erreur lors du filtrage : " + e.getMessage());
+            showAlert("Erreur", "Erreur lors du filtrage", Alert.AlertType.ERROR);
+        }
+    }
+
+    // ── Mise à jour des statistiques ──
 
     private void mettreAJourStatistiques() {
         int enAttente = 0;
@@ -183,13 +425,13 @@ public class AvanceController {
         int refusees = 0;
         double totalAvance = 0.0;
 
-        for (DemandeAvance d : demandes) {
-            String statut = d.getStatut();
+        for (Avance a : avances) {
+            String statut = a.getStatutLabel();
             if ("En attente".equals(statut)) {
                 enAttente++;
             } else if ("Validée".equals(statut)) {
                 validees++;
-                totalAvance += d.getMontant();
+                totalAvance += a.getMontant();
             } else if ("Refusée".equals(statut)) {
                 refusees++;
             }
@@ -199,36 +441,51 @@ public class AvanceController {
         lblValidees.setText(String.valueOf(validees));
         lblRefusees.setText(String.valueOf(refusees));
         lblTotalAvance.setText(String.format("%.0f DT", totalAvance));
-        lblTotalDemandes.setText(String.valueOf(demandes.size()));
+        lblTotalDemandes.setText(String.valueOf(avances.size()));
     }
+
+    // ── Actions ──
 
     @FXML
     private void onRetour() {
         MainController.loadPage("paie", "Gestion de la Paie");
     }
 
-    // ── Classe interne pour les données ──────────────────────────────────────
+    @FXML
+    private void onExporter() {
+        showAlert("Information", "Fonctionnalité d'export à implémenter.", Alert.AlertType.INFORMATION);
+    }
 
-    public static class DemandeAvance {
-        private final String employe;
-        private final double montant;
-        private final String motif;
-        private final String date;
-        private String statut;
-
-        public DemandeAvance(String employe, double montant, String motif, String date, String statut) {
-            this.employe = employe;
-            this.montant = montant;
-            this.motif = motif;
-            this.date = date;
-            this.statut = statut;
+    @FXML
+    private void onFiltrer() {
+        if (comboFiltreStatut != null) {
+            String statut = comboFiltreStatut.getValue();
+            if ("Tous".equals(statut)) {
+                chargerDonnees();
+            } else {
+                filtrerParStatut(statut);
+            }
         }
+    }
 
-        public String getEmploye() { return employe; }
-        public double getMontant() { return montant; }
-        public String getMotif() { return motif; }
-        public String getDate() { return date; }
-        public String getStatut() { return statut; }
-        public void setStatut(String statut) { this.statut = statut; }
+    @FXML
+    private void onReinitialiser() {
+        if (txtRecherche != null) {
+            txtRecherche.clear();
+        }
+        if (comboFiltreStatut != null) {
+            comboFiltreStatut.setValue("Tous");
+        }
+        chargerDonnees();
+    }
+
+    // ── Méthodes utilitaires ──
+
+    private void showAlert(String title, String message, Alert.AlertType type) {
+        Alert alert = new Alert(type);
+        alert.setTitle(title);
+        alert.setHeaderText(null);
+        alert.setContentText(message);
+        alert.showAndWait();
     }
 }

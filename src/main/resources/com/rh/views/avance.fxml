@@ -15,8 +15,18 @@
             <Button text="← Retour" styleClass="btn-back" onAction="#onRetour"/>
             <Label styleClass="welcome-label" text="💰  Demandes d'avance sur salaire"/>
             <Region HBox.hgrow="ALWAYS"/>
-            <Button text="➕  Nouvelle demande" styleClass="btn-primary"/>
-            <Button text="📥  Exporter" styleClass="btn-secondary"/>
+            <Button text="➕  Nouvelle demande" styleClass="btn-primary" onAction="#onNouvelleDemande"/>
+            <Button text="📥  Exporter" styleClass="btn-secondary" onAction="#onExporter"/>
+        </HBox>
+
+        <!-- ── Filtres / Recherche ── -->
+        <HBox spacing="12" alignment="CENTER_LEFT">
+            <TextField fx:id="txtRecherche" promptText="🔍  Rechercher un employé..."
+                       style="-fx-background-color: white; -fx-background-radius: 8; -fx-padding: 8 14; -fx-border-color: #F0E6DA; -fx-border-radius: 8; -fx-pref-width: 350;"/>
+            <ComboBox fx:id="comboFiltreStatut" promptText="Filtrer par statut"
+                      style="-fx-background-color: white; -fx-background-radius: 8; -fx-padding: 4 12; -fx-border-color: #F0E6DA; -fx-border-radius: 8; -fx-pref-height: 36;"/>
+            <Button text="Filtrer" styleClass="btn-secondary" onAction="#onFiltrer"/>
+            <Button text="Réinitialiser" styleClass="btn-back" onAction="#onReinitialiser"/>
         </HBox>
 
         <!-- ── Statistiques ── -->
@@ -39,16 +49,6 @@
             </VBox>
         </HBox>
 
-        <!-- ── Recherche ── -->
-        <HBox spacing="12" alignment="CENTER_LEFT">
-            <TextField promptText="🔍  Rechercher un employé..."
-                       style="-fx-background-color: white; -fx-background-radius: 8; -fx-padding: 8 14; -fx-border-color: #F0E6DA; -fx-border-radius: 8; -fx-pref-width: 350;"/>
-            <ComboBox promptText="Filtrer par statut"
-                      style="-fx-background-color: white; -fx-background-radius: 8; -fx-padding: 4 12; -fx-border-color: #F0E6DA; -fx-border-radius: 8; -fx-pref-height: 36;"/>
-            <Button text="Filtrer" styleClass="btn-secondary"/>
-            <Button text="Réinitialiser" styleClass="btn-back"/>
-        </HBox>
-
         <!-- ── Tableau ── -->
         <VBox styleClass="chart-card" VBox.vgrow="ALWAYS" spacing="12">
 
@@ -64,12 +64,14 @@
             <!-- TableView -->
             <TableView fx:id="tableView" styleClass="activity-table" VBox.vgrow="ALWAYS" prefHeight="450">
                 <columns>
-                    <TableColumn fx:id="colEmploye" text="EMPLOYÉ" prefWidth="200"/>
+                    <TableColumn fx:id="colEmploye" text="EMPLOYÉ" prefWidth="180"/>
+                    <TableColumn fx:id="colDepartement" text="DÉPARTEMENT" prefWidth="150"/>
                     <TableColumn fx:id="colMontant" text="MONTANT" prefWidth="120" styleClass="column-statut"/>
-                    <TableColumn fx:id="colMotif" text="MOTIF" prefWidth="200"/>
+                    <TableColumn fx:id="colMotif" text="MOTIF" prefWidth="180"/>
                     <TableColumn fx:id="colDate" text="DATE" prefWidth="120"/>
                     <TableColumn fx:id="colStatut" text="STATUT" prefWidth="130" styleClass="column-statut"/>
-                    <TableColumn fx:id="colActions" text="ACTIONS" prefWidth="180" styleClass="column-statut"/>
+                    <TableColumn fx:id="colCommentaire" text="COMMENTAIRE" prefWidth="150"/>
+                    <TableColumn fx:id="colActions" text="ACTIONS" prefWidth="150" styleClass="column-statut"/>
                 </columns>
             </TableView>
 

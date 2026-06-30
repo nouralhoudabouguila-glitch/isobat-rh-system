@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.geometry.Insets?>
+
+<VBox xmlns="http://javafx.com/javafx/17"
+      xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="com.rh.contollers.ModifierAvanceController"
+      spacing="20" style="-fx-background-color: #F0E6DA; -fx-padding: 25 30 25 30;"
+      prefWidth="500" prefHeight="580">
+
+    <Label text="✏️  Modifier la demande d'avance" style="-fx-font-size: 20px; -fx-font-weight: bold; -fx-text-fill: #1A1A1A;"/>
+    <Separator/>
+
+    <VBox spacing="15">
+        <!-- Employé (lecture seule) -->
+        <VBox spacing="5">
+            <Label text="Employé" style="-fx-font-weight: bold; -fx-text-fill: #333333;"/>
+            <TextField fx:id="txtEmploye" editable="false"
+                       style="-fx-background-color: #f0f0f0; -fx-background-radius: 8; -fx-padding: 10 14; -fx-border-color: #E0D8D0; -fx-border-radius: 8;"/>
+        </VBox>
+
+        <!-- Montant -->
+        <VBox spacing="5">
+            <Label text="Montant *" style="-fx-font-weight: bold; -fx-text-fill: #333333;"/>
+            <TextField fx:id="txtMontant" promptText="Ex: 500,00"
+                       style="-fx-background-color: white; -fx-background-radius: 8; -fx-padding: 10 14; -fx-border-color: #F0E6DA; -fx-border-radius: 8;"/>
+        </VBox>
+
+        <!-- Motif -->
+        <VBox spacing="5">
+            <Label text="Motif *" style="-fx-font-weight: bold; -fx-text-fill: #333333;"/>
+            <TextField fx:id="txtMotif" promptText="Motif de la demande"
+                       style="-fx-background-color: white; -fx-background-radius: 8; -fx-padding: 10 14; -fx-border-color: #F0E6DA; -fx-border-radius: 8;"/>
+        </VBox>
+
+        <!-- Date de demande -->
+        <VBox spacing="5">
+            <Label text="Date de demande *" style="-fx-font-weight: bold; -fx-text-fill: #333333;"/>
+            <DatePicker fx:id="datePickerDemande"
+                        style="-fx-background-color: white; -fx-background-radius: 8; -fx-padding: 8 12; -fx-border-color: #F0E6DA; -fx-border-radius: 8; -fx-pref-height: 40;"
+                        prefWidth="250"/>
+        </VBox>
+
+        <!-- Statut -->
+        <VBox spacing="5">
+            <Label text="Statut *" style="-fx-font-weight: bold; -fx-text-fill: #333333;"/>
+            <ComboBox fx:id="comboStatut"
+                      style="-fx-background-color: white; -fx-background-radius: 8; -fx-padding: 8 12; -fx-border-color: #F0E6DA; -fx-border-radius: 8; -fx-pref-height: 40;"
+                      prefWidth="250"/>
+        </VBox>
+
+        <!-- Commentaire -->
+        <VBox spacing="5">
+            <Label text="Commentaire" style="-fx-font-weight: bold; -fx-text-fill: #333333;"/>
+            <TextArea fx:id="txtCommentaire" promptText="Ajoutez un commentaire..." prefHeight="80" wrapText="true"
+                      style="-fx-background-color: white; -fx-background-radius: 8; -fx-padding: 10 14; -fx-border-color: #F0E6DA; -fx-border-radius: 8;"/>
+        </VBox>
+
+        <Label text="* Champs obligatoires" style="-fx-font-size: 11px; -fx-text-fill: #888888;"/>
+    </VBox>
+
+    <HBox spacing="15" alignment="CENTER_RIGHT" style="-fx-padding: 20 0 0 0;">
+        <Button fx:id="btnAnnuler" text="Annuler" styleClass="btn-back" onAction="#onAnnuler"/>
+        <Button fx:id="btnModifier" text="Modifier" styleClass="btn-primary" onAction="#onModifier"/>
+    </HBox>
+</VBox>
