@@ -1,23 +1,91 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<?import javafx.scene.layout.*?>
+
 <?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.geometry.Insets?>
 
-<ScrollPane fitToWidth="true" hbarPolicy="NEVER" styleClass="content-scroll"
-            xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1"
-            fx:controller="com.rh.contollers.PlanningController">
+<BorderPane xmlns="http://javafx.com/javafx/17"
+            xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="com.rh.contollers.PlanningController"
+            style="-fx-background-color:#FAF6F0;">
 
-    <VBox styleClass="dashboard-root" spacing="20">
+    <top>
+        <VBox spacing="10" style="-fx-padding:16 28 10 28;">
 
-        <!-- En-tête -->
-        <HBox alignment="CENTER_LEFT" spacing="8">
-            <Label text="📅  Planning" styleClass="welcome-label"/>
-        </HBox>
+            <!-- Titre -->
+            <VBox spacing="2">
+                <Label text="📅 Mon Planning"
+                       style="-fx-font-family:'Poppins';-fx-font-size:22;-fx-font-weight:bold;-fx-text-fill:#2A2A2A;"/>
+                <Label text="Gérez vos rendez-vous, missions et rappels"
+                       style="-fx-font-family:'Poppins';-fx-font-size:12;-fx-text-fill:#999999;"/>
+            </VBox>
 
-        <!-- Zone de contenu — à implémenter -->
-        <VBox styleClass="chart-card" VBox.vgrow="ALWAYS" spacing="16">
-            <!-- TODO: Ajouter votre interface ici (calendrier, planning équipes, etc.) -->
+            <!-- Navigation mois -->
+            <HBox spacing="12" alignment="CENTER">
+                <Button text="◀" onAction="#handlePrevMonth"
+                        style="-fx-font-family:'Poppins';-fx-font-size:18;-fx-font-weight:bold;-fx-background-color:transparent;-fx-text-fill:#75070C;-fx-cursor:hand;-fx-padding:4 10 4 10;"/>
+
+                <Label fx:id="lblMoisAnnee" text="Juin 2026"
+                       style="-fx-font-family:'Poppins';-fx-font-size:18;-fx-font-weight:bold;-fx-text-fill:#1A1A1A;-fx-min-width:200;-fx-alignment:CENTER;"/>
+
+                <Button text="▶" onAction="#handleNextMonth"
+                        style="-fx-font-family:'Poppins';-fx-font-size:18;-fx-font-weight:bold;-fx-background-color:transparent;-fx-text-fill:#75070C;-fx-cursor:hand;-fx-padding:4 10 4 10;"/>
+
+                <Region HBox.hgrow="ALWAYS"/>
+
+                <Button text="📅 Aujourd'hui" onAction="#handleToday"
+                        style="-fx-font-family:'Poppins';-fx-font-size:12;-fx-font-weight:bold;-fx-background-color:#4F6815;-fx-text-fill:#FFFFFF;-fx-border-radius:8;-fx-padding:7 18 7 18;-fx-cursor:hand;"/>
+
+                <Button fx:id="btnNouveau" text="＋ Nouveau" onAction="#handleAdd"
+                        style="-fx-font-family:'Poppins';-fx-font-size:12;-fx-font-weight:bold;-fx-background-color:#75070C;-fx-text-fill:#FFFFFF;-fx-border-radius:8;-fx-padding:7 18 7 18;-fx-cursor:hand;"/>
+            </HBox>
+
+            <!-- Jours de la semaine -->
+            <GridPane hgap="4" vgap="2" style="-fx-padding:4 0 2 0;">
+                <columnConstraints>
+                    <ColumnConstraints percentWidth="14.28"/>
+                    <ColumnConstraints percentWidth="14.28"/>
+                    <ColumnConstraints percentWidth="14.28"/>
+                    <ColumnConstraints percentWidth="14.28"/>
+                    <ColumnConstraints percentWidth="14.28"/>
+                    <ColumnConstraints percentWidth="14.28"/>
+                    <ColumnConstraints percentWidth="14.28"/>
+                </columnConstraints>
+                <Label text="Lun" style="-fx-font-family:'Poppins';-fx-font-size:13;-fx-font-weight:bold;-fx-text-fill:#888888;-fx-alignment:CENTER;" GridPane.columnIndex="0" maxWidth="Infinity"/>
+                <Label text="Mar" style="-fx-font-family:'Poppins';-fx-font-size:13;-fx-font-weight:bold;-fx-text-fill:#888888;-fx-alignment:CENTER;" GridPane.columnIndex="1" maxWidth="Infinity"/>
+                <Label text="Mer" style="-fx-font-family:'Poppins';-fx-font-size:13;-fx-font-weight:bold;-fx-text-fill:#888888;-fx-alignment:CENTER;" GridPane.columnIndex="2" maxWidth="Infinity"/>
+                <Label text="Jeu" style="-fx-font-family:'Poppins';-fx-font-size:13;-fx-font-weight:bold;-fx-text-fill:#888888;-fx-alignment:CENTER;" GridPane.columnIndex="3" maxWidth="Infinity"/>
+                <Label text="Ven" style="-fx-font-family:'Poppins';-fx-font-size:13;-fx-font-weight:bold;-fx-text-fill:#888888;-fx-alignment:CENTER;" GridPane.columnIndex="4" maxWidth="Infinity"/>
+                <Label text="Sam" style="-fx-font-family:'Poppins';-fx-font-size:13;-fx-font-weight:bold;-fx-text-fill:#C8A000;-fx-alignment:CENTER;" GridPane.columnIndex="5" maxWidth="Infinity"/>
+                <Label text="Dim" style="-fx-font-family:'Poppins';-fx-font-size:13;-fx-font-weight:bold;-fx-text-fill:#75070C;-fx-alignment:CENTER;" GridPane.columnIndex="6" maxWidth="Infinity"/>
+            </GridPane>
+
         </VBox>
+    </top>
 
-    </VBox>
-</ScrollPane>
+    <center>
+        <VBox style="-fx-padding:0 28 14 28;">
 
+            <!-- Calendrier -->
+            <ScrollPane fx:id="scrollCalendrier" VBox.vgrow="ALWAYS"
+                        style="-fx-background-color:transparent;-fx-border-color:transparent;-fx-background:#FAF6F0;"
+                        fitToWidth="true" fitToHeight="true">
+                <GridPane fx:id="calendrierGrid" hgap="4" vgap="4"
+                          style="-fx-background-color:#FFFFFF;-fx-background-radius:12;-fx-border-color:#E8DDD0;-fx-border-radius:12;-fx-border-width:1;-fx-padding:10;"/>
+            </ScrollPane>
+
+            <!-- Événements du jour -->
+            <VBox spacing="4" style="-fx-padding:10 0 0 0;" minHeight="80">
+                <Label fx:id="lblJourSelectionne" text="📅 Aucun événement ce jour"
+                       style="-fx-font-family:'Poppins';-fx-font-size:14;-fx-font-weight:bold;-fx-text-fill:#1A1A1A;"/>
+
+                <ScrollPane fx:id="scrollEvents" fitToWidth="true" prefHeight="70"
+                            style="-fx-background-color:transparent;-fx-border-color:transparent;">
+                    <VBox fx:id="eventListContainer" spacing="2" style="-fx-padding:2 0 0 0;"/>
+                </ScrollPane>
+            </VBox>
+
+        </VBox>
+    </center>
+
+</BorderPane>

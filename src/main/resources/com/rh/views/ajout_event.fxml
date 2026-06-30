@@ -1,0 +1,111 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<BorderPane xmlns="http://javafx.com/javafx/17"
+            xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="com.rh.contollers.AjoutEventController"
+            style="-fx-background-color:#FFFFFF;">
+
+    <top>
+        <VBox spacing="6" style="-fx-padding:20 24 16 24;-fx-background-color:#F0E6DA;-fx-background-radius:0 0 20 20;">
+            <Label fx:id="lblTitle" text="➕ Nouvel événement"
+                   style="-fx-font-family:'Poppins';-fx-font-size:18;-fx-font-weight:bold;-fx-text-fill:#1A1A1A;"/>
+            <Label text="Ajoutez un rendez-vous, une mission ou un rappel"
+                   style="-fx-font-family:'Poppins';-fx-font-size:12;-fx-text-fill:#888888;"/>
+        </VBox>
+    </top>
+
+    <center>
+        <ScrollPane style="-fx-background-color:transparent;-fx-border-color:transparent;"
+                    fitToWidth="true">
+            <VBox spacing="12" style="-fx-padding:20 24 20 24;">
+
+                <!-- Titre -->
+                <VBox spacing="4">
+                    <Label text="Titre *" style="-fx-font-family:'Poppins';-fx-font-size:12;-fx-font-weight:600;-fx-text-fill:#555555;"/>
+                    <TextField fx:id="tfTitre" promptText="Titre de l'événement"
+                               style="-fx-font-family:'Poppins';-fx-font-size:13;-fx-padding:10 12 10 12;-fx-background-color:#FFFFFF;-fx-border-color:#E0D0BE;-fx-border-radius:8;-fx-background-radius:8;-fx-border-width:1.5;"/>
+                    <Label fx:id="errTitre" style="-fx-font-family:'Poppins';-fx-font-size:10;-fx-text-fill:#75070C;" text="" managed="false"/>
+                </VBox>
+
+                <!-- Description -->
+                <VBox spacing="4">
+                    <Label text="Description" style="-fx-font-family:'Poppins';-fx-font-size:12;-fx-font-weight:600;-fx-text-fill:#555555;"/>
+                    <TextField fx:id="tfDescription" promptText="Description"
+                               style="-fx-font-family:'Poppins';-fx-font-size:13;-fx-padding:10 12 10 12;-fx-background-color:#FFFFFF;-fx-border-color:#E0D0BE;-fx-border-radius:8;-fx-background-radius:8;-fx-border-width:1.5;"/>
+                </VBox>
+
+                <!-- Date -->
+                <VBox spacing="4">
+                    <Label text="Date *" style="-fx-font-family:'Poppins';-fx-font-size:12;-fx-font-weight:600;-fx-text-fill:#555555;"/>
+                    <DatePicker fx:id="dpDate"
+                                style="-fx-font-family:'Poppins';-fx-font-size:13;-fx-padding:8 12 8 12;-fx-background-color:#FFFFFF;-fx-border-color:#E0D0BE;-fx-border-radius:8;-fx-background-radius:8;-fx-border-width:1.5;"/>
+                    <Label fx:id="errDate" style="-fx-font-family:'Poppins';-fx-font-size:10;-fx-text-fill:#75070C;" text="" managed="false"/>
+                </VBox>
+
+                <!-- Heures -->
+                <GridPane hgap="12" vgap="4">
+                    <columnConstraints>
+                        <ColumnConstraints percentWidth="50"/>
+                        <ColumnConstraints percentWidth="50"/>
+                    </columnConstraints>
+
+                    <VBox spacing="4" GridPane.columnIndex="0">
+                        <Label text="Heure début" style="-fx-font-family:'Poppins';-fx-font-size:12;-fx-font-weight:600;-fx-text-fill:#555555;"/>
+                        <TextField fx:id="tfHeureDebut" promptText="09:00"
+                                   style="-fx-font-family:'Poppins';-fx-font-size:13;-fx-padding:10 12 10 12;-fx-background-color:#FFFFFF;-fx-border-color:#E0D0BE;-fx-border-radius:8;-fx-background-radius:8;-fx-border-width:1.5;"/>
+                    </VBox>
+
+                    <VBox spacing="4" GridPane.columnIndex="1">
+                        <Label text="Heure fin" style="-fx-font-family:'Poppins';-fx-font-size:12;-fx-font-weight:600;-fx-text-fill:#555555;"/>
+                        <TextField fx:id="tfHeureFin" promptText="17:00"
+                                   style="-fx-font-family:'Poppins';-fx-font-size:13;-fx-padding:10 12 10 12;-fx-background-color:#FFFFFF;-fx-border-color:#E0D0BE;-fx-border-radius:8;-fx-background-radius:8;-fx-border-width:1.5;"/>
+                    </VBox>
+                </GridPane>
+
+                <!-- Lieu -->
+                <VBox spacing="4">
+                    <Label text="Lieu" style="-fx-font-family:'Poppins';-fx-font-size:12;-fx-font-weight:600;-fx-text-fill:#555555;"/>
+                    <TextField fx:id="tfLieu" promptText="Lieu"
+                               style="-fx-font-family:'Poppins';-fx-font-size:13;-fx-padding:10 12 10 12;-fx-background-color:#FFFFFF;-fx-border-color:#E0D0BE;-fx-border-radius:8;-fx-background-radius:8;-fx-border-width:1.5;"/>
+                </VBox>
+
+                <!-- Type et Priorité -->
+                <GridPane hgap="12" vgap="4">
+                    <columnConstraints>
+                        <ColumnConstraints percentWidth="50"/>
+                        <ColumnConstraints percentWidth="50"/>
+                    </columnConstraints>
+
+                    <VBox spacing="4" GridPane.columnIndex="0">
+                        <Label text="Type" style="-fx-font-family:'Poppins';-fx-font-size:12;-fx-font-weight:600;-fx-text-fill:#555555;"/>
+                        <ComboBox fx:id="cbType"
+                                  style="-fx-font-family:'Poppins';-fx-font-size:13;-fx-padding:8 12 8 12;-fx-background-color:#FFFFFF;-fx-border-color:#E0D0BE;-fx-border-radius:8;-fx-background-radius:8;-fx-border-width:1.5;"/>
+                    </VBox>
+
+                    <VBox spacing="4" GridPane.columnIndex="1">
+                        <Label text="Priorité" style="-fx-font-family:'Poppins';-fx-font-size:12;-fx-font-weight:600;-fx-text-fill:#555555;"/>
+                        <ComboBox fx:id="cbPriorite"
+                                  style="-fx-font-family:'Poppins';-fx-font-size:13;-fx-padding:8 12 8 12;-fx-background-color:#FFFFFF;-fx-border-color:#E0D0BE;-fx-border-radius:8;-fx-background-radius:8;-fx-border-width:1.5;"/>
+                    </VBox>
+                </GridPane>
+
+                <!-- Message erreur -->
+                <Label fx:id="errForm" text="" style="-fx-font-family:'Poppins';-fx-font-size:12;-fx-text-fill:#75070C;" wrapText="true" visible="false" managed="false"/>
+
+            </VBox>
+        </ScrollPane>
+    </center>
+
+    <bottom>
+        <HBox spacing="12" alignment="CENTER_RIGHT" style="-fx-padding:16 24 20 24;-fx-background-color:#FAF6F0;-fx-background-radius:20 20 0 0;">
+            <Button text="Annuler" onAction="#handleCancel"
+                    style="-fx-font-family:'Poppins';-fx-font-size:13;-fx-font-weight:600;-fx-background-color:#FFFFFF;-fx-border-color:#E0D0BE;-fx-text-fill:#555555;-fx-border-radius:8;-fx-background-radius:8;-fx-padding:10 24 10 24;-fx-cursor:hand;"/>
+            <Button text="Enregistrer" onAction="#handleSave"
+                    style="-fx-font-family:'Poppins';-fx-font-size:13;-fx-font-weight:bold;-fx-background-color:#4F6815;-fx-text-fill:#FFFFFF;-fx-background-radius:8;-fx-padding:10 30 10 30;-fx-cursor:hand;"/>
+        </HBox>
+    </bottom>
+
+</BorderPane>
