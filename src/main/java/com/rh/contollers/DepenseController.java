@@ -1,10 +1,12 @@
 package com.rh.contollers;
 
+import com.rh.models.Departement;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
+import javafx.scene.control.Button;
 import javafx.scene.layout.VBox;
 
 public class DepenseController {
@@ -57,19 +59,17 @@ public class DepenseController {
     @FXML
     private Label lblCountAutre;
 
-    private String centreActuel = "Centre d'appel 1";
+    private String centreActuel = "Centre d'appel B2B";
 
     @FXML
     public void initialize() {
-        // Configurer le ComboBox
-        ObservableList<String> centres = FXCollections.observableArrayList(
-                "Centre d'appel 1",
-                "Centre d'appel 2",
-                "Bureau d'étude",
-                "Administration"
-        );
+        // Configurer le ComboBox avec les labels des départements
+        ObservableList<String> centres = FXCollections.observableArrayList();
+        for (Departement dept : Departement.values()) {
+            centres.add(dept.toString());
+        }
         comboCentre.setItems(centres);
-        comboCentre.setValue("Centre d'appel 1");
+        comboCentre.setValue("Centre d'appel B2B");
 
         // Ajouter un écouteur pour le changement de centre
         comboCentre.setOnAction(e -> {
@@ -81,21 +81,13 @@ public class DepenseController {
         chargerDonnees(centreActuel);
     }
 
-    @FXML
-    private void onVoirDetailsSalaires() {
-        // Passer le centre actuel à la page de détails
-        DetailSalaireController.setCentre(centreActuel);
-        MainController.loadPage("detail_salaire", "Détails des Salaires");
-    }
-
     private void chargerDonnees(String centre) {
         // Données statiques d'exemple (à remplacer par les données de la BD)
-        // Chaque centre a des montants différents
         switch (centre) {
-            case "Centre d'appel 1":
+            case "Centre d'appel B2B":
                 setMontants(1250.00, 890.00, 450.00, 320.00, 4500.00, 150.00, 3, 2, 4, 2, 1, 1);
                 break;
-            case "Centre d'appel 2":
+            case "Centre d'appel B2C":
                 setMontants(1250.00, 760.00, 380.00, 280.00, 3800.00, 120.00, 3, 2, 3, 2, 1, 1);
                 break;
             case "Bureau d'étude":
@@ -140,7 +132,12 @@ public class DepenseController {
         lblCountAutre.setText(countAutre + " dépense(s) enregistrée(s)");
     }
 
-    // ── Getters pour les labels (si besoin de les utiliser ailleurs) ──
+    @FXML
+    private void onVoirDetailsSalaires() {
+        // Passer le centre actuel à la page de détails
+        DetailSalaireController.setCentre(centreActuel);
+        MainController.loadPage("detail_salaire", "Détails des Salaires");
+    }
 
     public String getCentreActuel() {
         return centreActuel;

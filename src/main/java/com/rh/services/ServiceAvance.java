@@ -60,7 +60,6 @@ public class ServiceAvance implements IServices<Avance> {
     @Override
     public List<Avance> getAll() {
         List<Avance> avances = new ArrayList<>();
-        // Récupérer les avances avec les informations de l'employé
         String query = "SELECT a.*, e.nom, e.prenom, e.profil, e.Departement FROM avance a " +
                 "LEFT JOIN employe e ON a.id_employe = e.id " +
                 "ORDER BY a.id_avance DESC";
@@ -129,34 +128,37 @@ public class ServiceAvance implements IServices<Avance> {
 
     // ── Méthodes pour récupérer les employés ──
 
+    /**
+     * Récupère les employés d'un département
+     * @param departement Le nom du département (ex: "Centre d'appel B2B" ou "BUREAU_ETUDE")
+     * @return Liste des employés complets
+     */
     public List<Employe> getEmployesByDepartement(String departement) {
         List<Employe> employes = new ArrayList<>();
-        String query = "SELECT id, nom, prenom, profil, Departement FROM employe WHERE Departement = ? ORDER BY nom, prenom";
+
+        // Si le paramètre est le label (ex: "Centre d'appel B2B"), trouver l'enum correspondant
+        String enumName = departement;
+        for (Departement d : Departement.values()) {
+            if (d.toString().equals(departement)) {
+                enumName = d.name();
+                break;
+            }
+        }
+
+        System.out.println("Recherche des employés pour : " + departement + " (nom enum: " + enumName + ")");
+
+        String query = "SELECT * FROM employe WHERE Departement = ? ORDER BY nom, prenom";
 
         try (PreparedStatement pstmt = cnx.prepareStatement(query)) {
-            pstmt.setString(1, departement);
+            pstmt.setString(1, enumName);
             ResultSet rs = pstmt.executeQuery();
 
             while (rs.next()) {
-                Employe employe = new Employe();
-                employe.setId(rs.getInt("id"));
-                employe.setNom(rs.getString("nom"));
-                employe.setPrenom(rs.getString("prenom"));
-                employe.setProfil(rs.getString("profil"));
-
-                String dept = rs.getString("Departement");
-                if (dept != null) {
-                    for (Departement d : Departement.values()) {
-                        if (d.toString().equals(dept)) {
-                            employe.setDepartement(d);
-                            break;
-                        }
-                    }
-                }
+                Employe employe = extractEmployeFromResultSet(rs);
                 employes.add(employe);
             }
 
-            System.out.println("Employés du département " + departement + " : " + employes.size());
+            System.out.println("Employés trouvés : " + employes.size());
 
         } catch (SQLException e) {
             System.err.println("Erreur lors de la récupération des employés : " + e.getMessage());
@@ -166,30 +168,24 @@ public class ServiceAvance implements IServices<Avance> {
         return employes;
     }
 
+    /**
+     * Récupère les employés d'un département (version avec enum)
+     * @param departement Le département (enum)
+     * @return Liste des employés du département
+     */
+    public List<Employe> getEmployesByDepartement(Departement departement) {
+        return getEmployesByDepartement(departement.toString());
+    }
+
     public Employe getEmployeById(int id) {
-        String query = "SELECT id, nom, prenom, profil, Departement FROM employe WHERE id = ?";
+        String query = "SELECT * FROM employe WHERE id = ?";
 
         try (PreparedStatement pstmt = cnx.prepareStatement(query)) {
             pstmt.setInt(1, id);
             ResultSet rs = pstmt.executeQuery();
 
             if (rs.next()) {
-                Employe employe = new Employe();
-                employe.setId(rs.getInt("id"));
-                employe.setNom(rs.getString("nom"));
-                employe.setPrenom(rs.getString("prenom"));
-                employe.setProfil(rs.getString("profil"));
-
-                String dept = rs.getString("Departement");
-                if (dept != null) {
-                    for (Departement d : Departement.values()) {
-                        if (d.toString().equals(dept)) {
-                            employe.setDepartement(d);
-                            break;
-                        }
-                    }
-                }
-                return employe;
+                return extractEmployeFromResultSet(rs);
             }
 
         } catch (SQLException e) {
@@ -198,6 +194,26 @@ public class ServiceAvance implements IServices<Avance> {
         }
 
         return null;
+    }
+
+    public List<Employe> getAllEmployes() {
+        List<Employe> employes = new ArrayList<>();
+        String query = "SELECT * FROM employe ORDER BY nom, prenom";
+
+        try (Statement stmt = cnx.createStatement();
+             ResultSet rs = stmt.executeQuery(query)) {
+
+            while (rs.next()) {
+                Employe employe = extractEmployeFromResultSet(rs);
+                employes.add(employe);
+            }
+
+        } catch (SQLException e) {
+            System.err.println("Erreur lors de la récupération des employés : " + e.getMessage());
+            e.printStackTrace();
+        }
+
+        return employes;
     }
 
     public List<String> getDepartements() {
@@ -219,7 +235,7 @@ public class ServiceAvance implements IServices<Avance> {
         return departements;
     }
 
-    // ── Méthodes pour les avances (recherche, filtrage) ──
+    // ── Méthodes pour les avances ──
 
     public Avance findById(int id) {
         String query = "SELECT a.*, e.nom, e.prenom, e.profil, e.Departement FROM avance a " +
@@ -424,7 +440,7 @@ public class ServiceAvance implements IServices<Avance> {
         }
     }
 
-    // ── Méthode d'extraction ──
+    // ── Méthodes d'extraction ──
 
     private Avance extractAvanceFromResultSet(ResultSet rs) throws SQLException {
         Avance avance = new Avance();
@@ -446,21 +462,15 @@ public class ServiceAvance implements IServices<Avance> {
         avance.setStatut(rs.getString("statut"));
         avance.setCommentaire(rs.getString("commentaire"));
 
-        // Créer l'objet Employe avec les informations de la jointure
         Employe employe = new Employe();
         employe.setId(rs.getInt("id_employe"));
         employe.setNom(rs.getString("nom"));
         employe.setPrenom(rs.getString("prenom"));
         employe.setProfil(rs.getString("profil"));
 
-        // Récupérer le département et le convertir en enum
         String dept = rs.getString("Departement");
-        System.out.println("Département récupéré : " + dept);
-
         if (dept != null) {
-            // Convertir le string en enum
             for (Departement d : Departement.values()) {
-                // Comparer avec le nom de l'enum (ex: "CENTRE_APPEL_B2B")
                 if (d.name().equals(dept)) {
                     employe.setDepartement(d);
                     break;
@@ -471,5 +481,35 @@ public class ServiceAvance implements IServices<Avance> {
         avance.setEmploye(employe);
 
         return avance;
+    }
+
+    private Employe extractEmployeFromResultSet(ResultSet rs) throws SQLException {
+        Employe employe = new Employe();
+        employe.setId(rs.getInt("id"));
+        employe.setNom(rs.getString("nom"));
+        employe.setPrenom(rs.getString("prenom"));
+        employe.setDateNaissance(rs.getDate("dateNaissance") != null ? rs.getDate("dateNaissance").toLocalDate() : null);
+        employe.setSituationFamiliale(rs.getString("situationFamiliale"));
+        employe.setCin(rs.getString("cin"));
+        employe.setTelephone(rs.getString("telephone"));
+        employe.setSalaireMensuelNet(rs.getDouble("salaireMensuelNet"));
+        employe.setProfil(rs.getString("profil"));
+        employe.setTypeContrat(rs.getString("typeContrat"));
+        employe.setStatut(rs.getString("statut"));
+        employe.setDateEmbauche(rs.getDate("dateEmbauche") != null ? rs.getDate("dateEmbauche").toLocalDate() : null);
+        employe.setnRIB(rs.getString("nRIB"));
+        employe.setnCNSS(rs.getString("nCNSS"));
+
+        String dept = rs.getString("Departement");
+        if (dept != null) {
+            for (Departement d : Departement.values()) {
+                if (d.name().equals(dept)) {
+                    employe.setDepartement(d);
+                    break;
+                }
+            }
+        }
+
+        return employe;
     }
 }

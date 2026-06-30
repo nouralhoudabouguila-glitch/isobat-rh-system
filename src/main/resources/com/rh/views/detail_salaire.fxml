@@ -36,8 +36,11 @@
             <HBox alignment="CENTER_LEFT">
                 <Label text="📋  Liste des employés" styleClass="section-title"/>
                 <Region HBox.hgrow="ALWAYS"/>
-                <Button text="📥  Exporter" styleClass="btn-secondary"/>
-                <Button text="🔄  Actualiser" styleClass="btn-back"/>
+                <Label text="💡 Double-cliquez sur le montant pour le modifier"
+                       style="-fx-font-size: 11px; -fx-text-fill: #888; -fx-font-style: italic;"/>
+                <Region HBox.hgrow="ALWAYS"/>
+                <Button text="📥  Exporter" styleClass="btn-secondary" onAction="#onExporter"/>
+                <Button text="🔄  Actualiser" styleClass="btn-back" onAction="#onActualiser"/>
             </HBox>
 
             <Separator/>

@@ -14,10 +14,10 @@
             <Label text="💰  Gestion des Dépenses" styleClass="welcome-label"/>
             <Region HBox.hgrow="ALWAYS"/>
 
-            <!-- Filtre par centre -->
+            <!-- ── Filtre par centre ── -->
             <Label text="Centre : " styleClass="depense-meta" style="-fx-font-weight: bold;"/>
             <ComboBox fx:id="comboCentre"
-                      style="-fx-background-color: white; -fx-background-radius: 8; -fx-padding: 4 12; -fx-border-color: #F0E6DA; -fx-border-radius: 8; -fx-pref-height: 36; -fx-pref-width: 180;"
+                      style="-fx-background-color: white; -fx-background-radius: 8; -fx-padding: 4 12; -fx-border-color: #F0E6DA; -fx-border-radius: 8; -fx-pref-height: 36; -fx-pref-width: 200;"
                       promptText="Sélectionner un centre"/>
 
             <Button text="＋  Ajouter une dépense" styleClass="btn-primary"/>
