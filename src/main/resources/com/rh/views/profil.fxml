@@ -57,9 +57,9 @@
 
                     <!-- Boutons -->
                     <HBox spacing="12" alignment="CENTER">
-                        <Button text="✏️  Modifier" onAction="#handleModifier"
+                        <Button text="✏ Modifier" onAction="#handleModifier"
                                 style="-fx-font-family:'Poppins';-fx-font-size:13;-fx-font-weight:bold;-fx-background-color:#4F6815;-fx-text-fill:#FFFFFF;-fx-background-radius:8;-fx-padding:10 30 10 30;-fx-cursor:hand;"/>
-                        <Button text="🗑️  Supprimer le compte" onAction="#handleSupprimer"
+                        <Button text="🗑 Supprimer le compte" onAction="#handleSupprimer"
                                 style="-fx-font-family:'Poppins';-fx-font-size:13;-fx-font-weight:bold;-fx-background-color:#75070C;-fx-text-fill:#FFFFFF;-fx-background-radius:8;-fx-padding:10 30 10 30;-fx-cursor:hand;"/>
                     </HBox>
                 </VBox>

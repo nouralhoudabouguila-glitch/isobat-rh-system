@@ -98,7 +98,7 @@
 
             <!-- Pie Chart: Répartition départements -->
             <VBox styleClass="chart-card" prefWidth="340" spacing="10">
-                <Label text="🏗️  Répartition par département" styleClass="section-title"/>
+                <Label text="🏗  Répartition par département" styleClass="section-title"/>
                 <PieChart fx:id="deptChart" animated="false"
                           VBox.vgrow="ALWAYS" labelsVisible="true" legendVisible="true"/>
             </VBox>

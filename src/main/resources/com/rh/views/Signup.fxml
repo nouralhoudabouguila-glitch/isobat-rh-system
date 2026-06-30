@@ -33,7 +33,7 @@
                     <Separator style="-fx-background-color:#F0E6DA;"/>
 
                     <!-- Titre -->
-                    <Label text="📝 Créer un compte"
+                    <Label text=" Créer un compte"
                            style="-fx-font-family:'Poppins';-fx-font-size:20;-fx-font-weight:bold;-fx-text-fill:#1A1A1A;"/>
 
                     <!-- Champs du formulaire -->
