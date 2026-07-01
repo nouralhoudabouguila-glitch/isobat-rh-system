@@ -1,7 +1,7 @@
 package com.rh.contollers;
 
 import com.rh.models.EntretienPhysique;
-import com.rh.services.ExportEntretienExcelService;
+import com.rh.services.ExportExcelServiceUnifie;
 import com.rh.services.ServiceEntretienPhysique;
 import com.rh.services.ServiceTriTelephonique;
 import javafx.collections.FXCollections;
@@ -338,14 +338,12 @@ public class EntretienPhysiqueController {
         }
 
         try {
-            ExportEntretienExcelService exportService = new ExportEntretienExcelService();
+            ExportExcelServiceUnifie exportService = new ExportExcelServiceUnifie();
             Stage stage = (Stage) tableView.getScene().getWindow();
-            boolean success = exportService.exporterVersExcel(entretiens, stage);
+            boolean success = exportService.exporterEntretiensPhysiques(entretiens, stage);
 
             if (success) {
                 showAlert("Succès", "Exportation réussie ! Le fichier va s'ouvrir automatiquement.", Alert.AlertType.INFORMATION);
-            } else {
-                showAlert("Erreur", "L'exportation a été annulée ou a échoué.", Alert.AlertType.ERROR);
             }
         } catch (Exception e) {
             System.err.println("Erreur lors de l'exportation : " + e.getMessage());

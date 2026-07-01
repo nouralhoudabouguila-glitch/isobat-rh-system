@@ -1,7 +1,7 @@
 package com.rh.contollers;
 
 import com.rh.models.TriTelephonique;
-import com.rh.services.ExportExcelService;
+import com.rh.services.ExportExcelServiceUnifie;
 import com.rh.services.ServiceTriTelephonique;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -511,14 +511,12 @@ public class TriTelephoniqueController {
         }
 
         try {
-            ExportExcelService exportService = new ExportExcelService();
+            ExportExcelServiceUnifie exportService = new ExportExcelServiceUnifie();
             Stage stage = (Stage) tableView.getScene().getWindow();
-            boolean success = exportService.exporterVersExcel(tousLesCandidats, stage);
+            boolean success = exportService.exporterTriTelephonique(tousLesCandidats, stage);
 
             if (success) {
                 afficherSucces("Exportation réussie ! Le fichier va s'ouvrir automatiquement.");
-            } else {
-                afficherErreur("L'exportation a été annulée ou a échoué.");
             }
         } catch (Exception e) {
             System.err.println("Erreur lors de l'exportation : " + e.getMessage());

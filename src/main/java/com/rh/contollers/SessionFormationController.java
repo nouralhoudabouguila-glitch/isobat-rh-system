@@ -1,7 +1,7 @@
 package com.rh.contollers;
 
 import com.rh.models.ParticipationFormation;
-import com.rh.services.ExportSessionExcelService;
+import com.rh.services.ExportExcelServiceUnifie;
 import com.rh.services.ParticipationFormationService;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -341,14 +341,12 @@ public class SessionFormationController {
         }
 
         try {
-            ExportSessionExcelService exportService = new ExportSessionExcelService();
+            ExportExcelServiceUnifie exportService = new ExportExcelServiceUnifie();
             Stage stage = (Stage) tableView.getScene().getWindow();
-            boolean success = exportService.exporterVersExcel(participations, stage);
+            boolean success = exportService.exporterSessionsFormation(participations, stage);
 
             if (success) {
                 showAlert("Succès", "Exportation réussie ! Le fichier va s'ouvrir automatiquement.", Alert.AlertType.INFORMATION);
-            } else {
-                showAlert("Erreur", "L'exportation a été annulée ou a échoué.", Alert.AlertType.ERROR);
             }
         } catch (Exception e) {
             System.err.println("Erreur lors de l'exportation : " + e.getMessage());
