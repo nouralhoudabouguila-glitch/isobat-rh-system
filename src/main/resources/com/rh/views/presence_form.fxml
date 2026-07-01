@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<BorderPane xmlns="http://javafx.com/javafx/17"
+            xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="com.rh.contollers.PresenceFormController"
+            style="-fx-background-color:#FFFFFF;">
+
+    <top>
+        <VBox spacing="8" style="-fx-padding:20 24 16 24;-fx-background-color:#F0E6DA;-fx-background-radius:0 0 20 20;">
+            <Label text="✏️ Modifier la présence"
+                   style="-fx-font-family:'Manrope';-fx-font-size:18;-fx-font-weight:bold;-fx-text-fill:#1A1A1A;"/>
+            <Label fx:id="lblEmploye" text="Employé"
+                   style="-fx-font-family:'Manrope';-fx-font-size:13;-fx-text-fill:#888888;"/>
+        </VBox>
+    </top>
+
+    <center>
+        <VBox spacing="14" style="-fx-padding:24 28 20 28;">
+
+            <!-- Date -->
+            <VBox spacing="4">
+                <Label text="Date" style="-fx-font-family:'Manrope';-fx-font-size:12;-fx-font-weight:600;-fx-text-fill:#555555;"/>
+                <DatePicker fx:id="dpDate"
+                            style="-fx-font-family:'Manrope';-fx-font-size:13;-fx-padding:8 12 8 12;-fx-background-color:#FFFFFF;-fx-border-color:#E0D0BE;-fx-border-radius:8;-fx-background-radius:8;-fx-border-width:1.5;"/>
+            </VBox>
+
+            <GridPane hgap="12" vgap="12">
+                <columnConstraints>
+                    <ColumnConstraints percentWidth="50"/>
+                    <ColumnConstraints percentWidth="50"/>
+                </columnConstraints>
+
+                <!-- Arrivée -->
+                <VBox spacing="4" GridPane.columnIndex="0">
+                    <Label text="Heure d'arrivée" style="-fx-font-family:'Manrope';-fx-font-size:12;-fx-font-weight:600;-fx-text-fill:#555555;"/>
+                    <TextField fx:id="tfArrivee" promptText="08:00"
+                               style="-fx-font-family:'Manrope';-fx-font-size:13;-fx-padding:8 12 8 12;-fx-background-color:#FFFFFF;-fx-border-color:#E0D0BE;-fx-border-radius:8;-fx-background-radius:8;-fx-border-width:1.5;"/>
+                </VBox>
+
+                <!-- Début pause -->
+                <VBox spacing="4" GridPane.columnIndex="1">
+                    <Label text="Début pause" style="-fx-font-family:'Manrope';-fx-font-size:12;-fx-font-weight:600;-fx-text-fill:#555555;"/>
+                    <TextField fx:id="tfDebutPause" promptText="12:00"
+                               style="-fx-font-family:'Manrope';-fx-font-size:13;-fx-padding:8 12 8 12;-fx-background-color:#FFFFFF;-fx-border-color:#E0D0BE;-fx-border-radius:8;-fx-background-radius:8;-fx-border-width:1.5;"/>
+                </VBox>
+
+                <!-- Fin pause -->
+                <VBox spacing="4" GridPane.columnIndex="0">
+                    <Label text="Fin pause" style="-fx-font-family:'Manrope';-fx-font-size:12;-fx-font-weight:600;-fx-text-fill:#555555;"/>
+                    <TextField fx:id="tfFinPause" promptText="14:00"
+                               style="-fx-font-family:'Manrope';-fx-font-size:13;-fx-padding:8 12 8 12;-fx-background-color:#FFFFFF;-fx-border-color:#E0D0BE;-fx-border-radius:8;-fx-background-radius:8;-fx-border-width:1.5;"/>
+                </VBox>
+
+                <!-- Départ -->
+                <VBox spacing="4" GridPane.columnIndex="1">
+                    <Label text="Heure de départ" style="-fx-font-family:'Manrope';-fx-font-size:12;-fx-font-weight:600;-fx-text-fill:#555555;"/>
+                    <TextField fx:id="tfDepart" promptText="17:00"
+                               style="-fx-font-family:'Manrope';-fx-font-size:13;-fx-padding:8 12 8 12;-fx-background-color:#FFFFFF;-fx-border-color:#E0D0BE;-fx-border-radius:8;-fx-background-radius:8;-fx-border-width:1.5;"/>
+                </VBox>
+            </GridPane>
+
+            <!-- Statut -->
+            <VBox spacing="4">
+                <Label text="Statut" style="-fx-font-family:'Manrope';-fx-font-size:12;-fx-font-weight:600;-fx-text-fill:#555555;"/>
+                <ComboBox fx:id="cbStatut"
+                          style="-fx-font-family:'Manrope';-fx-font-size:13;-fx-padding:8 12 8 12;-fx-background-color:#FFFFFF;-fx-border-color:#E0D0BE;-fx-border-radius:8;-fx-background-radius:8;-fx-border-width:1.5;"/>
+            </VBox>
+
+            <!-- Commentaire -->
+            <VBox spacing="4">
+                <Label text="Commentaire" style="-fx-font-family:'Manrope';-fx-font-size:12;-fx-font-weight:600;-fx-text-fill:#555555;"/>
+                <TextArea fx:id="taCommentaire" promptText="Commentaire..."
+                          style="-fx-font-family:'Manrope';-fx-font-size:13;-fx-padding:8 12 8 12;-fx-background-color:#FFFFFF;-fx-border-color:#E0D0BE;-fx-border-radius:8;-fx-background-radius:8;-fx-border-width:1.5;"
+                          prefHeight="60"/>
+            </VBox>
+
+        </VBox>
+    </center>
+
+    <bottom>
+        <HBox spacing="12" alignment="CENTER_RIGHT" style="-fx-padding:16 28 24 28;-fx-background-color:#FAF6F0;-fx-background-radius:20 20 0 0;">
+            <Button text="Annuler" onAction="#handleCancel"
+                    style="-fx-font-family:'Manrope';-fx-font-size:13;-fx-font-weight:600;-fx-background-color:#FFFFFF;-fx-border-color:#E0D0BE;-fx-text-fill:#555555;-fx-border-radius:8;-fx-background-radius:8;-fx-padding:10 24 10 24;-fx-cursor:hand;"/>
+            <Button text="Enregistrer" onAction="#handleSave"
+                    style="-fx-font-family:'Manrope';-fx-font-size:13;-fx-font-weight:bold;-fx-background-color:#4F6815;-fx-text-fill:#FFFFFF;-fx-background-radius:8;-fx-padding:10 30 10 30;-fx-cursor:hand;"/>
+        </HBox>
+    </bottom>
+
+</BorderPane>
