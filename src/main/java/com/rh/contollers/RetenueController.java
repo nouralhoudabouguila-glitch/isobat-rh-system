@@ -2,6 +2,7 @@ package com.rh.contollers;
 
 import com.rh.models.Departement;
 import com.rh.models.Retenue;
+import com.rh.services.ExportExcelServiceUnifie;
 import com.rh.services.ServiceRetenue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -419,7 +420,24 @@ public class RetenueController {
 
     @FXML
     private void onExporter() {
-        showAlert("Information", "Fonctionnalité d'export à implémenter.", Alert.AlertType.INFORMATION);
+        if (retenuesFiltrees.isEmpty()) {
+            showAlert("Attention", "Aucune donnée à exporter.", Alert.AlertType.WARNING);
+            return;
+        }
+
+        try {
+            ExportExcelServiceUnifie exportService = new ExportExcelServiceUnifie();
+            Stage stage = (Stage) tableView.getScene().getWindow();
+            boolean success = exportService.exporterRetenues(retenuesFiltrees, stage);
+
+            if (success) {
+                showAlert("Succès", "Exportation réussie ! Le fichier va s'ouvrir automatiquement.", Alert.AlertType.INFORMATION);
+            }
+        } catch (Exception e) {
+            System.err.println("Erreur lors de l'exportation : " + e.getMessage());
+            e.printStackTrace();
+            showAlert("Erreur", "Erreur lors de l'exportation : " + e.getMessage(), Alert.AlertType.ERROR);
+        }
     }
 
     @FXML
