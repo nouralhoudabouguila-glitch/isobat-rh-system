@@ -73,7 +73,6 @@ public class PaieController {
 
     @FXML
     private void onVoirRetenue() {
-        // À implémenter
-        System.out.println("Navigation vers Retenues");
+        MainController.loadPage("retenue", "Gestion des Retenues");
     }
 }

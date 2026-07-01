@@ -1,0 +1,106 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.collections.FXCollections?>
+
+<?import java.lang.Integer?>
+<ScrollPane fitToWidth="true" hbarPolicy="NEVER" styleClass="content-scroll"
+            xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="com.rh.contollers.RetenueController">
+
+    <VBox spacing="24" styleClass="dashboard-root">
+
+        <!-- ── En-tête avec retour ── -->
+        <HBox alignment="CENTER_LEFT" spacing="14">
+            <Button text="← Retour" styleClass="btn-back" onAction="#onRetour"/>
+            <Label styleClass="welcome-label" text="🔒  Gestion des Retenues"/>
+            <Region HBox.hgrow="ALWAYS"/>
+            <Button text="➕  Ajouter une retenue" styleClass="btn-primary" onAction="#onAjouterRetenue"/>
+            <Button text="📥  Exporter" styleClass="btn-secondary" onAction="#onExporter"/>
+        </HBox>
+
+        <!-- ── Filtres / Recherche ── -->
+        <HBox spacing="12" alignment="CENTER_LEFT">
+            <TextField fx:id="txtRecherche" promptText="🔍  Rechercher un employé..."
+                       style="-fx-background-color: white; -fx-background-radius: 8; -fx-padding: 8 14; -fx-border-color: #F0E6DA; -fx-border-radius: 8; -fx-pref-width: 250;"/>
+
+            <Label text="Date :" style="-fx-font-weight: bold; -fx-text-fill: #333333;"/>
+            <DatePicker fx:id="datePickerFiltre"
+                        style="-fx-background-color: white; -fx-background-radius: 8; -fx-padding: 4 12; -fx-border-color: #F0E6DA; -fx-border-radius: 8; -fx-pref-height: 36;"
+                        prefWidth="150"/>
+
+            <Label text="Département :" style="-fx-font-weight: bold; -fx-text-fill: #333333;"/>
+            <ComboBox fx:id="comboDepartement" promptText="Tous les départements"
+                      style="-fx-background-color: white; -fx-background-radius: 8; -fx-padding: 4 12; -fx-border-color: #F0E6DA; -fx-border-radius: 8; -fx-pref-height: 36;"
+                      prefWidth="200"/>
+
+            <Button text="Réinitialiser" styleClass="btn-back" onAction="#onReinitialiser"/>
+        </HBox>
+
+        <!-- ── Statistiques ── -->
+        <HBox spacing="15">
+            <VBox styleClass="stat-card" HBox.hgrow="ALWAYS" spacing="5" style="-fx-padding: 12 18;">
+                <Label text="Total retenues" styleClass="card-label"/>
+                <Label fx:id="lblTotalRetenues" text="0" styleClass="card-value" style="-fx-font-size: 22px;"/>
+            </VBox>
+            <VBox styleClass="stat-card" HBox.hgrow="ALWAYS" spacing="5" style="-fx-padding: 12 18; -fx-border-color: #75070C; -fx-border-width: 2;">
+                <Label text="Montant total" styleClass="card-label"/>
+                <Label fx:id="lblMontantTotal" text="0,00 DT" styleClass="card-value" style="-fx-font-size: 22px; -fx-text-fill: #75070C;"/>
+            </VBox>
+            <VBox styleClass="stat-card" HBox.hgrow="ALWAYS" spacing="5" style="-fx-padding: 12 18; -fx-border-color: #4F6815; -fx-border-width: 2;">
+                <Label text="Employés concernés" styleClass="card-label"/>
+                <Label fx:id="lblNbEmployes" text="0" styleClass="card-value" style="-fx-font-size: 22px; -fx-text-fill: #4F6815;"/>
+            </VBox>
+        </HBox>
+
+        <!-- ── Tableau ── -->
+        <VBox styleClass="chart-card" VBox.vgrow="ALWAYS" spacing="12">
+
+            <HBox alignment="CENTER_LEFT">
+                <Label text="📋  Liste des retenues" styleClass="section-title"/>
+                <Region HBox.hgrow="ALWAYS"/>
+            </HBox>
+
+            <Separator/>
+
+            <TableView fx:id="tableView" styleClass="activity-table" VBox.vgrow="ALWAYS" prefHeight="450">
+                <columns>
+                    <TableColumn fx:id="colEmploye" text="EMPLOYÉ" prefWidth="180"/>
+                    <TableColumn fx:id="colDepartement" text="DÉPARTEMENT" prefWidth="150"/>
+                    <TableColumn fx:id="colMontant" text="MONTANT" prefWidth="120" styleClass="column-statut"/>
+                    <TableColumn fx:id="colMotif" text="MOTIF" prefWidth="180"/>
+                    <TableColumn fx:id="colDate" text="DATE" prefWidth="120"/>
+                    <TableColumn fx:id="colCommentaire" text="COMMENTAIRE" prefWidth="150"/>
+                    <TableColumn fx:id="colActions" text="ACTIONS" prefWidth="120" styleClass="column-statut"/>
+                </columns>
+            </TableView>
+
+            <!-- Pagination -->
+            <HBox alignment="CENTER_RIGHT" spacing="8" style="-fx-padding: 8 0 0 0;">
+                <Label text="Lignes par page : " styleClass="depense-meta"/>
+                <ComboBox prefWidth="70"
+                          style="-fx-background-color: white; -fx-background-radius: 4; -fx-border-color: #F0E6DA; -fx-border-radius: 4;">
+                    <items>
+                        <FXCollections fx:factory="observableArrayList">
+                            <Integer fx:value="10"/>
+                            <Integer fx:value="25"/>
+                            <Integer fx:value="50"/>
+                            <Integer fx:value="100"/>
+                        </FXCollections>
+                    </items>
+                    <value>
+                        <Integer fx:value="10"/>
+                    </value>
+                </ComboBox>
+                <HBox spacing="4">
+                    <Button text="←" styleClass="btn-back" style="-fx-padding: 4 10;"/>
+                    <Label text="1" style="-fx-padding: 4 10; -fx-background-color: #4F6815; -fx-text-fill: white; -fx-background-radius: 4;"/>
+                    <Button text="2" style="-fx-padding: 4 10; -fx-background-color: transparent; -fx-text-fill: #333; -fx-cursor: hand; -fx-border-color: #F0E6DA; -fx-border-radius: 4;"/>
+                    <Button text="→" styleClass="btn-back" style="-fx-padding: 4 10;"/>
+                </HBox>
+            </HBox>
+
+        </VBox>
+
+    </VBox>
+</ScrollPane>
