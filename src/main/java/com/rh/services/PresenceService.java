@@ -15,6 +15,7 @@ import java.sql.*;
 import java.sql.Date;
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.time.YearMonth;
 import java.util.*;
 import java.util.regex.Pattern;
 
@@ -115,7 +116,7 @@ public class PresenceService {
     }
 
     // ══════════════════════════════════════════════════════════════════════════
-    // IMPORT EXCEL - VERSION CORRIGÉE
+    // IMPORT EXCEL - CORRECT
     // ══════════════════════════════════════════════════════════════════════════
 
     public static class ImportResult {
@@ -133,127 +134,197 @@ public class PresenceService {
 
     public ImportResult importerExcel(File fichier, Departement departement) {
         ImportResult result = new ImportResult();
-        LocalDate dateImport = LocalDate.now();
 
         try (FileInputStream fis = new FileInputStream(fichier);
              Workbook workbook = createWorkbook(fichier, fis)) {
 
-            Sheet sheet = workbook.getSheet("Enre. de perf. de carte");
-            if (sheet == null) {
-                sheet = workbook.getSheetAt(0);
+            // ── Lire l'onglet "Info. de calendrier" pour le mois ──────────
+            Sheet infoSheet = workbook.getSheet("Info. de calendrier");
+            YearMonth yearMonth = YearMonth.of(2026, 6);
+
+            if (infoSheet != null) {
+                Row dateRow = infoSheet.getRow(1);
+                if (dateRow != null) {
+                    String dateStr = getCellStringValue(dateRow.getCell(1));
+                    if (dateStr.contains("~")) {
+                        try {
+                            String[] parts = dateStr.split("~");
+                            String debutStr = parts[0].trim();
+                            if (debutStr.length() >= 10) {
+                                LocalDate date = LocalDate.parse(debutStr);
+                                yearMonth = YearMonth.of(date.getYear(), date.getMonthValue());
+                            }
+                        } catch (Exception e) {}
+                    }
+                }
             }
 
-            System.out.println("📄 Lecture de l'onglet: " + sheet.getSheetName());
+            System.out.println("📅 Mois: " + yearMonth);
 
-            Map<Integer, String> employeNoms = new HashMap<>();
-            Map<Integer, List<LocalTime>> horaires = new HashMap<>();
+            // ── Lire l'onglet "Enre. de perf. de carte" ────────────────────
+            Sheet cardSheet = workbook.getSheet("Enre. de perf. de carte");
+            if (cardSheet == null) {
+                cardSheet = workbook.getSheetAt(0);
+            }
+
+            System.out.println("📄 Lecture: " + cardSheet.getSheetName());
+
+            // 🔥 Les jours sont en ligne 2 (ou 3), colonnes 3 à 31
+            // Aller chercher la ligne des jours pour savoir où ils commencent
+            int dayStartCol = -1;
+            int dayEndCol = -1;
+
+            // Chercher la ligne avec "1" dans les premières colonnes
+            for (Row row : cardSheet) {
+                if (row == null) continue;
+                for (int col = 0; col < 35; col++) {
+                    Cell cell = row.getCell(col);
+                    if (cell != null) {
+                        String val = getCellStringValue(cell);
+                        if ("1".equals(val)) {
+                            dayStartCol = col;
+                            // Trouver le dernier jour
+                            for (int c = col; c < 35; c++) {
+                                Cell c2 = row.getCell(c);
+                                if (c2 != null) {
+                                    String v2 = getCellStringValue(c2);
+                                    if (v2.matches("\\d+")) {
+                                        dayEndCol = c;
+                                    } else {
+                                        break;
+                                    }
+                                }
+                            }
+                            break;
+                        }
+                    }
+                }
+                if (dayStartCol != -1) break;
+            }
+
+            // Si pas trouvé, utiliser les colonnes 3 à 31
+            if (dayStartCol == -1) {
+                dayStartCol = 3;
+                dayEndCol = 31;
+            }
+
+            System.out.println("🔍 Jours: colonnes " + dayStartCol + " à " + dayEndCol);
 
             int currentId = -1;
-            int ligneNum = 0;
+            String currentNom = "";
+            Map<Integer, List<PresenceTemp>> employeData = new HashMap<>();
+            Map<Integer, String> employeNoms = new HashMap<>();
 
-            for (Row row : sheet) {
-                ligneNum++;
+            for (Row row : cardSheet) {
                 if (row == null) continue;
 
                 Cell firstCell = row.getCell(0);
                 String firstVal = getCellStringValue(firstCell);
 
-                // ── Détection ligne ID ──────────────────────────────────
+                // ── Détection ID ──────────────────────────────────────────
                 if ("ID".equalsIgnoreCase(firstVal)) {
-                    // L'ID est dans la colonne 3 (index 2)
                     Cell idCell = row.getCell(2);
+                    if (idCell == null) idCell = row.getCell(1);
                     if (idCell != null) {
                         String idStr = getCellStringValue(idCell);
                         try {
                             if (idStr.matches("\\d+")) {
                                 currentId = Integer.parseInt(idStr);
-                                System.out.println("🔍 ID trouvé ligne " + ligneNum + ": " + currentId);
+                                System.out.println("🔍 ID: " + currentId);
                             }
                         } catch (Exception e) {
-                            System.out.println("⚠️ Erreur lecture ID: " + idStr);
                             currentId = -1;
                         }
                     }
 
-                    // Le nom est dans la colonne 10 (index 9) ou 9 (index 8)
                     Cell nomCell = row.getCell(9);
-                    if (nomCell == null || getCellStringValue(nomCell).isEmpty()) {
-                        nomCell = row.getCell(8);
-                    }
+                    if (nomCell == null) nomCell = row.getCell(8);
                     if (nomCell != null) {
                         String nom = getCellStringValue(nomCell);
-                        if (!nom.isEmpty() && !"Nom".equalsIgnoreCase(nom)) {
-                            employeNoms.put(currentId, nom.trim());
-                            System.out.println("📝 Nom trouvé: " + currentId + " -> " + nom);
+                        if (!nom.isEmpty() && !"Nom".equalsIgnoreCase(nom) && !"Dépt.".equalsIgnoreCase(nom)) {
+                            currentNom = nom.trim();
+                            employeNoms.put(currentId, currentNom);
+                            System.out.println("👤 " + currentId + " - " + currentNom);
                         }
                     }
                     continue;
                 }
 
-                // ── Ligne avec des horaires ──────────────────────────────
-                List<LocalTime> times = extractAllTimesFromRow(row);
-                if (!times.isEmpty() && currentId > 0) {
-                    horaires.put(currentId, times);
-                    System.out.println("⏰ Horaires pour ID " + currentId + ": " + times.size() + " heures");
+                // ── Ligne avec horaires ──────────────────────────────────
+                if (currentId > 0) {
+                    for (int col = dayStartCol; col <= dayEndCol; col++) {
+                        Cell cell = row.getCell(col);
+                        if (cell != null) {
+                            List<LocalTime> times = extractTimesFromCell(cell);
+                            if (!times.isEmpty()) {
+                                int jour = col - dayStartCol + 1;
+                                if (jour >= 1 && jour <= yearMonth.lengthOfMonth()) {
+                                    LocalDate date = yearMonth.atDay(jour);
+
+                                    LocalTime arrivee = times.size() > 0 ? times.get(0) : null;
+                                    LocalTime debPause = times.size() > 1 ? times.get(1) : null;
+                                    LocalTime finPause = times.size() > 2 ? times.get(2) : null;
+                                    LocalTime depart = times.size() > 3 ? times.get(3) : null;
+
+                                    if (arrivee != null || depart != null) {
+                                        PresenceTemp temp = new PresenceTemp();
+                                        temp.date = date;
+                                        temp.arrivee = arrivee;
+                                        temp.debutPause = debPause;
+                                        temp.finPause = finPause;
+                                        temp.depart = depart;
+                                        employeData.computeIfAbsent(currentId, k -> new ArrayList<>()).add(temp);
+                                    }
+                                }
+                            }
+                        }
+                    }
                 }
             }
 
-            System.out.println("📊 Total IDs trouvés: " + horaires.size());
+            System.out.println("📊 Employés: " + employeData.size());
 
             // ── Créer les présences ──────────────────────────────────────
-            for (Map.Entry<Integer, List<LocalTime>> entry : horaires.entrySet()) {
+            for (Map.Entry<Integer, List<PresenceTemp>> entry : employeData.entrySet()) {
                 int employeId = entry.getKey();
-                List<LocalTime> times = entry.getValue();
-                String nom = employeNoms.getOrDefault(employeId, "");
+                List<PresenceTemp> temps = entry.getValue();
 
                 Employe emp = employeService.findById(employeId);
                 if (emp == null) {
-                    result.anomalies.add("❌ Employé ID " + employeId + " (" + nom + ") introuvable en BDD");
+                    result.anomalies.add("❌ Employé ID " + employeId + " introuvable en BDD");
                     result.erreurs++;
                     continue;
                 }
 
-                LocalTime arrivee = times.size() > 0 ? times.get(0) : null;
-                LocalTime debPause = times.size() > 1 ? times.get(1) : null;
-                LocalTime finPause = times.size() > 2 ? times.get(2) : null;
-                LocalTime depart = times.size() > 3 ? times.get(3) : null;
+                for (PresenceTemp temp : temps) {
+                    if (temp.arrivee == null) continue;
 
-                if (arrivee == null) {
-                    result.anomalies.add("⚠️ Pas d'heure d'arrivée pour: " + emp.getNom() + " " + emp.getPrenom());
-                    continue;
+                    Presence p = new Presence();
+                    p.setEmploye(emp);
+                    p.setDatePresence(temp.date);
+                    p.setHeureArrivee(temp.arrivee);
+                    p.setDebutPause(temp.debutPause);
+                    p.setFinPause(temp.finPause);
+                    p.setHeureDepart(temp.depart);
+                    p.setSource(Presence.Source.IMPORT);
+                    p.setDepartement(departement != null ? departement : emp.getDepartement());
+
+                    Statut statut = p.detecterStatut();
+                    p.setStatut(statut);
+                    p.calculerHeuresTravaillees();
+
+                    if (statut == Statut.RETARD) {
+                        result.anomalies.add("⏰ Retard: " + emp.getNom() + " " + emp.getPrenom() +
+                                " — " + temp.date + " " + p.getHeureArriveeStr());
+                    }
+                    if (statut == Statut.INCOMPLET) {
+                        result.anomalies.add("⚠️ Incomplet: " + emp.getNom() + " " + emp.getPrenom() +
+                                " — " + temp.date);
+                    }
+
+                    result.presences.add(p);
+                    result.total++;
                 }
-
-                Presence p = new Presence();
-                p.setEmploye(emp);
-                p.setDatePresence(dateImport);
-                p.setHeureArrivee(arrivee);
-                p.setDebutPause(debPause);
-                p.setFinPause(finPause);
-                p.setHeureDepart(depart);
-                p.setSource(Presence.Source.IMPORT);
-                p.setDepartement(departement != null ? departement : emp.getDepartement());
-                p.setCommentaire("Importé depuis: " + fichier.getName());
-
-                Statut statut = p.detecterStatut();
-                p.setStatut(statut);
-                p.calculerHeuresTravaillees();
-
-                switch (statut) {
-                    case RETARD -> result.retards++;
-                    case PRESENT -> result.presents++;
-                    case INCOMPLET -> result.incomplets++;
-                    case ABSENT_JUSTIFIE, ABSENT_NON_JUSTIFIE -> result.absents++;
-                }
-
-                if (statut == Statut.RETARD) {
-                    result.anomalies.add("⏰ Retard: " + emp.getNom() + " " + emp.getPrenom() + " — " + p.getHeureArriveeStr());
-                }
-                if (statut == Statut.INCOMPLET) {
-                    result.anomalies.add("⚠️ Incomplet: " + emp.getNom() + " " + emp.getPrenom());
-                }
-
-                result.presences.add(p);
-                result.total++;
             }
 
             for (Presence p : result.presences) {
@@ -265,31 +336,22 @@ public class PresenceService {
                     .map(p -> p.getEmploye().getId())
                     .distinct().count();
 
-            System.out.println("✅ Import terminé: " + result.importees + " présences importées");
+            System.out.println("✅ Importé: " + result.importees + " présences pour " + result.employes + " employés");
 
         } catch (Exception e) {
             e.printStackTrace();
-            result.anomalies.add("❌ Erreur lecture fichier: " + e.getMessage());
-            result.erreurs++;
+            result.anomalies.add("❌ Erreur: " + e.getMessage());
         }
 
         return result;
     }
 
-    // ── Méthodes d'extraction ────────────────────────────────────────────────
-
-    private List<LocalTime> extractAllTimesFromRow(Row row) {
-        List<LocalTime> allTimes = new ArrayList<>();
-        if (row == null) return allTimes;
-
-        for (int col = 1; col <= 10; col++) {
-            Cell cell = row.getCell(col);
-            if (cell != null) {
-                List<LocalTime> times = extractTimesFromCell(cell);
-                allTimes.addAll(times);
-            }
-        }
-        return allTimes;
+    private static class PresenceTemp {
+        LocalDate date;
+        LocalTime arrivee;
+        LocalTime debutPause;
+        LocalTime finPause;
+        LocalTime depart;
     }
 
     private List<LocalTime> extractTimesFromCell(Cell cell) {
@@ -311,7 +373,6 @@ public class PresenceService {
                 String val = cell.getStringCellValue().trim();
                 Pattern pattern = Pattern.compile("\\d{2}:\\d{2}");
                 java.util.regex.Matcher matcher = pattern.matcher(val);
-
                 while (matcher.find()) {
                     String timeStr = matcher.group();
                     try {
@@ -335,8 +396,6 @@ public class PresenceService {
         if (name.endsWith(".xls")) return new HSSFWorkbook(fis);
         throw new IllegalArgumentException("Format non supporté");
     }
-
-    // ── STATS ─────────────────────────────────────────────────────────────────
 
     public Map<Statut, Long> getStatsJour(LocalDate date) {
         Map<Statut, Long> stats = new HashMap<>();
@@ -367,12 +426,9 @@ public class PresenceService {
         return 0;
     }
 
-    // ── MAP ResultSet ─────────────────────────────────────────────────────────
-
     private Presence map(ResultSet rs) throws SQLException {
         Presence p = new Presence();
         p.setId(rs.getInt("id"));
-
         Employe emp = employeService.findById(rs.getInt("employe_id"));
         p.setEmploye(emp);
 
@@ -409,10 +465,10 @@ public class PresenceService {
     private String getCellStringValue(Cell cell) {
         if (cell == null) return "";
         return switch (cell.getCellType()) {
-            case STRING  -> cell.getStringCellValue().trim();
+            case STRING -> cell.getStringCellValue().trim();
             case NUMERIC -> String.valueOf((int) cell.getNumericCellValue());
             case BOOLEAN -> String.valueOf(cell.getBooleanCellValue());
-            default      -> "";
+            default -> "";
         };
     }
 }
