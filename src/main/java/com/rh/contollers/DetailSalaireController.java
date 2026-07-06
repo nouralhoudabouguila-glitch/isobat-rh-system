@@ -220,7 +220,7 @@ public class DetailSalaireController {
 
     @FXML
     private void onRetour() {
-        MainController.loadPage("depense", "Gestion des Dépenses");
+        MainController.getInstance().loadPage("depense", "Gestion des Dépenses");
     }
 
     @FXML

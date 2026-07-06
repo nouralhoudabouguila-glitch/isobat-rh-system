@@ -131,6 +131,9 @@ public class TicketController {
             // Ajouter les boutons d'action
             ajouterBoutonsActions();
 
+            // Ajouter le double-clic pour modifier
+            ajouterDoubleClic();
+
             // ── Configurer les filtres ──
             configurerFiltres();
 
@@ -162,6 +165,69 @@ public class TicketController {
         }
     }
 
+    // ── Double-clic pour modifier ──
+
+    private void ajouterDoubleClic() {
+        tableView.setOnMouseClicked(event -> {
+            if (event.getClickCount() == 2) {
+                TicketEmploye ticket = tableView.getSelectionModel().getSelectedItem();
+                if (ticket != null) {
+                    ouvrirFormulaireModification(ticket);
+                }
+            }
+        });
+    }
+
+    /**
+     * Ouvre le formulaire de modification d'un ticket
+     */
+    private void ouvrirFormulaireModification(TicketEmploye ticket) {
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/rh/views/modifier_ticket.fxml"));
+            VBox root = loader.load();
+
+            ModifierTicketController controller = loader.getController();
+            controller.setTicket(ticket);
+            controller.setOnModificationReussie(() -> {
+                filtrerParMoisAnnee();
+                rafraichirPaie();
+            });
+
+            Scene scene = new Scene(root);
+            String css = getClass().getResource("/com/rh/styles/main.css").toExternalForm();
+            if (css != null) {
+                scene.getStylesheets().add(css);
+            }
+
+            Stage stage = new Stage();
+            stage.setTitle("Modifier un ticket");
+            stage.setScene(scene);
+            stage.initModality(Modality.WINDOW_MODAL);
+            stage.initOwner(tableView.getScene().getWindow());
+            stage.setResizable(false);
+            stage.showAndWait();
+
+        } catch (IOException e) {
+            System.err.println("Erreur lors de l'ouverture du formulaire : " + e.getMessage());
+            showAlert("Erreur", "Impossible d'ouvrir le formulaire de modification.", Alert.AlertType.ERROR);
+        }
+    }
+
+    /**
+     * Rafraîchit les données de la page Paie
+     */
+    private void rafraichirPaie() {
+        try {
+            MainController mainController = MainController.getInstance();
+            if (mainController != null) {
+                mainController.rafraichirPaie();
+                System.out.println("Paie rafraîchie depuis TicketController");
+            }
+        } catch (Exception e) {
+            System.err.println("Erreur lors du rafraîchissement de la paie : " + e.getMessage());
+        }
+    }
+
     private void configurerFiltres() {
         // Mois
         if (comboMois != null) {
@@ -169,7 +235,6 @@ public class TicketController {
                     "Janvier", "Février", "Mars", "Avril", "Mai", "Juin",
                     "Juillet", "Août", "Septembre", "Octobre", "Novembre", "Décembre"
             ));
-            // Sélectionner le mois en cours
             String moisActuel = LocalDate.now().getMonth().toString();
             comboMois.setValue(moisActuel);
             comboMois.setOnAction(e -> filtrerParMoisAnnee());
@@ -185,7 +250,6 @@ public class TicketController {
     }
 
     private void chargerDonneesParDefaut() {
-        // Charger les tickets du mois et année en cours
         if (comboMois != null && comboAnnee != null) {
             String mois = comboMois.getValue();
             Integer annee = comboAnnee.getValue();
@@ -195,7 +259,6 @@ public class TicketController {
                     tickets.setAll(liste);
                     System.out.println("Tickets chargés pour " + mois + " " + annee + " : " + liste.size());
 
-                    // Si aucun ticket trouvé, afficher un message
                     if (liste.isEmpty()) {
                         System.out.println("Aucun ticket trouvé pour " + mois + " " + annee);
                     }
@@ -212,7 +275,6 @@ public class TicketController {
             Integer annee = comboAnnee.getValue();
             if (mois != null && annee != null) {
                 try {
-                    // Filtrer par mois et année
                     List<TicketEmploye> liste = service.findByMoisAnnee(mois, annee);
                     tickets.setAll(liste);
                     mettreAJourStatistiques();
@@ -263,39 +325,6 @@ public class TicketController {
         });
     }
 
-    // ── Modifier un ticket ──
-
-    private void ouvrirFormulaireModification(TicketEmploye ticket) {
-        try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/rh/views/modifier_ticket.fxml"));
-            VBox root = loader.load();
-
-            ModifierTicketController controller = loader.getController();
-            controller.setTicket(ticket);
-            controller.setOnModificationReussie(() -> {
-                filtrerParMoisAnnee();
-            });
-
-            Scene scene = new Scene(root);
-            String css = getClass().getResource("/com/rh/styles/main.css").toExternalForm();
-            if (css != null) {
-                scene.getStylesheets().add(css);
-            }
-
-            Stage stage = new Stage();
-            stage.setTitle("Modifier un ticket");
-            stage.setScene(scene);
-            stage.initModality(Modality.WINDOW_MODAL);
-            stage.initOwner(tableView.getScene().getWindow());
-            stage.setResizable(false);
-            stage.showAndWait();
-
-        } catch (IOException e) {
-            System.err.println("Erreur lors de l'ouverture du formulaire : " + e.getMessage());
-            showAlert("Erreur", "Impossible d'ouvrir le formulaire de modification.", Alert.AlertType.ERROR);
-        }
-    }
-
     // ── Supprimer un ticket ──
 
     private void supprimerTicket(TicketEmploye ticket) {
@@ -310,6 +339,7 @@ public class TicketController {
                 service.delete(ticket);
                 filtrerParMoisAnnee();
                 showAlert("Succès", "Ticket supprimé avec succès !", Alert.AlertType.INFORMATION);
+                rafraichirPaie();
             } catch (Exception e) {
                 System.err.println("Erreur lors de la suppression : " + e.getMessage());
                 showAlert("Erreur", "Erreur lors de la suppression.", Alert.AlertType.ERROR);
@@ -348,6 +378,7 @@ public class TicketController {
                     if (nbGeneres > 0) {
                         showAlert("Succès", nbGeneres + " ticket(s) généré(s) avec succès !", Alert.AlertType.INFORMATION);
                         filtrerParMoisAnnee();
+                        rafraichirPaie();
                     } else {
                         showAlert("Information", "Aucun nouveau ticket généré. Les tickets existent peut-être déjà pour cette période.", Alert.AlertType.INFORMATION);
                     }
@@ -363,9 +394,7 @@ public class TicketController {
 
     private void rechercherTickets(String keyword) {
         try {
-            // Rechercher uniquement dans les tickets du mois sélectionné
             List<TicketEmploye> liste = service.search(keyword);
-            // Filtrer par mois et année
             String mois = comboMois.getValue();
             Integer annee = comboAnnee.getValue();
             if (mois != null && annee != null) {
@@ -410,7 +439,7 @@ public class TicketController {
 
     @FXML
     private void onRetour() {
-        MainController.loadPage("paie", "Gestion de la Paie");
+        MainController.getInstance().loadPage("paie", "Gestion de la Paie");
     }
 
     @FXML
@@ -439,6 +468,7 @@ public class TicketController {
             showAlert("Erreur", "Erreur lors de l'exportation : " + e.getMessage(), Alert.AlertType.ERROR);
         }
     }
+
     @FXML
     private void onFiltrer() {
         filtrerParMoisAnnee();

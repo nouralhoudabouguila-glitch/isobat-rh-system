@@ -91,7 +91,6 @@ public class AvanceController {
             colDepartement.setCellValueFactory(cellData -> {
                 Avance a = cellData.getValue();
                 if (a.getEmploye() != null && a.getEmploye().getDepartement() != null) {
-                    // Afficher le label (ex: "Centre d'appel B2B") au lieu du nom enum
                     return new javafx.beans.property.SimpleStringProperty(
                             a.getEmploye().getDepartement().toString()
                     );
@@ -129,8 +128,11 @@ public class AvanceController {
             // Styliser la colonne statut
             styliserStatuts();
 
-            // Ajouter les boutons d'action (uniquement Valider, Refuser, Supprimer - pas Modifier)
+            // Ajouter les boutons d'action
             ajouterBoutonsActions();
+
+            // Ajouter le double-clic pour modifier
+            ajouterDoubleClic();
 
             // ── Configurer le filtre par statut ──
             if (comboFiltreStatut != null) {
@@ -219,7 +221,59 @@ public class AvanceController {
         });
     }
 
-    // ── Boutons d'action (uniquement Valider, Refuser, Supprimer) ──
+    // ── Double-clic pour modifier ──
+
+    private void ajouterDoubleClic() {
+        tableView.setOnMouseClicked(event -> {
+            if (event.getClickCount() == 2) {
+                Avance avance = tableView.getSelectionModel().getSelectedItem();
+                if (avance != null) {
+                    if ("En attente".equals(avance.getStatutLabel())) {
+                        ouvrirFormulaireModification(avance);
+                    } else {
+                        showAlert("Information", "Seules les demandes en attente peuvent être modifiées.", Alert.AlertType.INFORMATION);
+                    }
+                }
+            }
+        });
+    }
+
+    /**
+     * Ouvre le formulaire de modification d'une avance
+     */
+    private void ouvrirFormulaireModification(Avance avance) {
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/rh/views/modifier_avance.fxml"));
+            VBox root = loader.load();
+
+            ModifierAvanceController controller = loader.getController();
+            controller.setAvance(avance);
+            controller.setOnModificationReussie(() -> {
+                chargerDonnees();
+                rafraichirPaie();
+            });
+
+            Scene scene = new Scene(root);
+            String css = getClass().getResource("/com/rh/styles/main.css").toExternalForm();
+            if (css != null) {
+                scene.getStylesheets().add(css);
+            }
+
+            Stage stage = new Stage();
+            stage.setTitle("Modifier une demande d'avance");
+            stage.setScene(scene);
+            stage.initModality(Modality.WINDOW_MODAL);
+            stage.initOwner(tableView.getScene().getWindow());
+            stage.setResizable(false);
+            stage.showAndWait();
+
+        } catch (IOException e) {
+            System.err.println("Erreur lors de l'ouverture du formulaire : " + e.getMessage());
+            showAlert("Erreur", "Impossible d'ouvrir le formulaire de modification.", Alert.AlertType.ERROR);
+        }
+    }
+
+    // ── Boutons d'action ──
 
     private void ajouterBoutonsActions() {
         colActions.setCellFactory(param -> new TableCell<Avance, Void>() {
@@ -263,7 +317,6 @@ public class AvanceController {
                     Avance avance = getTableView().getItems().get(getIndex());
                     String statut = avance.getStatutLabel();
 
-                    // Afficher les boutons selon le statut
                     if ("En attente".equals(statut)) {
                         btnValider.setVisible(true);
                         btnRefuser.setVisible(true);
@@ -290,6 +343,7 @@ public class AvanceController {
             AjouterAvanceController controller = loader.getController();
             controller.setOnAjoutReussi(() -> {
                 chargerDonnees();
+                rafraichirPaie();
             });
 
             Scene scene = new Scene(root);
@@ -330,6 +384,7 @@ public class AvanceController {
                     tableView.refresh();
                     mettreAJourStatistiques();
                     showAlert("Succès", "Demande validée avec succès !", Alert.AlertType.INFORMATION);
+                    rafraichirPaie();
                 }
             } catch (Exception e) {
                 showAlert("Erreur", "Erreur lors de la validation : " + e.getMessage(), Alert.AlertType.ERROR);
@@ -353,6 +408,7 @@ public class AvanceController {
                     tableView.refresh();
                     mettreAJourStatistiques();
                     showAlert("Succès", "Demande refusée avec succès !", Alert.AlertType.INFORMATION);
+                    rafraichirPaie();
                 }
             } catch (Exception e) {
                 showAlert("Erreur", "Erreur lors du refus : " + e.getMessage(), Alert.AlertType.ERROR);
@@ -372,10 +428,26 @@ public class AvanceController {
                 service.delete(avance);
                 chargerDonnees();
                 showAlert("Succès", "Demande supprimée avec succès !", Alert.AlertType.INFORMATION);
+                rafraichirPaie();
             } catch (Exception e) {
                 System.err.println("Erreur lors de la suppression : " + e.getMessage());
                 showAlert("Erreur", "Erreur lors de la suppression.", Alert.AlertType.ERROR);
             }
+        }
+    }
+
+    /**
+     * Rafraîchit les données de la page Paie
+     */
+    private void rafraichirPaie() {
+        try {
+            MainController mainController = MainController.getInstance();
+            if (mainController != null) {
+                mainController.rafraichirPaie();
+                System.out.println("Paie rafraîchie depuis AvanceController");
+            }
+        } catch (Exception e) {
+            System.err.println("Erreur lors du rafraîchissement de la paie : " + e.getMessage());
         }
     }
 
@@ -449,7 +521,7 @@ public class AvanceController {
 
     @FXML
     private void onRetour() {
-        MainController.loadPage("paie", "Gestion de la Paie");
+        MainController.getInstance().loadPage("paie", "Gestion de la Paie");
     }
 
     @FXML

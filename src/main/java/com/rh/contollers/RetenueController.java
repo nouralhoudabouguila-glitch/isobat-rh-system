@@ -116,6 +116,9 @@ public class RetenueController {
             // Ajouter les boutons d'action
             ajouterBoutonsActions();
 
+            // Ajouter le double-clic pour modifier
+            ajouterDoubleClic();
+
             // ── Configurer les filtres ──
             configurerFiltres();
 
@@ -149,6 +152,69 @@ public class RetenueController {
         }
     }
 
+    // ── Double-clic pour modifier ──
+
+    private void ajouterDoubleClic() {
+        tableView.setOnMouseClicked(event -> {
+            if (event.getClickCount() == 2) {
+                Retenue retenue = tableView.getSelectionModel().getSelectedItem();
+                if (retenue != null) {
+                    ouvrirFormulaireModification(retenue);
+                }
+            }
+        });
+    }
+
+    /**
+     * Ouvre le formulaire de modification d'une retenue
+     */
+    private void ouvrirFormulaireModification(Retenue retenue) {
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/rh/views/modifier_retenue.fxml"));
+            VBox root = loader.load();
+
+            ModifierRetenueController controller = loader.getController();
+            controller.setRetenue(retenue);
+            controller.setOnModificationReussie(() -> {
+                appliquerFiltres();
+                rafraichirPaie();
+            });
+
+            Scene scene = new Scene(root);
+            String css = getClass().getResource("/com/rh/styles/main.css").toExternalForm();
+            if (css != null) {
+                scene.getStylesheets().add(css);
+            }
+
+            Stage stage = new Stage();
+            stage.setTitle("Modifier une retenue");
+            stage.setScene(scene);
+            stage.initModality(Modality.WINDOW_MODAL);
+            stage.initOwner(tableView.getScene().getWindow());
+            stage.setResizable(false);
+            stage.showAndWait();
+
+        } catch (IOException e) {
+            System.err.println("Erreur lors de l'ouverture du formulaire : " + e.getMessage());
+            showAlert("Erreur", "Impossible d'ouvrir le formulaire de modification.", Alert.AlertType.ERROR);
+        }
+    }
+
+    /**
+     * Rafraîchit les données de la page Paie
+     */
+    private void rafraichirPaie() {
+        try {
+            MainController mainController = MainController.getInstance();
+            if (mainController != null) {
+                mainController.rafraichirPaie();
+                System.out.println("Paie rafraîchie depuis RetenueController");
+            }
+        } catch (Exception e) {
+            System.err.println("Erreur lors du rafraîchissement de la paie : " + e.getMessage());
+        }
+    }
+
     private void configurerFiltres() {
         // ── Date picker ──
         if (datePickerFiltre != null) {
@@ -163,7 +229,6 @@ public class RetenueController {
                 comboDepartement.getItems().clear();
                 comboDepartement.getItems().add("Tous les départements");
 
-                // Convertir les noms d'enum en labels lisibles
                 for (String dept : departements) {
                     for (Departement d : Departement.values()) {
                         if (d.name().equals(dept)) {
@@ -187,11 +252,9 @@ public class RetenueController {
 
             List<Retenue> liste = retenues.stream()
                     .filter(r -> {
-                        // Filtrer par date
                         if (dateFiltre != null && !r.getDateRetenue().equals(dateFiltre)) {
                             return false;
                         }
-                        // Filtrer par département
                         if (departement != null && !"Tous les départements".equals(departement)) {
                             if (r.getEmploye() == null || r.getEmploye().getDepartement() == null) {
                                 return false;
@@ -262,6 +325,7 @@ public class RetenueController {
             AjouterRetenueController controller = loader.getController();
             controller.setOnAjoutReussi(() -> {
                 chargerDonnees();
+                rafraichirPaie();
             });
 
             Scene scene = new Scene(root);
@@ -284,39 +348,6 @@ public class RetenueController {
         }
     }
 
-    // ── Ouvrir formulaire de modification ──
-
-    private void ouvrirFormulaireModification(Retenue retenue) {
-        try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/rh/views/modifier_retenue.fxml"));
-            VBox root = loader.load();
-
-            ModifierRetenueController controller = loader.getController();
-            controller.setRetenue(retenue);
-            controller.setOnModificationReussie(() -> {
-                appliquerFiltres();
-            });
-
-            Scene scene = new Scene(root);
-            String css = getClass().getResource("/com/rh/styles/main.css").toExternalForm();
-            if (css != null) {
-                scene.getStylesheets().add(css);
-            }
-
-            Stage stage = new Stage();
-            stage.setTitle("Modifier une retenue");
-            stage.setScene(scene);
-            stage.initModality(Modality.WINDOW_MODAL);
-            stage.initOwner(tableView.getScene().getWindow());
-            stage.setResizable(false);
-            stage.showAndWait();
-
-        } catch (IOException e) {
-            System.err.println("Erreur lors de l'ouverture du formulaire : " + e.getMessage());
-            showAlert("Erreur", "Impossible d'ouvrir le formulaire de modification.", Alert.AlertType.ERROR);
-        }
-    }
-
     // ── Suppression ──
 
     private void supprimerRetenue(Retenue retenue) {
@@ -331,6 +362,7 @@ public class RetenueController {
                 service.delete(retenue);
                 chargerDonnees();
                 showAlert("Succès", "Retenue supprimée avec succès !", Alert.AlertType.INFORMATION);
+                rafraichirPaie();
             } catch (Exception e) {
                 System.err.println("Erreur lors de la suppression : " + e.getMessage());
                 showAlert("Erreur", "Erreur lors de la suppression.", Alert.AlertType.ERROR);
@@ -362,7 +394,6 @@ public class RetenueController {
         try {
             List<Retenue> liste = service.search(keyword);
 
-            // Appliquer les filtres supplémentaires
             LocalDate dateFiltre = datePickerFiltre.getValue();
             String departement = comboDepartement.getValue();
 
@@ -415,7 +446,7 @@ public class RetenueController {
 
     @FXML
     private void onRetour() {
-        MainController.loadPage("paie", "Gestion de la Paie");
+        MainController.getInstance().loadPage("paie", "Gestion de la Paie");
     }
 
     @FXML

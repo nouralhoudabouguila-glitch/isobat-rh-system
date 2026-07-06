@@ -136,7 +136,7 @@ public class DepenseController {
     private void onVoirDetailsSalaires() {
         // Passer le centre actuel à la page de détails
         DetailSalaireController.setCentre(centreActuel);
-        MainController.loadPage("detail_salaire", "Détails des Salaires");
+        MainController.getInstance().loadPage("detail_salaire", "Détails des Salaires");
     }
 
     public String getCentreActuel() {
