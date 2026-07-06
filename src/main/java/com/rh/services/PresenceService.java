@@ -116,7 +116,7 @@ public class PresenceService {
     }
 
     // ══════════════════════════════════════════════════════════════════════════
-    // IMPORT EXCEL - CORRECT
+    // IMPORT EXCEL - AVEC MAPPING DES IDs POUR LES DEUX SITES
     // ══════════════════════════════════════════════════════════════════════════
 
     public static class ImportResult {
@@ -169,12 +169,10 @@ public class PresenceService {
 
             System.out.println("📄 Lecture: " + cardSheet.getSheetName());
 
-            // 🔥 Les jours sont en ligne 2 (ou 3), colonnes 3 à 31
-            // Aller chercher la ligne des jours pour savoir où ils commencent
+            // 🔥 Détecter la ligne des jours
             int dayStartCol = -1;
             int dayEndCol = -1;
 
-            // Chercher la ligne avec "1" dans les premières colonnes
             for (Row row : cardSheet) {
                 if (row == null) continue;
                 for (int col = 0; col < 35; col++) {
@@ -183,7 +181,6 @@ public class PresenceService {
                         String val = getCellStringValue(cell);
                         if ("1".equals(val)) {
                             dayStartCol = col;
-                            // Trouver le dernier jour
                             for (int c = col; c < 35; c++) {
                                 Cell c2 = row.getCell(c);
                                 if (c2 != null) {
@@ -202,7 +199,6 @@ public class PresenceService {
                 if (dayStartCol != -1) break;
             }
 
-            // Si pas trouvé, utiliser les colonnes 3 à 31
             if (dayStartCol == -1) {
                 dayStartCol = 3;
                 dayEndCol = 31;
@@ -210,10 +206,39 @@ public class PresenceService {
 
             System.out.println("🔍 Jours: colonnes " + dayStartCol + " à " + dayEndCol);
 
-            int currentId = -1;
-            String currentNom = "";
-            Map<Integer, List<PresenceTemp>> employeData = new HashMap<>();
-            Map<Integer, String> employeNoms = new HashMap<>();
+            // ──────────────────────────────────────────────────────────────────
+            // 🔥 MAPPING DES IDS SELON LE DÉPARTEMENT
+            // ──────────────────────────────────────────────────────────────────
+            // Bureau d'étude   : ID Excel 1-48   → ID Base 1-48   (pas de décalage)
+            // Centre d'appel   : ID Excel 1-37   → ID Base 101-137 (décalage +100)
+            // ──────────────────────────────────────────────────────────────────
+
+            boolean isCentreAppel = departement == Departement.CENTRE_APPEL_B2B;
+            boolean isBureauEtude = departement == Departement.BUREAU_ETUDE;
+
+            // Si département non spécifié, on essaie de deviner par le nom du fichier
+            if (departement == null) {
+                String fileName = fichier.getName().toLowerCase();
+                if (fileName.contains("appel") || fileName.contains("call")) {
+                    isCentreAppel = true;
+                    isBureauEtude = false;
+                } else if (fileName.contains("bureau") || fileName.contains("etude")) {
+                    isCentreAppel = false;
+                    isBureauEtude = true;
+                }
+            }
+
+            System.out.println("🏢 Département détecté: " +
+                    (isCentreAppel ? "CENTRE D'APPEL (ID base = ID excel + 100)" :
+                            isBureauEtude ? "BUREAU D'ÉTUDE (ID base = ID excel)" :
+                                    "AUTO"));
+
+            // ──────────────────────────────────────────────────────────────────
+            // 🔥 1ère PASSE : Lire TOUS les IDs et Noms du fichier Excel
+            // ──────────────────────────────────────────────────────────────────
+
+            Map<Integer, Integer> excelIdToBaseId = new HashMap<>();
+            Map<Integer, String> excelIdToName = new HashMap<>();
 
             for (Row row : cardSheet) {
                 if (row == null) continue;
@@ -221,37 +246,143 @@ public class PresenceService {
                 Cell firstCell = row.getCell(0);
                 String firstVal = getCellStringValue(firstCell);
 
-                // ── Détection ID ──────────────────────────────────────────
-                if ("ID".equalsIgnoreCase(firstVal)) {
+                if (firstVal != null && firstVal.equalsIgnoreCase("ID")) {
                     Cell idCell = row.getCell(2);
                     if (idCell == null) idCell = row.getCell(1);
                     if (idCell != null) {
                         String idStr = getCellStringValue(idCell);
                         try {
                             if (idStr.matches("\\d+")) {
-                                currentId = Integer.parseInt(idStr);
-                                System.out.println("🔍 ID: " + currentId);
+                                int excelId = Integer.parseInt(idStr);
+
+                                // 🔥 Calculer l'ID Base selon le département
+                                int baseId = excelId;
+                                if (isCentreAppel && excelId >= 1 && excelId <= 37) {
+                                    baseId = excelId + 100; // 1→101, 2→102, ..., 37→137
+                                } else if (isBureauEtude && excelId >= 1 && excelId <= 48) {
+                                    baseId = excelId; // 1→1, 2→2, ...
+                                } else {
+                                    // Mode auto : essayer les deux
+                                    Employe emp = employeService.findById(excelId);
+                                    if (emp != null) {
+                                        baseId = excelId;
+                                    } else {
+                                        int testId = excelId + 100;
+                                        emp = employeService.findById(testId);
+                                        if (emp != null) {
+                                            baseId = testId;
+                                        } else {
+                                            result.anomalies.add("❌ ID Excel " + excelId + " non trouvé en base (testé " + excelId + " et " + testId + ")");
+                                            continue;
+                                        }
+                                    }
+                                }
+
+                                // 🔥 Vérifier que l'employé existe dans la base
+                                Employe emp = employeService.findById(baseId);
+                                if (emp != null) {
+                                    excelIdToBaseId.put(excelId, baseId);
+                                    excelIdToName.put(excelId, emp.getNom().toLowerCase().trim());
+                                    System.out.println("🔍 Mapping: Excel " + excelId + " → Base " + baseId + " (" + emp.getNom() + " " + emp.getPrenom() + ")");
+                                } else {
+                                    result.anomalies.add("❌ ID Base " + baseId + " introuvable pour ID Excel " + excelId);
+                                }
                             }
                         } catch (Exception e) {
-                            currentId = -1;
+                            // ignorer
+                        }
+                    }
+                }
+            }
+
+            // ──────────────────────────────────────────────────────────────────
+            // 🔥 2ème PASSE : Vérifier la cohérence des noms et corriger
+            // ──────────────────────────────────────────────────────────────────
+
+            int currentExcelId = -1;
+            int currentBaseId = -1;
+            Map<Integer, List<PresenceTemp>> employeData = new HashMap<>();
+
+            for (Row row : cardSheet) {
+                if (row == null) continue;
+
+                Cell firstCell = row.getCell(0);
+                String firstVal = getCellStringValue(firstCell);
+
+                if (firstVal != null && firstVal.equalsIgnoreCase("ID")) {
+                    Cell idCell = row.getCell(2);
+                    if (idCell == null) idCell = row.getCell(1);
+                    if (idCell != null) {
+                        String idStr = getCellStringValue(idCell);
+                        try {
+                            if (idStr.matches("\\d+")) {
+                                currentExcelId = Integer.parseInt(idStr);
+                                if (excelIdToBaseId.containsKey(currentExcelId)) {
+                                    currentBaseId = excelIdToBaseId.get(currentExcelId);
+                                } else {
+                                    currentBaseId = -1;
+                                }
+                            }
+                        } catch (Exception e) {
+                            currentBaseId = -1;
+                            currentExcelId = -1;
                         }
                     }
 
+                    // 🔥 Lire le nom et vérifier la cohérence
                     Cell nomCell = row.getCell(9);
                     if (nomCell == null) nomCell = row.getCell(8);
                     if (nomCell != null) {
-                        String nom = getCellStringValue(nomCell);
-                        if (!nom.isEmpty() && !"Nom".equalsIgnoreCase(nom) && !"Dépt.".equalsIgnoreCase(nom)) {
-                            currentNom = nom.trim();
-                            employeNoms.put(currentId, currentNom);
-                            System.out.println("👤 " + currentId + " - " + currentNom);
+                        String nomFichier = getCellStringValue(nomCell);
+                        if (nomFichier != null && !nomFichier.isEmpty() &&
+                                !nomFichier.equalsIgnoreCase("Nom") && !nomFichier.equalsIgnoreCase("Dépt.")) {
+
+                            if (currentBaseId > 0) {
+                                Employe emp = employeService.findById(currentBaseId);
+                                if (emp != null) {
+                                    String empNom = emp.getNom().toLowerCase().trim();
+                                    String empPrenom = emp.getPrenom() != null ? emp.getPrenom().toLowerCase().trim() : "";
+                                    String nomFichierClean = nomFichier.toLowerCase().trim().replace(" ", "");
+
+                                    // 🔥 Vérifier si le nom correspond
+                                    boolean nomOk = nomFichierClean.equals(empNom) ||
+                                            nomFichierClean.equals(empPrenom) ||
+                                            nomFichierClean.equals(empNom + empPrenom) ||
+                                            nomFichierClean.equals(empPrenom + empNom);
+
+                                    if (!nomOk) {
+                                        result.anomalies.add("⚠️ INCOHÉRENCE: Excel ID " + currentExcelId +
+                                                " → Base " + currentBaseId + " (" + emp.getNom() + " " + emp.getPrenom() +
+                                                ") mais fichier dit '" + nomFichier + "'");
+
+                                        // 🔥 Essayer de corriger par le nom
+                                        Employe empCorrige = employeService.findByNomPrenom(nomFichier);
+                                        if (empCorrige != null) {
+                                            int correctId = empCorrige.getId();
+                                            // Vérifier que le département correspond
+                                            if (departement == null || empCorrige.getDepartement() == departement) {
+                                                result.anomalies.add("✅ CORRECTION: Excel ID " + currentExcelId +
+                                                        " → ID Base " + correctId + " (" + empCorrige.getNom() + " " + empCorrige.getPrenom() + ")");
+                                                excelIdToBaseId.put(currentExcelId, correctId);
+                                                currentBaseId = correctId;
+                                            } else {
+                                                result.anomalies.add("❌ CORRECTION IMPOSSIBLE: " + empCorrige.getNom() +
+                                                        " n'est pas dans le bon département (" + departement + ")");
+                                            }
+                                        }
+                                    }
+                                }
+                            }
                         }
                     }
                     continue;
                 }
 
-                // ── Ligne avec horaires ──────────────────────────────────
-                if (currentId > 0) {
+                // ──────────────────────────────────────────────────────────────
+                // 🔥 3ème PASSE : Lire les données de pointage
+                // ──────────────────────────────────────────────────────────────
+
+                if (currentBaseId > 0) {
                     for (int col = dayStartCol; col <= dayEndCol; col++) {
                         Cell cell = row.getCell(col);
                         if (cell != null) {
@@ -267,13 +398,25 @@ public class PresenceService {
                                     LocalTime depart = times.size() > 3 ? times.get(3) : null;
 
                                     if (arrivee != null || depart != null) {
-                                        PresenceTemp temp = new PresenceTemp();
-                                        temp.date = date;
-                                        temp.arrivee = arrivee;
-                                        temp.debutPause = debPause;
-                                        temp.finPause = finPause;
-                                        temp.depart = depart;
-                                        employeData.computeIfAbsent(currentId, k -> new ArrayList<>()).add(temp);
+                                        // 🔥 Utiliser l'ID base CORRIGÉ
+                                        Employe emp = employeService.findById(currentBaseId);
+                                        if (emp != null) {
+                                            // Vérifier le département
+                                            if (departement != null && emp.getDepartement() != departement) {
+                                                result.anomalies.add("⚠️ " + emp.getNom() + " (" + currentBaseId +
+                                                        ") n'est pas dans le département " + departement);
+                                                continue;
+                                            }
+
+                                            PresenceTemp temp = new PresenceTemp();
+                                            temp.date = date;
+                                            temp.arrivee = arrivee;
+                                            temp.debutPause = debPause;
+                                            temp.finPause = finPause;
+                                            temp.depart = depart;
+
+                                            employeData.computeIfAbsent(currentBaseId, k -> new ArrayList<>()).add(temp);
+                                        }
                                     }
                                 }
                             }
@@ -282,9 +425,12 @@ public class PresenceService {
                 }
             }
 
-            System.out.println("📊 Employés: " + employeData.size());
+            // ──────────────────────────────────────────────────────────────────
+            // 🔥 TRAITER LES DONNÉES
+            // ──────────────────────────────────────────────────────────────────
 
-            // ── Créer les présences ──────────────────────────────────────
+            System.out.println("📊 Employés avec données: " + employeData.size());
+
             for (Map.Entry<Integer, List<PresenceTemp>> entry : employeData.entrySet()) {
                 int employeId = entry.getKey();
                 List<PresenceTemp> temps = entry.getValue();
@@ -297,7 +443,18 @@ public class PresenceService {
                 }
 
                 for (PresenceTemp temp : temps) {
-                    if (temp.arrivee == null) continue;
+                    if (temp.arrivee == null) {
+                        Presence p = new Presence();
+                        p.setEmploye(emp);
+                        p.setDatePresence(temp.date);
+                        p.setSource(Presence.Source.IMPORT);
+                        p.setDepartement(departement != null ? departement : emp.getDepartement());
+                        p.setStatut(Statut.ABSENT_NON_JUSTIFIE);
+                        result.absents++;
+                        result.presences.add(p);
+                        result.total++;
+                        continue;
+                    }
 
                     Presence p = new Presence();
                     p.setEmploye(emp);
@@ -314,10 +471,13 @@ public class PresenceService {
                     p.calculerHeuresTravaillees();
 
                     if (statut == Statut.RETARD) {
+                        result.retards++;
                         result.anomalies.add("⏰ Retard: " + emp.getNom() + " " + emp.getPrenom() +
                                 " — " + temp.date + " " + p.getHeureArriveeStr());
-                    }
-                    if (statut == Statut.INCOMPLET) {
+                    } else if (statut == Statut.PRESENT) {
+                        result.presents++;
+                    } else if (statut == Statut.INCOMPLET) {
+                        result.incomplets++;
                         result.anomalies.add("⚠️ Incomplet: " + emp.getNom() + " " + emp.getPrenom() +
                                 " — " + temp.date);
                     }
@@ -327,6 +487,7 @@ public class PresenceService {
                 }
             }
 
+            // ── Sauvegarder en base ──────────────────────────────────────────
             for (Presence p : result.presences) {
                 add(p);
                 result.importees++;
@@ -346,6 +507,8 @@ public class PresenceService {
         return result;
     }
 
+    // ─── CLASSES INTERNES ──────────────────────────────────────────────────────
+
     private static class PresenceTemp {
         LocalDate date;
         LocalTime arrivee;
@@ -353,6 +516,8 @@ public class PresenceService {
         LocalTime finPause;
         LocalTime depart;
     }
+
+    // ─── MÉTHODES UTILITAIRES ──────────────────────────────────────────────────
 
     private List<LocalTime> extractTimesFromCell(Cell cell) {
         List<LocalTime> times = new ArrayList<>();

@@ -89,30 +89,25 @@ public class EmployeService implements IServices<Employe> {
 
     @Override
     public void delete(Employe e) {
-        // 🔥 Supprimer d'abord les enregistrements liés
         try {
-            // Supprimer les soldes de congés
             String sqlSolde = "DELETE FROM solde_conge WHERE employe_id=?";
             try (PreparedStatement ps = cnx.prepareStatement(sqlSolde)) {
                 ps.setInt(1, e.getId());
                 ps.executeUpdate();
             }
 
-            // Supprimer les présences
             String sqlPresence = "DELETE FROM presence WHERE employe_id=?";
             try (PreparedStatement ps = cnx.prepareStatement(sqlPresence)) {
                 ps.setInt(1, e.getId());
                 ps.executeUpdate();
             }
 
-            // Supprimer les demandes de congé
             String sqlDemande = "DELETE FROM demande_conge WHERE employe_id=?";
             try (PreparedStatement ps = cnx.prepareStatement(sqlDemande)) {
                 ps.setInt(1, e.getId());
                 ps.executeUpdate();
             }
 
-            // Supprimer l'employé
             String sqlEmploye = "DELETE FROM employe WHERE id=?";
             try (PreparedStatement ps = cnx.prepareStatement(sqlEmploye)) {
                 ps.setInt(1, e.getId());
@@ -139,14 +134,128 @@ public class EmployeService implements IServices<Employe> {
         return null;
     }
 
-    // 🔥 MAP RESULT SET - Version temporaire pour les tests (ignore les dates)
+    // ══════════════════════════════════════════════════════════════════════════
+    // 🔥 NOUVELLES MÉTHODES POUR L'IMPORT EXCEL
+    // ══════════════════════════════════════════════════════════════════════════
+
+    /**
+     * 🔥 RECHERCHE D'UN EMPLOYÉ PAR SON NOM COMPLET (peu importe l'ordre)
+     * Utile pour corriger les mappings d'import Excel
+     *
+     * Exemples: "Inesnssiri", "Ines nssiri", "Nssiri Ines" → tout fonctionne
+     */
+    public Employe findByNomPrenom(String nomComplet) {
+        if (nomComplet == null || nomComplet.trim().isEmpty()) return null;
+
+        String search = nomComplet.trim().replace(" ", "").toLowerCase();
+
+        String sql = "SELECT * FROM employe WHERE LOWER(CONCAT(nom, prenom)) LIKE ? OR LOWER(CONCAT(prenom, nom)) LIKE ?";
+        try (PreparedStatement ps = cnx.prepareStatement(sql)) {
+            String pattern = "%" + search + "%";
+            ps.setString(1, pattern);
+            ps.setString(2, pattern);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    return mapResultSet(rs);
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    /**
+     * 🔥 RECHERCHE D'UN EMPLOYÉ PAR SON NOM ET PRÉNOM SÉPARÉMENT
+     */
+    public Employe findByNomPrenom(String nom, String prenom) {
+        if (nom == null || nom.trim().isEmpty()) return null;
+
+        String sql = "SELECT * FROM employe WHERE LOWER(nom) LIKE ? AND LOWER(prenom) LIKE ?";
+        try (PreparedStatement ps = cnx.prepareStatement(sql)) {
+            ps.setString(1, "%" + nom.trim().toLowerCase() + "%");
+            ps.setString(2, prenom != null ? "%" + prenom.trim().toLowerCase() + "%" : "%%");
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    return mapResultSet(rs);
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    /**
+     * 🔥 RECHERCHE DES EMPLOYÉS PAR DÉPARTEMENT
+     */
+    public List<Employe> getByDepartement(Departement dept) {
+        List<Employe> list = new ArrayList<>();
+        String sql = "SELECT * FROM employe WHERE departement = ? ORDER BY nom";
+        try (PreparedStatement ps = cnx.prepareStatement(sql)) {
+            ps.setString(1, dept.name());
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    list.add(mapResultSet(rs));
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return list;
+    }
+
+    /**
+     * 🔥 RÉCUPÉRER TOUS LES EMPLOYÉS DU CENTRE D'APPEL (ID 101 à 137)
+     */
+    public List<Employe> getCentreAppel() {
+        return getByDepartement(Departement.CENTRE_APPEL_B2B);
+    }
+
+    /**
+     * 🔥 RÉCUPÉRER TOUS LES EMPLOYÉS DU BUREAU D'ÉTUDE (ID 1 à 48)
+     */
+    public List<Employe> getBureauEtude() {
+        return getByDepartement(Departement.BUREAU_ETUDE);
+    }
+
+    /**
+     * 🔥 VÉRIFIER SI UN EMPLOYÉ EXISTE
+     */
+    public boolean exists(int id) {
+        String sql = "SELECT 1 FROM employe WHERE id=?";
+        try (PreparedStatement ps = cnx.prepareStatement(sql)) {
+            ps.setInt(1, id);
+            try (ResultSet rs = ps.executeQuery()) {
+                return rs.next();
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
+
+    /**
+     * 🔥 COMPTER LE NOMBRE TOTAL D'EMPLOYÉS
+     */
+    public int count() {
+        String sql = "SELECT COUNT(*) FROM employe";
+        try (Statement st = cnx.createStatement(); ResultSet rs = st.executeQuery(sql)) {
+            if (rs.next()) return rs.getInt(1);
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return 0;
+    }
+
+    // ══════════════════════════════════════════════════════════════════════════
+
     private Employe mapResultSet(ResultSet rs) throws SQLException {
         Employe e = new Employe();
         e.setId(rs.getInt("id"));
         e.setNom(rs.getString("nom"));
         e.setPrenom(rs.getString("prenom"));
 
-        // 🔥 IGNORE LES DATES POUR LES TESTS (évite l'erreur Zero date)
         try {
             Date dNaiss = rs.getDate("dateNaissance");
             if (dNaiss != null && !dNaiss.toString().startsWith("0000")) {
