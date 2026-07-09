@@ -1,80 +1,85 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<?import javafx.scene.layout.*?>
-<?import javafx.scene.control.*?>
-<?import javafx.geometry.Insets?>
 
-<ScrollPane fitToWidth="true" hbarPolicy="NEVER" styleClass="content-scroll"
-            xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1"
-            fx:controller="com.rh.contollers.DepenseController">
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.ComboBox?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.control.Separator?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Region?>
+<?import javafx.scene.layout.VBox?>
 
-    <VBox styleClass="dashboard-root" spacing="24">
+<ScrollPane fitToWidth="true" hbarPolicy="NEVER" styleClass="content-scroll" xmlns="http://javafx.com/javafx/26" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.rh.contollers.DepenseController">
+
+    <VBox spacing="24" styleClass="dashboard-root">
 
         <!-- ── En-tête ── -->
         <HBox alignment="CENTER_LEFT" spacing="12">
-            <Label text="💰  Gestion des Dépenses" styleClass="welcome-label"/>
-            <Region HBox.hgrow="ALWAYS"/>
+            <Label styleClass="welcome-label" text="💰  Gestion des Dépenses" />
+            <Region HBox.hgrow="ALWAYS" />
+
+            <!-- ── Sélecteur de devise ── -->
+            <Label style="-fx-font-weight: bold;" styleClass="depense-meta" text="Devise : " />
+            <ComboBox fx:id="comboDevise" prefWidth="100" style="-fx-background-color: white; -fx-background-radius: 8; -fx-padding: 4 12; -fx-border-color: #F0E6DA; -fx-border-radius: 8; -fx-pref-height: 36;" />
+            <Label fx:id="lblTauxDate" style="-fx-font-size: 10px; -fx-text-fill: #888;" text="" />
 
             <!-- ── Filtre par centre ── -->
-            <Label text="Centre : " styleClass="depense-meta" style="-fx-font-weight: bold;"/>
-            <ComboBox fx:id="comboCentre"
-                      style="-fx-background-color: white; -fx-background-radius: 8; -fx-padding: 4 12; -fx-border-color: #F0E6DA; -fx-border-radius: 8; -fx-pref-height: 36; -fx-pref-width: 200;"
-                      promptText="Sélectionner un centre"/>
-
-            <Button text="＋  Ajouter une dépense" styleClass="btn-primary"/>
+            <Label style="-fx-font-weight: bold;" styleClass="depense-meta" text="Centre : " />
+            <ComboBox fx:id="comboCentre" promptText="Sélectionner un centre" style="-fx-background-color: white; -fx-background-radius: 8; -fx-padding: 4 12; -fx-border-color: #F0E6DA; -fx-border-radius: 8; -fx-pref-height: 36; -fx-pref-width: 200;" />
         </HBox>
 
         <!-- ── Total général ── -->
         <HBox alignment="CENTER_RIGHT" spacing="10">
-            <Label text="Total général : " styleClass="depense-meta" style="-fx-font-size: 14px; -fx-font-weight: bold;"/>
-            <Label fx:id="lblTotalGeneral" text="0,00 €" style="-fx-font-size: 24px; -fx-font-weight: bold; -fx-text-fill: #75070C;"/>
+            <Label style="-fx-font-size: 14px; -fx-font-weight: bold;" styleClass="depense-meta" text="Total général : " />
+            <Label fx:id="lblTotalGeneral" style="-fx-font-size: 24px; -fx-font-weight: bold; -fx-text-fill: #75070C;" text="0,00 €" />
         </HBox>
 
         <!-- ── Ligne 1 : Loyer | Services | Fournitures ── -->
         <HBox spacing="22">
 
             <!-- Loyer / Local -->
-            <VBox fx:id="cardLoyer" styleClass="depense-card" HBox.hgrow="ALWAYS" spacing="14">
+            <VBox fx:id="cardLoyer" spacing="14" styleClass="depense-card" HBox.hgrow="ALWAYS">
                 <HBox alignment="CENTER_LEFT" spacing="14">
-                    <Label text="🏠" styleClass="depense-icon depense-icon-cherry"/>
-                    <Label text="Loyer / Local" styleClass="depense-title"/>
+                    <Label styleClass="depense-icon depense-icon-cherry" text="🏠" />
+                    <Label styleClass="depense-title" text="Loyer / Local" />
                 </HBox>
-                <Separator styleClass="depense-sep"/>
+                <Separator styleClass="depense-sep" />
                 <VBox spacing="4">
-                    <Label text="Total du mois" styleClass="depense-meta"/>
-                    <Label fx:id="lblMontantLoyer" text="0,00 €" styleClass="depense-amount"/>
+                    <Label styleClass="depense-meta" text="Total du mois" />
+                    <Label fx:id="lblMontantLoyer" styleClass="depense-amount" text="0,00 €" />
                 </VBox>
-                <Label fx:id="lblCountLoyer" text="0 dépense(s) enregistrée(s)" styleClass="depense-count"/>
-                <Button text="Voir les détails →" styleClass="btn-link"/>
+                <Label fx:id="lblCountLoyer" styleClass="depense-count" text="0 dépense(s) enregistrée(s)" />
+                <Button styleClass="btn-link" text="Voir les détails →" />
             </VBox>
 
             <!-- Services / Abonnements -->
-            <VBox fx:id="cardServices" styleClass="depense-card" HBox.hgrow="ALWAYS" spacing="14">
+            <VBox fx:id="cardServices" spacing="14" styleClass="depense-card" HBox.hgrow="ALWAYS">
                 <HBox alignment="CENTER_LEFT" spacing="14">
-                    <Label text="📡" styleClass="depense-icon depense-icon-olive"/>
-                    <Label text="Services / Abonnements" styleClass="depense-title"/>
+                    <Label styleClass="depense-icon depense-icon-olive" text="📡" />
+                    <Label styleClass="depense-title" text="Services / Abonnements" />
                 </HBox>
-                <Separator styleClass="depense-sep"/>
+                <Separator styleClass="depense-sep" />
                 <VBox spacing="4">
-                    <Label text="Total du mois" styleClass="depense-meta"/>
-                    <Label fx:id="lblMontantServices" text="0,00 €" styleClass="depense-amount"/>
+                    <Label styleClass="depense-meta" text="Total du mois" />
+                    <Label fx:id="lblMontantServices" styleClass="depense-amount" text="0,00 €" />
                 </VBox>
-                <Label fx:id="lblCountServices" text="0 dépense(s) enregistrée(s)" styleClass="depense-count"/>
-                <Button text="Voir les détails →" styleClass="btn-link"/>
+                <Label fx:id="lblCountServices" styleClass="depense-count" text="0 dépense(s) enregistrée(s)" />
+                <Button styleClass="btn-link" text="Voir les détails →" />
             </VBox>
 
             <!-- Fournitures -->
-            <VBox fx:id="cardFournitures" styleClass="depense-card" HBox.hgrow="ALWAYS" spacing="14">
+            <VBox fx:id="cardFournitures" spacing="14" styleClass="depense-card" HBox.hgrow="ALWAYS">
                 <HBox alignment="CENTER_LEFT" spacing="14">
-                    <Label text="📦" styleClass="depense-icon depense-icon-butter"/>
-                    <Label text="Fournitures" styleClass="depense-title"/>
+                    <Label styleClass="depense-icon depense-icon-butter" text="📦" />
+                    <Label styleClass="depense-title" text="Fournitures" />
                 </HBox>
-                <Separator styleClass="depense-sep"/>
+                <Separator styleClass="depense-sep" />
                 <VBox spacing="4">
-                    <Label text="Total du mois" styleClass="depense-meta"/>
-                    <Label fx:id="lblMontantFournitures" text="0,00 €" styleClass="depense-amount"/>
+                    <Label styleClass="depense-meta" text="Total du mois" />
+                    <Label fx:id="lblMontantFournitures" styleClass="depense-amount" text="0,00 €" />
                 </VBox>
-                <Label fx:id="lblCountFournitures" text="0 dépense(s) enregistrée(s)" styleClass="depense-count"/>
-                <Button text="Voir les détails →" styleClass="btn-link"/>
+                <Label fx:id="lblCountFournitures" styleClass="depense-count" text="0 dépense(s) enregistrée(s)" />
+                <Button styleClass="btn-link" text="Voir les détails →" />
             </VBox>
 
         </HBox>
@@ -83,48 +88,48 @@
         <HBox spacing="22">
 
             <!-- Transport -->
-            <VBox fx:id="cardTransport" styleClass="depense-card" HBox.hgrow="ALWAYS" spacing="14">
+            <VBox fx:id="cardTransport" spacing="14" styleClass="depense-card" HBox.hgrow="ALWAYS">
                 <HBox alignment="CENTER_LEFT" spacing="14">
-                    <Label text="🚗" styleClass="depense-icon depense-icon-cherry"/>
-                    <Label text="Transport" styleClass="depense-title"/>
+                    <Label styleClass="depense-icon depense-icon-cherry" text="🚗" />
+                    <Label styleClass="depense-title" text="Transport" />
                 </HBox>
-                <Separator styleClass="depense-sep"/>
+                <Separator styleClass="depense-sep" />
                 <VBox spacing="4">
-                    <Label text="Total du mois" styleClass="depense-meta"/>
-                    <Label fx:id="lblMontantTransport" text="0,00 €" styleClass="depense-amount"/>
+                    <Label styleClass="depense-meta" text="Total du mois" />
+                    <Label fx:id="lblMontantTransport" styleClass="depense-amount" text="0,00 €" />
                 </VBox>
-                <Label fx:id="lblCountTransport" text="0 dépense(s) enregistrée(s)" styleClass="depense-count"/>
-                <Button text="Voir les détails →" styleClass="btn-link"/>
+                <Label fx:id="lblCountTransport" styleClass="depense-count" text="0 dépense(s) enregistrée(s)" />
+                <Button styleClass="btn-link" text="Voir les détails →" />
             </VBox>
 
             <!-- Salaires / Charges -->
-            <VBox fx:id="cardSalaires" styleClass="depense-card" HBox.hgrow="ALWAYS" spacing="14">
+            <VBox fx:id="cardSalaires" spacing="14" styleClass="depense-card" HBox.hgrow="ALWAYS">
                 <HBox alignment="CENTER_LEFT" spacing="14">
-                    <Label text="💼" styleClass="depense-icon depense-icon-olive"/>
-                    <Label text="Salaires / Charges" styleClass="depense-title"/>
+                    <Label styleClass="depense-icon depense-icon-olive" text="💼" />
+                    <Label styleClass="depense-title" text="Salaires / Charges" />
                 </HBox>
-                <Separator styleClass="depense-sep"/>
+                <Separator styleClass="depense-sep" />
                 <VBox spacing="4">
-                    <Label text="Total du mois" styleClass="depense-meta"/>
-                    <Label fx:id="lblMontantSalaires" text="0,00 €" styleClass="depense-amount"/>
+                    <Label styleClass="depense-meta" text="Total du mois" />
+                    <Label fx:id="lblMontantSalaires" styleClass="depense-amount" text="0,00 €" />
                 </VBox>
-                <Label fx:id="lblCountSalaires" text="0 dépense(s) enregistrée(s)" styleClass="depense-count"/>
-                <Button text="Voir les détails →" styleClass="btn-link" onAction="#onVoirDetailsSalaires"/>
+                <Label fx:id="lblCountSalaires" styleClass="depense-count" text="0 dépense(s) enregistrée(s)" />
+                <Button onAction="#onVoirDetailsSalaires" styleClass="btn-link" text="Voir les détails →" />
             </VBox>
 
             <!-- Autre -->
-            <VBox fx:id="cardAutre" styleClass="depense-card" HBox.hgrow="ALWAYS" spacing="14">
+            <VBox fx:id="cardAutre" spacing="14" styleClass="depense-card" HBox.hgrow="ALWAYS">
                 <HBox alignment="CENTER_LEFT" spacing="14">
-                    <Label text="📋" styleClass="depense-icon depense-icon-oat"/>
-                    <Label text="Autre" styleClass="depense-title"/>
+                    <Label styleClass="depense-icon depense-icon-oat" text="📋" />
+                    <Label styleClass="depense-title" text="Autre" />
                 </HBox>
-                <Separator styleClass="depense-sep"/>
+                <Separator styleClass="depense-sep" />
                 <VBox spacing="4">
-                    <Label text="Total du mois" styleClass="depense-meta"/>
-                    <Label fx:id="lblMontantAutre" text="0,00 €" styleClass="depense-amount"/>
+                    <Label styleClass="depense-meta" text="Total du mois" />
+                    <Label fx:id="lblMontantAutre" styleClass="depense-amount" text="0,00 €" />
                 </VBox>
-                <Label fx:id="lblCountAutre" text="0 dépense(s) enregistrée(s)" styleClass="depense-count"/>
-                <Button text="Voir les détails →" styleClass="btn-link"/>
+                <Label fx:id="lblCountAutre" styleClass="depense-count" text="0 dépense(s) enregistrée(s)" />
+                <Button styleClass="btn-link" text="Voir les détails →" />
             </VBox>
 
         </HBox>
