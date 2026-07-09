@@ -74,11 +74,17 @@
                         <TextField promptText="Rechercher..." styleClass="search-field" prefWidth="210"/>
                     </HBox>
 
-                    <!-- Notifications -->
-                    <StackPane>
-                        <Label text="🔔" style="-fx-font-size:20px; -fx-cursor:hand;"/>
-                        <Label text="3" styleClass="notif-badge" StackPane.alignment="TOP_RIGHT"/>
-                    </StackPane>
+                    <HBox spacing="10" alignment="CENTER">
+                        <StackPane>
+                            <Button fx:id="btnNotifications" text="🔔"
+                                    style="-fx-font-size:20px; -fx-background-color:transparent; -fx-cursor:hand;"
+                                    onAction="#onNotifications"/>
+                            <Label fx:id="lblNotifBadge" text="0"
+                                   styleClass="notif-badge"
+                                   StackPane.alignment="TOP_RIGHT"
+                                   visible="false" managed="false"/>
+                        </StackPane>
+                    </HBox>
 
                     <!-- Avatar -->
                     <Label text="A" styleClass="avatar-circle"/>

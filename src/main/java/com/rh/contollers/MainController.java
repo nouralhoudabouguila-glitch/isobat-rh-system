@@ -1,14 +1,27 @@
 package com.rh.contollers;
 
+import com.rh.models.Notification;
+import com.rh.services.ServiceNotification;
+import javafx.animation.KeyFrame;
+import javafx.animation.Timeline;
+import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
+import javafx.geometry.Insets;
+import javafx.geometry.Pos;
 import javafx.scene.Node;
-import javafx.scene.control.Label;
-import javafx.scene.control.Button;
-import javafx.scene.layout.StackPane;
-import javafx.scene.layout.VBox;
+import javafx.scene.Scene;
+import javafx.scene.control.*;
+import javafx.scene.layout.*;
+import javafx.scene.paint.Color;
+import javafx.scene.text.Font;
+import javafx.scene.text.FontWeight;
+import javafx.stage.Modality;
+import javafx.stage.Stage;
+import javafx.util.Duration;
 
 import java.io.IOException;
+import java.util.List;
 
 public class MainController {
 
@@ -26,13 +39,33 @@ public class MainController {
     @FXML
     private VBox subMenuRecrutement;
 
+    @FXML
+    private Button btnNotifications;
+
+    @FXML
+    private Label lblNotifBadge;
+
     private PaieController paieController;
+    private ServiceNotification serviceNotification;
+    private Timeline notificationTimer;
+    private Stage panneauNotificationsStage; // Pour garder une référence
 
     @FXML
     public void initialize() {
         instance = this;
+        serviceNotification = new ServiceNotification();
 
-        // Configurer le sous-menu Recrutement
+        // Ajouter un listener pour les changements de notifications
+        serviceNotification.addListener(() -> {
+            Platform.runLater(() -> {
+                mettreAJourBadgeNotifications();
+                // Si le panneau est ouvert, le rafraîchir
+                if (panneauNotificationsStage != null && panneauNotificationsStage.isShowing()) {
+                    ouvrirPanneauNotifications(); // Rafraîchir
+                }
+            });
+        });
+
         if (btnRecrutement != null && subMenuRecrutement != null) {
             btnRecrutement.setOnAction(e -> {
                 boolean visible = subMenuRecrutement.isVisible();
@@ -42,34 +75,397 @@ public class MainController {
             });
         }
 
-        // Charger la page par défaut
         loadPage("dashboard", "Tableau de bord");
+
+        if (btnNotifications != null) {
+            btnNotifications.setOnAction(e -> ouvrirPanneauNotifications());
+        }
+
+        mettreAJourBadgeNotifications();
+        demarrerVerificationNotifications();
     }
+
+    /**
+     * Démarre la vérification périodique des notifications
+     */
+    private void demarrerVerificationNotifications() {
+        // Vérification toutes les 30 secondes (ou 1 minute)
+        notificationTimer = new Timeline(new KeyFrame(Duration.seconds(30), e -> {
+            serviceNotification.actualiser();
+            Platform.runLater(() -> mettreAJourBadgeNotifications());
+        }));
+        notificationTimer.setCycleCount(Timeline.INDEFINITE);
+        notificationTimer.play();
+
+        System.out.println("🔄 Vérification des notifications démarrée (toutes les 30 secondes)");
+    }
+
+    /**
+     * Met à jour le badge de notification
+     */
+    public void mettreAJourBadgeNotifications() {
+        if (lblNotifBadge == null) return;
+
+        try {
+            int nbNonLues = serviceNotification.compterNonLues();
+
+            if (nbNonLues > 0) {
+                lblNotifBadge.setText(String.valueOf(nbNonLues > 99 ? "99+" : nbNonLues));
+                lblNotifBadge.setVisible(true);
+                lblNotifBadge.setManaged(true);
+                lblNotifBadge.setStyle(
+                        "-fx-background-color: #75070C; " +
+                                "-fx-text-fill: white; " +
+                                "-fx-font-size: 9px; " +
+                                "-fx-font-weight: bold; " +
+                                "-fx-background-radius: 20px; " +
+                                "-fx-padding: 1 6 1 6; " +
+                                "-fx-min-width: 18px; " +
+                                "-fx-alignment: center;"
+                );
+            } else {
+                lblNotifBadge.setVisible(false);
+                lblNotifBadge.setManaged(false);
+            }
+
+            System.out.println("🔔 Notifications non lues : " + nbNonLues);
+
+        } catch (Exception e) {
+            System.err.println("Erreur lors de la mise à jour du badge : " + e.getMessage());
+        }
+    }
+
+    /**
+     * Ouvre le panneau de notifications avec rafraîchissement en temps réel
+     */
+    @FXML
+    private void onNotifications() {
+        ouvrirPanneauNotifications();
+    }
+
+    /**
+     * Crée et affiche le panneau de notifications
+     */
+    private void ouvrirPanneauNotifications() {
+        try {
+            // Si la fenêtre est déjà ouverte, la refermer et la rouvrir
+            if (panneauNotificationsStage != null && panneauNotificationsStage.isShowing()) {
+                panneauNotificationsStage.close();
+            }
+
+            List<Notification> notifications = serviceNotification.getAllNotifications();
+            int nbNonLues = serviceNotification.compterNonLues();
+
+            panneauNotificationsStage = new Stage();
+            panneauNotificationsStage.setTitle("Notifications");
+            panneauNotificationsStage.initModality(Modality.WINDOW_MODAL);
+            panneauNotificationsStage.initOwner(contentArea.getScene().getWindow());
+            panneauNotificationsStage.setResizable(false);
+            panneauNotificationsStage.setWidth(700);
+            panneauNotificationsStage.setHeight(600);
+
+            // ── Conteneur principal ──
+            VBox root = new VBox(10);
+            root.setStyle("-fx-background-color: #F5F0EA; -fx-padding: 20;");
+            root.setPrefWidth(680);
+
+            // ── En-tête ──
+            HBox header = new HBox(12);
+            header.setAlignment(Pos.CENTER_LEFT);
+
+            Label lblTitle = new Label("🔔 Notifications");
+            lblTitle.setFont(Font.font("Segoe UI", FontWeight.BOLD, 20));
+            lblTitle.setTextFill(Color.web("#1A1A1A"));
+
+            Label lblCount = new Label("(" + notifications.size() + " - " + nbNonLues + " non lue(s))");
+            lblCount.setFont(Font.font("Segoe UI", 13));
+            lblCount.setTextFill(Color.web(nbNonLues > 0 ? "#CC0000" : "#4F6815"));
+
+            // Bouton Actualiser
+            Button btnRefresh = new Button("🔄");
+            btnRefresh.setStyle(
+                    "-fx-background-color: transparent; " +
+                            "-fx-font-size: 18px; " +
+                            "-fx-cursor: hand;"
+            );
+            btnRefresh.setTooltip(new Tooltip("Actualiser les notifications"));
+            btnRefresh.setOnAction(e -> {
+                serviceNotification.actualiser();
+                // Fermer et rouvrir pour rafraîchir
+                panneauNotificationsStage.close();
+                ouvrirPanneauNotifications();
+            });
+
+            Region spacer = new Region();
+            HBox.setHgrow(spacer, Priority.ALWAYS);
+
+            // Bouton "Tout marquer comme lu"
+            Button btnToutLu = new Button("✅ Tout marquer comme lu");
+            btnToutLu.setStyle(
+                    "-fx-background-color: #4F6815; " +
+                            "-fx-text-fill: white; " +
+                            "-fx-font-weight: bold; " +
+                            "-fx-padding: 6 14; " +
+                            "-fx-background-radius: 8; " +
+                            "-fx-cursor: hand;"
+            );
+            btnToutLu.setVisible(nbNonLues > 0);
+            btnToutLu.setManaged(nbNonLues > 0);
+            btnToutLu.setOnAction(e -> {
+                serviceNotification.marquerToutCommeLu();
+                panneauNotificationsStage.close();
+                ouvrirPanneauNotifications();
+            });
+
+            Button btnFermer = new Button("✕");
+            btnFermer.setStyle("-fx-background-color: transparent; -fx-font-size: 18px; -fx-cursor: hand; -fx-text-fill: #666;");
+            btnFermer.setOnAction(e -> panneauNotificationsStage.close());
+
+            header.getChildren().addAll(lblTitle, lblCount, btnRefresh, spacer, btnToutLu, btnFermer);
+
+            // ── Liste des notifications ──
+            ScrollPane scrollPane = new ScrollPane();
+            scrollPane.setFitToWidth(true);
+            scrollPane.setStyle("-fx-background-color: transparent; -fx-background: transparent; -fx-border-color: transparent;");
+            scrollPane.setVbarPolicy(ScrollPane.ScrollBarPolicy.AS_NEEDED);
+
+            VBox notifList = new VBox(12);
+            notifList.setPadding(new Insets(5));
+            notifList.setStyle("-fx-background-color: transparent;");
+
+            if (notifications.isEmpty()) {
+                VBox emptyBox = new VBox(15);
+                emptyBox.setAlignment(Pos.CENTER);
+                emptyBox.setPadding(new Insets(80, 0, 80, 0));
+
+                Label emptyIcon = new Label("📭");
+                emptyIcon.setFont(Font.font(56));
+
+                Label emptyText = new Label("Aucune notification");
+                emptyText.setFont(Font.font("Segoe UI", 18));
+                emptyText.setTextFill(Color.web("#888888"));
+
+                emptyBox.getChildren().addAll(emptyIcon, emptyText);
+                notifList.getChildren().add(emptyBox);
+            } else {
+                for (Notification notif : notifications) {
+                    VBox notifCard = createNotificationCard(notif);
+                    notifList.getChildren().add(notifCard);
+                }
+            }
+
+            scrollPane.setContent(notifList);
+
+            // ── Footer avec info actualisation ──
+            HBox footer = new HBox(10);
+            footer.setAlignment(Pos.CENTER_RIGHT);
+            footer.setPadding(new Insets(10, 0, 0, 0));
+
+            Label lblAutoRefresh = new Label("🔄 Actualisation automatique toutes les 30 secondes");
+            lblAutoRefresh.setFont(Font.font("Segoe UI", 10));
+            lblAutoRefresh.setTextFill(Color.web("#888888"));
+
+            footer.getChildren().add(lblAutoRefresh);
+
+            root.getChildren().addAll(header, new Separator(), scrollPane, footer);
+
+            Scene scene = new Scene(root);
+            panneauNotificationsStage.setScene(scene);
+            panneauNotificationsStage.showAndWait();
+
+            // Rafraîchir le badge à la fermeture
+            mettreAJourBadgeNotifications();
+
+        } catch (Exception e) {
+            System.err.println("Erreur lors de l'ouverture du panneau : " + e.getMessage());
+            e.printStackTrace();
+        }
+    }
+
+    /**
+     * Crée une carte de notification
+     */
+    private VBox createNotificationCard(Notification notif) {
+        String bgColor = notif.getFondPriorite();
+        String borderColor = notif.isEstLue() ? "#D4C8B8" : "#E0D8D0";
+        double borderWidth = notif.isEstLue() ? 1 : 2;
+
+        VBox card = new VBox(8);
+        card.setStyle(
+                "-fx-background-color: " + bgColor + ";" +
+                        "-fx-padding: 16 18 14 18;" +
+                        "-fx-background-radius: 10;" +
+                        "-fx-border-color: " + borderColor + ";" +
+                        "-fx-border-radius: 10;" +
+                        "-fx-border-width: " + borderWidth + ";" +
+                        "-fx-effect: dropshadow(gaussian, rgba(0,0,0,0.06), 6, 0, 0, 2);"
+        );
+        card.setMaxWidth(Double.MAX_VALUE);
+
+        // ── LIGNE 1 : Titre avec icône ──
+        HBox header = new HBox(10);
+        header.setAlignment(Pos.CENTER_LEFT);
+
+        String icon = getIconForType(notif);
+        Label lblIcon = new Label(icon);
+        lblIcon.setFont(Font.font(18));
+
+        Label lblTitre = new Label(notif.getTitre());
+        lblTitre.setFont(Font.font("Segoe UI", FontWeight.BOLD, 14));
+        lblTitre.setStyle("-fx-text-fill: #1A1A1A !important;");
+        lblTitre.setWrapText(true);
+        HBox.setHgrow(lblTitre, Priority.ALWAYS);
+
+        // Indicateur "NON LU"
+        if (!notif.isEstLue()) {
+            Label lblNonLu = new Label("● NON LU");
+            lblNonLu.setFont(Font.font("Segoe UI", FontWeight.BOLD, 9));
+            lblNonLu.setStyle("-fx-text-fill: #CC0000 !important;");
+            header.getChildren().add(lblNonLu);
+        }
+
+        header.getChildren().addAll(lblIcon, lblTitre);
+
+        // ── LIGNE 2 : Message ──
+        Label lblMessage = new Label(notif.getMessage());
+        lblMessage.setFont(Font.font("Segoe UI", 13));
+        lblMessage.setStyle("-fx-text-fill: #333333 !important;");
+        lblMessage.setWrapText(true);
+
+        // ── LIGNE 3 : Badges et actions ──
+        HBox footer = new HBox(12);
+        footer.setAlignment(Pos.CENTER_LEFT);
+        footer.setPadding(new Insets(5, 0, 0, 0));
+
+        // Badge de priorité
+        Label badge = new Label(notif.getBadgePriorite());
+        badge.setFont(Font.font("Segoe UI", FontWeight.BOLD, 10));
+        String couleurBadge = notif.getCouleurPriorite();
+        badge.setStyle(
+                "-fx-background-color: " + couleurBadge + ";" +
+                        "-fx-text-fill: white;" +
+                        "-fx-padding: 2 10;" +
+                        "-fx-background-radius: 10;"
+        );
+        footer.getChildren().add(badge);
+
+        Label sep1 = new Label("•");
+        sep1.setStyle("-fx-text-fill: #CCCCCC;");
+        footer.getChildren().add(sep1);
+
+        String categorie = getCategorieForType(notif);
+        Label lblCategorie = new Label(categorie);
+        lblCategorie.setFont(Font.font("Segoe UI", 11));
+        lblCategorie.setStyle("-fx-text-fill: #666666 !important;");
+        footer.getChildren().add(lblCategorie);
+
+        Label sep2 = new Label("•");
+        sep2.setStyle("-fx-text-fill: #CCCCCC;");
+        footer.getChildren().add(sep2);
+
+        Label lblDate = new Label(notif.getDateNotificationFormatee());
+        lblDate.setFont(Font.font("Segoe UI", 11));
+        lblDate.setStyle("-fx-text-fill: #888888 !important;");
+        footer.getChildren().add(lblDate);
+
+        Region spacer = new Region();
+        HBox.setHgrow(spacer, Priority.ALWAYS);
+
+        // Bouton d'action
+        Button btnAction = new Button(notif.getActionLabel());
+        btnAction.setStyle(
+                "-fx-background-color: transparent;" +
+                        "-fx-text-fill: #4F6815;" +
+                        "-fx-font-weight: bold;" +
+                        "-fx-font-size: 12px;" +
+                        "-fx-cursor: hand;" +
+                        "-fx-border-color: transparent;" +
+                        "-fx-underline: true;"
+        );
+        final String actionPage = notif.getActionPage();
+        btnAction.setOnAction(e -> {
+            if (actionPage != null && !actionPage.isEmpty()) {
+                loadPage(actionPage, "Gestion des " + actionPage);
+            }
+        });
+        footer.getChildren().add(btnAction);
+
+        // Bouton "Marquer comme lu" (si non lu)
+        if (!notif.isEstLue()) {
+            final int notifId = notif.getIdNotification();
+            Button btnMarquerLu = new Button("✓ Marquer comme lu");
+            btnMarquerLu.setStyle(
+                    "-fx-background-color: transparent;" +
+                            "-fx-text-fill: #666666;" +
+                            "-fx-font-size: 11px;" +
+                            "-fx-cursor: hand;" +
+                            "-fx-border-color: transparent;"
+            );
+            btnMarquerLu.setOnAction(e -> {
+                serviceNotification.marquerCommeLue(notifId);
+                panneauNotificationsStage.close();
+                ouvrirPanneauNotifications();
+            });
+            footer.getChildren().add(btnMarquerLu);
+        }
+
+        card.getChildren().addAll(header, lblMessage, footer);
+
+        return card;
+    }
+
+    /**
+     * Retourne l'icône selon le type
+     */
+    private String getIconForType(Notification notif) {
+        switch (notif.getType()) {
+            case "FACTURE_ECHEANCE": return "📄";
+            case "AVANCE_ATTENTE": return "📋";
+            case "RETENUE_APPLIQUEE": return "🔒";
+            case "TICKET_RESTAURANT": return "🍽️";
+            default: return "🔔";
+        }
+    }
+
+    /**
+     * Retourne la catégorie selon le type
+     */
+    private String getCategorieForType(Notification notif) {
+        switch (notif.getType()) {
+            case "FACTURE_ECHEANCE": return "Factures";
+            case "AVANCE_ATTENTE": return "RH / Paie";
+            case "RETENUE_APPLIQUEE": return "RH / Paie";
+            case "TICKET_RESTAURANT": return "RH / Paie";
+            default: return "Général";
+        }
+    }
+
+    // ── Méthodes publiques ──
 
     public static MainController getInstance() {
         return instance;
     }
 
-    /**
-     * Charge une page dans le conteneur principal (méthode d'instance)
-     */
+    public void actualiserNotifications() {
+        serviceNotification.actualiser();
+    }
+
+    // ── Navigation ──
+
     public void loadPage(String page, String title) {
         try {
             String fxmlPath = "/com/rh/views/" + page + ".fxml";
             FXMLLoader loader = new FXMLLoader(getClass().getResource(fxmlPath));
             Node content = loader.load();
 
-            // Mettre à jour le titre
             if (headerTitle != null) {
                 headerTitle.setText(title);
             }
 
-            // Stocker le contrôleur si c'est la page Paie
             if ("paie".equals(page)) {
                 paieController = loader.getController();
             }
 
-            // Charger le contenu
             if (contentArea != null) {
                 contentArea.getChildren().clear();
                 contentArea.getChildren().add(content);
@@ -80,48 +476,22 @@ public class MainController {
         } catch (IOException e) {
             System.err.println("Erreur lors du chargement de la page " + page + " : " + e.getMessage());
             e.printStackTrace();
-        } catch (NullPointerException e) {
-            System.err.println("Erreur : contentArea est null. Vérifiez l'ID dans le FXML.");
-            e.printStackTrace();
         }
     }
 
-    /**
-     * Rafraîchit la page Paie si elle est affichée
-     */
     public void rafraichirPaie() {
         if (paieController != null) {
-            System.out.println("Rafraîchissement de la page Paie...");
             paieController.actualiser();
         }
     }
 
-    // ── Méthodes de navigation pour les boutons du sidebar ──
+    // ── Navigation ──
 
-    @FXML
-    private void onDashboard() {
-        loadPage("dashboard", "Tableau de bord");
-    }
-
-    @FXML
-    private void onEmploye() {
-        loadPage("employe", "Gestion des Employés");
-    }
-
-    @FXML
-    private void onPresence() {
-        loadPage("presence", "Gestion des Présences");
-    }
-
-    @FXML
-    private void onConges() {
-        loadPage("conges", "Gestion des Congés");
-    }
-
-    @FXML
-    private void onPlanning() {
-        loadPage("planning", "Planning");
-    }
+    @FXML private void onDashboard() { loadPage("dashboard", "Tableau de bord"); }
+    @FXML private void onEmploye() { loadPage("employe", "Gestion des Employés"); }
+    @FXML private void onPresence() { loadPage("presence", "Gestion des Présences"); }
+    @FXML private void onConges() { loadPage("conges", "Gestion des Congés"); }
+    @FXML private void onPlanning() { loadPage("planning", "Planning"); }
 
     @FXML
     private void onRecrutement() {
@@ -133,63 +503,29 @@ public class MainController {
         }
     }
 
-    @FXML
-    private void onTriTelephonique() {
-        loadPage("tri_telephonique", "Tri Téléphonique");
-    }
-
-    @FXML
-    private void onEntretienPhysique() {
-        loadPage("entretien_physique", "Entretien Physique");
-    }
-
-    @FXML
-    private void onSessionFormation() {
-        loadPage("session_formation", "Session de Formation");
-    }
-
-    @FXML
-    private void onPaie() {
-        loadPage("paie", "Gestion de la Paie");
-    }
-
-    @FXML
-    private void onAvance() {
-        loadPage("avance", "Demandes d'avance sur salaire");
-    }
-
-    @FXML
-    private void onTicket() {
-        loadPage("ticket", "Tickets Restaurant");
-    }
-
-    @FXML
-    private void onRetenue() {
-        loadPage("retenue", "Gestion des Retenues");
-    }
-
-    @FXML
-    private void onDepense() {
-        loadPage("depense", "Gestion des Dépenses");
-    }
-
-    @FXML
-    private void onFacture() {
-        loadPage("facture", "Gestion des Factures");
-    }
-
-    @FXML
-    private void onFournisseur() {
-        loadPage("fournisseur", "Gestion des Fournisseurs");
-    }
-
-    @FXML
-    private void onParametres() {
-        loadPage("parametres", "Paramètres");
-    }
+    @FXML private void onTriTelephonique() { loadPage("tri_telephonique", "Tri Téléphonique"); }
+    @FXML private void onEntretienPhysique() { loadPage("entretien_physique", "Entretien Physique"); }
+    @FXML private void onSessionFormation() { loadPage("session_formation", "Session de Formation"); }
+    @FXML private void onPaie() { loadPage("paie", "Gestion de la Paie"); }
+    @FXML private void onAvance() { loadPage("avance", "Demandes d'avance sur salaire"); }
+    @FXML private void onTicket() { loadPage("ticket", "Tickets Restaurant"); }
+    @FXML private void onRetenue() { loadPage("retenue", "Gestion des Retenues"); }
+    @FXML private void onDepense() { loadPage("depense", "Gestion des Dépenses"); }
+    @FXML private void onFacture() { loadPage("facture", "Gestion des Factures"); }
+    @FXML private void onFournisseur() { loadPage("fournisseur", "Gestion des Fournisseurs"); }
+    @FXML private void onParametres() { loadPage("parametres", "Paramètres"); }
 
     @FXML
     private void onLogout() {
+        if (notificationTimer != null) {
+            notificationTimer.stop();
+        }
         System.out.println("Déconnexion");
+    }
+
+    public void cleanup() {
+        if (notificationTimer != null) {
+            notificationTimer.stop();
+        }
     }
 }

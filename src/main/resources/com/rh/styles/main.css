@@ -1020,10 +1020,6 @@
     -fx-border-width: 0 0 1 0;
 }
 
-.activity-table .table-cell:last-child {
-    -fx-alignment: CENTER;
-}
-
 /* ── Lignes alternées ── */
 .activity-table .table-row-cell:even {
     -fx-background-color: #FCFAF8;
@@ -1481,4 +1477,88 @@
     -fx-padding: 4 14;
     -fx-background-radius: 12;
     -fx-font-size: 11px;
+}
+
+/* ═══════════════════════════════════════════════════════
+   NOTIFICATIONS - FORCER LES COULEURS
+   ═══════════════════════════════════════════════════════ */
+
+/* Forcer la couleur du texte dans TOUS les éléments des notifications */
+.notification-card,
+.notification-card *,
+.notification-card-unread,
+.notification-card-unread * {
+    -fx-text-fill: #1A1A1A !important;
+}
+
+/* Couleurs spécifiques */
+.notification-title {
+    -fx-text-fill: #1A1A1A !important;
+    -fx-font-weight: bold !important;
+}
+
+.notification-message {
+    -fx-text-fill: #333333 !important;
+}
+
+.notification-date {
+    -fx-text-fill: #666666 !important;
+}
+
+.notification-badge-new {
+    -fx-text-fill: #75070C !important;
+}
+
+/* Forcer les TextArea dans les notifications */
+.notification-card .text-area,
+.notification-card-unread .text-area {
+    -fx-text-fill: #333333 !important;
+    -fx-background-color: transparent !important;
+    -fx-border-color: transparent !important;
+}
+
+.notification-card .text-area .content,
+.notification-card-unread .text-area .content {
+    -fx-background-color: transparent !important;
+}
+
+.notification-card .text-area .text,
+.notification-card-unread .text-area .text {
+    -fx-fill: #333333 !important;
+}
+
+/* Forcer les labels dans les notifications */
+.notification-card .label,
+.notification-card-unread .label {
+    -fx-text-fill: #1A1A1A !important;
+}
+
+/* Pour le panneau de notification complet */
+.notification-panel .label {
+    -fx-text-fill: #1A1A1A !important;
+}
+
+.notification-panel .text-area {
+    -fx-text-fill: #333333 !important;
+}
+
+.notification-panel .text-area .content {
+    -fx-background-color: transparent !important;
+}
+
+/* Style des boutons dans les notifications */
+.notification-card .button,
+.notification-card-unread .button {
+    -fx-text-fill: white !important;
+}
+
+/* Style du bouton supprimer */
+.notification-card .btn-suppr,
+.notification-card-unread .btn-suppr {
+    -fx-text-fill: #666666 !important;
+}
+
+/* Couleur pour la référence */
+.notification-ref {
+    -fx-text-fill: #666666 !important;
 }
