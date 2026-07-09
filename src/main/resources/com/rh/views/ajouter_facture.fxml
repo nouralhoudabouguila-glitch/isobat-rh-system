@@ -27,6 +27,13 @@
                       style="-fx-background-color: white; -fx-background-radius: 8; -fx-padding: 8 12; -fx-border-color: #F0E6DA; -fx-border-radius: 8; -fx-pref-height: 40;"/>
         </VBox>
 
+        <VBox spacing="5">
+            <Label text="Devise *" style="-fx-font-weight: bold; -fx-text-fill: #333333;"/>
+            <ComboBox fx:id="comboDevise"
+                      style="-fx-background-color: white; -fx-background-radius: 8; -fx-padding: 8 12; -fx-border-color: #F0E6DA; -fx-border-radius: 8; -fx-pref-height: 40;"
+                      prefWidth="120"/>
+        </VBox>
+
         <HBox spacing="20">
             <!-- Montant HT -->
             <VBox spacing="5" HBox.hgrow="ALWAYS">

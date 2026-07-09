@@ -62,7 +62,6 @@ public class Facture {
     }
 
     // ── Attributs ──
-
     private int idFacture;
     private String numeroFacture;
     private int idFournisseur;
@@ -70,6 +69,7 @@ public class Facture {
     private double montantHt;
     private double montantTva;
     private double montantTtc;
+    private String devise; // NOUVEAU : devise de la facture (DT, EUR, USD, etc.)
     private LocalDate dateFacture;
     private LocalDate dateEcheance;
     private StatutFacture statut;
@@ -79,10 +79,12 @@ public class Facture {
 
     // ── Constructeurs ──
 
-    public Facture() {}
+    public Facture() {
+        this.devise = "TND"; // Devise par défaut
+    }
 
     public Facture(int idFacture, String numeroFacture, int idFournisseur, double montantHt,
-                   double montantTva, double montantTtc, LocalDate dateFacture,
+                   double montantTva, double montantTtc, String devise, LocalDate dateFacture,
                    LocalDate dateEcheance, StatutFacture statut, ModePaiement modePaiement,
                    String fichierPdf, String commentaire) {
         this.idFacture = idFacture;
@@ -91,6 +93,7 @@ public class Facture {
         this.montantHt = montantHt;
         this.montantTva = montantTva;
         this.montantTtc = montantTtc;
+        this.devise = devise != null ? devise : "DT";
         this.dateFacture = dateFacture;
         this.dateEcheance = dateEcheance;
         this.statut = statut;
@@ -100,7 +103,7 @@ public class Facture {
     }
 
     public Facture(String numeroFacture, int idFournisseur, double montantHt,
-                   double montantTva, double montantTtc, LocalDate dateFacture,
+                   double montantTva, double montantTtc, String devise, LocalDate dateFacture,
                    LocalDate dateEcheance, StatutFacture statut, ModePaiement modePaiement,
                    String commentaire) {
         this.numeroFacture = numeroFacture;
@@ -108,6 +111,7 @@ public class Facture {
         this.montantHt = montantHt;
         this.montantTva = montantTva;
         this.montantTtc = montantTtc;
+        this.devise = devise != null ? devise : "DT";
         this.dateFacture = dateFacture;
         this.dateEcheance = dateEcheance;
         this.statut = statut;
@@ -117,34 +121,16 @@ public class Facture {
 
     // ── Getters et Setters ──
 
-    public int getIdFacture() {
-        return idFacture;
-    }
+    public int getIdFacture() { return idFacture; }
+    public void setIdFacture(int idFacture) { this.idFacture = idFacture; }
 
-    public void setIdFacture(int idFacture) {
-        this.idFacture = idFacture;
-    }
+    public String getNumeroFacture() { return numeroFacture; }
+    public void setNumeroFacture(String numeroFacture) { this.numeroFacture = numeroFacture; }
 
-    public String getNumeroFacture() {
-        return numeroFacture;
-    }
+    public int getIdFournisseur() { return idFournisseur; }
+    public void setIdFournisseur(int idFournisseur) { this.idFournisseur = idFournisseur; }
 
-    public void setNumeroFacture(String numeroFacture) {
-        this.numeroFacture = numeroFacture;
-    }
-
-    public int getIdFournisseur() {
-        return idFournisseur;
-    }
-
-    public void setIdFournisseur(int idFournisseur) {
-        this.idFournisseur = idFournisseur;
-    }
-
-    public Fournisseur getFournisseur() {
-        return fournisseur;
-    }
-
+    public Fournisseur getFournisseur() { return fournisseur; }
     public void setFournisseur(Fournisseur fournisseur) {
         this.fournisseur = fournisseur;
         if (fournisseur != null) {
@@ -152,85 +138,37 @@ public class Facture {
         }
     }
 
-    public double getMontantHt() {
-        return montantHt;
-    }
+    public double getMontantHt() { return montantHt; }
+    public void setMontantHt(double montantHt) { this.montantHt = montantHt; }
 
-    public void setMontantHt(double montantHt) {
-        this.montantHt = montantHt;
-    }
+    public double getMontantTva() { return montantTva; }
+    public void setMontantTva(double montantTva) { this.montantTva = montantTva; }
 
-    public double getMontantTva() {
-        return montantTva;
-    }
+    public double getMontantTtc() { return montantTtc; }
+    public void setMontantTtc(double montantTtc) { this.montantTtc = montantTtc; }
 
-    public void setMontantTva(double montantTva) {
-        this.montantTva = montantTva;
-    }
+    public String getDevise() { return devise; }
+    public void setDevise(String devise) { this.devise = devise != null ? devise : "DT"; }
 
-    public double getMontantTtc() {
-        return montantTtc;
-    }
+    public LocalDate getDateFacture() { return dateFacture; }
+    public void setDateFacture(LocalDate dateFacture) { this.dateFacture = dateFacture; }
 
-    public void setMontantTtc(double montantTtc) {
-        this.montantTtc = montantTtc;
-    }
+    public LocalDate getDateEcheance() { return dateEcheance; }
+    public void setDateEcheance(LocalDate dateEcheance) { this.dateEcheance = dateEcheance; }
 
-    public LocalDate getDateFacture() {
-        return dateFacture;
-    }
+    public StatutFacture getStatut() { return statut; }
+    public void setStatut(StatutFacture statut) { this.statut = statut; }
+    public void setStatut(String statut) { this.statut = StatutFacture.fromString(statut); }
 
-    public void setDateFacture(LocalDate dateFacture) {
-        this.dateFacture = dateFacture;
-    }
+    public ModePaiement getModePaiement() { return modePaiement; }
+    public void setModePaiement(ModePaiement modePaiement) { this.modePaiement = modePaiement; }
+    public void setModePaiement(String modePaiement) { this.modePaiement = ModePaiement.fromString(modePaiement); }
 
-    public LocalDate getDateEcheance() {
-        return dateEcheance;
-    }
+    public String getFichierPdf() { return fichierPdf; }
+    public void setFichierPdf(String fichierPdf) { this.fichierPdf = fichierPdf; }
 
-    public void setDateEcheance(LocalDate dateEcheance) {
-        this.dateEcheance = dateEcheance;
-    }
-
-    public StatutFacture getStatut() {
-        return statut;
-    }
-
-    public void setStatut(StatutFacture statut) {
-        this.statut = statut;
-    }
-
-    public void setStatut(String statut) {
-        this.statut = StatutFacture.fromString(statut);
-    }
-
-    public ModePaiement getModePaiement() {
-        return modePaiement;
-    }
-
-    public void setModePaiement(ModePaiement modePaiement) {
-        this.modePaiement = modePaiement;
-    }
-
-    public void setModePaiement(String modePaiement) {
-        this.modePaiement = ModePaiement.fromString(modePaiement);
-    }
-
-    public String getFichierPdf() {
-        return fichierPdf;
-    }
-
-    public void setFichierPdf(String fichierPdf) {
-        this.fichierPdf = fichierPdf;
-    }
-
-    public String getCommentaire() {
-        return commentaire;
-    }
-
-    public void setCommentaire(String commentaire) {
-        this.commentaire = commentaire;
-    }
+    public String getCommentaire() { return commentaire; }
+    public void setCommentaire(String commentaire) { this.commentaire = commentaire; }
 
     // ── Méthodes utilitaires ──
 
@@ -263,21 +201,25 @@ public class Facture {
         return modePaiement != null ? modePaiement.toString() : "";
     }
 
+    public String getMontantHtFormate() {
+        return String.format("%.2f", montantHt) + " " + getDevise();
+    }
+
+    public String getMontantTtcFormate() {
+        return String.format("%.2f", montantTtc) + " " + getDevise();
+    }
+
+    public String getMontantTvaFormate() {
+        return String.format("%.2f", montantTva) + " " + getDevise();
+    }
+
     @Override
     public String toString() {
         return "Facture{" +
                 "idFacture=" + idFacture +
                 ", numeroFacture='" + numeroFacture + '\'' +
-                ", idFournisseur=" + idFournisseur +
-                ", montantHt=" + montantHt +
-                ", montantTva=" + montantTva +
+                ", devise='" + devise + '\'' +
                 ", montantTtc=" + montantTtc +
-                ", dateFacture=" + dateFacture +
-                ", dateEcheance=" + dateEcheance +
-                ", statut=" + statut +
-                ", modePaiement=" + modePaiement +
-                ", fichierPdf='" + fichierPdf + '\'' +
-                ", commentaire='" + commentaire + '\'' +
                 '}';
     }
 

@@ -5,6 +5,7 @@ import com.rh.models.Fournisseur;
 import com.rh.services.ExportExcelServiceUnifie;
 import com.rh.services.ServiceFacture;
 import com.rh.services.ServiceFournisseur;
+import com.rh.services.TauxChangeService;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
@@ -22,10 +23,13 @@ import java.text.NumberFormat;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 public class FactureController {
 
+    // ── TableView ──
     @FXML
     private TableView<Facture> tableView;
 
@@ -40,6 +44,8 @@ public class FactureController {
     @FXML
     private TableColumn<Facture, Double> colMontantTtc;
     @FXML
+    private TableColumn<Facture, String> colDevise;
+    @FXML
     private TableColumn<Facture, String> colDateFacture;
     @FXML
     private TableColumn<Facture, String> colDateEcheance;
@@ -50,21 +56,37 @@ public class FactureController {
     @FXML
     private TableColumn<Facture, Void> colActions;
 
+    // ── Labels des statistiques ──
     @FXML
     private Label lblTotalFactures;
     @FXML
     private Label lblMontantTotal;
+    @FXML
+    private Label lblTotalParDevise;
+    @FXML
+    private Label lblNbFactures;
 
+    // ── Champs de recherche et filtres ──
     @FXML
     private TextField txtRecherche;
     @FXML
     private ComboBox<String> comboFiltreStatut;
+    @FXML
+    private ComboBox<String> comboFiltreDevise;
+    @FXML
+    private ComboBox<Integer> comboLignesParPage;
 
+    // ── Services et données ──
     private ServiceFacture service;
     private ServiceFournisseur serviceFournisseur;
+    private TauxChangeService tauxChangeService;
     private ObservableList<Facture> factures = FXCollections.observableArrayList();
     private DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("dd-MM-yyyy");
     private NumberFormat format = NumberFormat.getInstance(Locale.FRENCH);
+
+    // Liste des devises disponibles pour le filtre
+    private static final String[] DEVISES = {"Toutes", "TND", "EUR", "USD", "GBP", "CHF", "JPY", "CAD", "DZD", "MAD"};
+    private static final String DEVISE_REFERENCE = "TND";
 
     @FXML
     public void initialize() {
@@ -73,12 +95,14 @@ public class FactureController {
 
             service = new ServiceFacture();
             serviceFournisseur = new ServiceFournisseur();
+            tauxChangeService = new TauxChangeService();
 
             // ── Configurer les colonnes ──
             colNumero.setCellValueFactory(new PropertyValueFactory<>("numeroFacture"));
             colFournisseur.setCellValueFactory(new PropertyValueFactory<>("nomFournisseur"));
+            colDevise.setCellValueFactory(new PropertyValueFactory<>("devise"));
 
-            // Colonne MONTANT HT avec formatage
+            // Colonne MONTANT HT avec formatage et devise
             colMontantHt.setCellValueFactory(new PropertyValueFactory<>("montantHt"));
             colMontantHt.setCellFactory(column -> new TableCell<Facture, Double>() {
                 @Override
@@ -87,13 +111,15 @@ public class FactureController {
                     if (empty || item == null) {
                         setText(null);
                     } else {
-                        setText(format.format(item) + " DT");
+                        Facture facture = getTableView().getItems().get(getIndex());
+                        String devise = facture.getDevise() != null ? facture.getDevise() : "DT";
+                        setText(format.format(item) + " " + devise);
                         setAlignment(Pos.CENTER_RIGHT);
                     }
                 }
             });
 
-            // Colonne TVA avec formatage
+            // Colonne TVA avec formatage et devise
             colMontantTva.setCellValueFactory(new PropertyValueFactory<>("montantTva"));
             colMontantTva.setCellFactory(column -> new TableCell<Facture, Double>() {
                 @Override
@@ -102,13 +128,15 @@ public class FactureController {
                     if (empty || item == null) {
                         setText(null);
                     } else {
-                        setText(format.format(item) + " DT");
+                        Facture facture = getTableView().getItems().get(getIndex());
+                        String devise = facture.getDevise() != null ? facture.getDevise() : "DT";
+                        setText(format.format(item) + " " + devise);
                         setAlignment(Pos.CENTER_RIGHT);
                     }
                 }
             });
 
-            // Colonne MONTANT TTC avec formatage
+            // Colonne MONTANT TTC avec formatage et devise
             colMontantTtc.setCellValueFactory(new PropertyValueFactory<>("montantTtc"));
             colMontantTtc.setCellFactory(column -> new TableCell<Facture, Double>() {
                 @Override
@@ -117,7 +145,9 @@ public class FactureController {
                     if (empty || item == null) {
                         setText(null);
                     } else {
-                        setText(format.format(item) + " DT");
+                        Facture facture = getTableView().getItems().get(getIndex());
+                        String devise = facture.getDevise() != null ? facture.getDevise() : "DT";
+                        setText(format.format(item) + " " + devise);
                         setAlignment(Pos.CENTER_RIGHT);
                     }
                 }
@@ -143,6 +173,23 @@ public class FactureController {
                         "Tous", "En attente", "Payée", "Annulée"
                 ));
                 comboFiltreStatut.setValue("Tous");
+                comboFiltreStatut.setOnAction(e -> appliquerFiltres());
+            }
+
+            // ── Configurer le filtre par devise ──
+            if (comboFiltreDevise != null) {
+                comboFiltreDevise.setItems(FXCollections.observableArrayList(DEVISES));
+                comboFiltreDevise.setValue("Toutes");
+                comboFiltreDevise.setOnAction(e -> appliquerFiltres());
+            }
+
+            // ── Configurer les lignes par page ──
+            if (comboLignesParPage != null) {
+                comboLignesParPage.setItems(FXCollections.observableArrayList(10, 25, 50, 100));
+                comboLignesParPage.setValue(10);
+                comboLignesParPage.setOnAction(e -> {
+                    // TODO: Implémenter la pagination
+                });
             }
 
             // ── Charger les données ──
@@ -154,24 +201,13 @@ public class FactureController {
             // ── Mettre à jour les statistiques ──
             mettreAJourStatistiques();
 
-            // ── Écouteurs ──
+            // ── Écouteur pour la recherche ──
             if (txtRecherche != null) {
                 txtRecherche.textProperty().addListener((observable, oldValue, newValue) -> {
                     if (newValue == null || newValue.isEmpty()) {
-                        chargerDonnees();
+                        appliquerFiltres();
                     } else {
                         rechercherFactures(newValue);
-                    }
-                });
-            }
-
-            if (comboFiltreStatut != null) {
-                comboFiltreStatut.setOnAction(e -> {
-                    String statut = comboFiltreStatut.getValue();
-                    if ("Tous".equals(statut)) {
-                        chargerDonnees();
-                    } else {
-                        filtrerParStatut(statut);
                     }
                 });
             }
@@ -364,6 +400,39 @@ public class FactureController {
         }
     }
 
+    // ── Application des filtres ──
+
+    private void appliquerFiltres() {
+        String statut = comboFiltreStatut.getValue();
+        String devise = comboFiltreDevise.getValue();
+
+        try {
+            List<Facture> liste = service.getAll();
+
+            // Filtrer par statut
+            if (statut != null && !"Tous".equals(statut)) {
+                liste = liste.stream()
+                        .filter(f -> statut.equals(f.getStatutLabel()))
+                        .collect(Collectors.toList());
+            }
+
+            // Filtrer par devise
+            if (devise != null && !"Toutes".equals(devise)) {
+                liste = liste.stream()
+                        .filter(f -> devise.equals(f.getDevise()))
+                        .collect(Collectors.toList());
+            }
+
+            factures.setAll(liste);
+            mettreAJourStatistiques();
+            tableView.refresh();
+
+        } catch (Exception e) {
+            System.err.println("Erreur lors du filtrage : " + e.getMessage());
+            showAlert("Erreur", "Erreur lors du filtrage.", Alert.AlertType.ERROR);
+        }
+    }
+
     // ── Chargement des données ──
 
     private void chargerDonnees() {
@@ -376,6 +445,9 @@ public class FactureController {
             mettreAJourStatistiques();
             tableView.refresh();
 
+            // Réappliquer les filtres
+            appliquerFiltres();
+
         } catch (Exception e) {
             System.err.println("Erreur lors du chargement : " + e.getMessage());
             e.printStackTrace();
@@ -385,7 +457,8 @@ public class FactureController {
 
     private void rechercherFactures(String keyword) {
         try {
-            factures.setAll(service.search(keyword));
+            List<Facture> liste = service.search(keyword);
+            factures.setAll(liste);
             mettreAJourStatistiques();
         } catch (Exception e) {
             System.err.println("Erreur lors de la recherche : " + e.getMessage());
@@ -393,33 +466,74 @@ public class FactureController {
         }
     }
 
-    private void filtrerParStatut(String statut) {
-        try {
-            factures.setAll(service.filterByStatut(statut));
-            mettreAJourStatistiques();
-        } catch (Exception e) {
-            System.err.println("Erreur lors du filtrage : " + e.getMessage());
-            showAlert("Erreur", "Erreur lors du filtrage", Alert.AlertType.ERROR);
-        }
-    }
+    // ── Mise à jour des statistiques avec conversion des devises ──
 
-    // ── Mise à jour des statistiques ──
+    // ── Mise à jour des statistiques avec conversion des devises ──
 
     private void mettreAJourStatistiques() {
         int total = factures.size();
-        double montantTotal = 0;
+
+        // Calcul du montant total en DT avec conversion
+        double montantTotalEnDT = 0;
+        Map<String, Double> totauxParDevise = new java.util.HashMap<>();
 
         for (Facture f : factures) {
-            montantTotal += f.getMontantTtc();
+            String devise = f.getDevise() != null ? f.getDevise() : "DT";
+            double montant = f.getMontantTtc();
+
+            // Ajouter au total par devise (en devise d'origine)
+            totauxParDevise.put(devise, totauxParDevise.getOrDefault(devise, 0.0) + montant);
+
+            // Convertir en DT pour le total général
+            if ("DT".equals(devise) || "TND".equals(devise)) {
+                montantTotalEnDT += montant;
+            } else {
+                // Utiliser le service de taux de change pour convertir
+                try {
+                    double converti = tauxChangeService.convertir(montant, devise, "DT");
+                    montantTotalEnDT += converti;
+                } catch (Exception e) {
+                    System.err.println("Erreur de conversion pour " + devise + " : " + e.getMessage());
+                    montantTotalEnDT += montant; // Fallback
+                }
+            }
         }
 
+        // Construire le texte des totaux par devise
+        StringBuilder totalParDeviseText = new StringBuilder();
+        int count = 0;
+        for (Map.Entry<String, Double> entry : totauxParDevise.entrySet()) {
+            if (count > 0) {
+                totalParDeviseText.append(" | ");
+            }
+            totalParDeviseText.append(entry.getKey())
+                    .append(": ")
+                    .append(format.format(entry.getValue()));
+            count++;
+        }
+
+        // Mettre à jour les labels
         if (lblTotalFactures != null) {
             lblTotalFactures.setText(String.valueOf(total));
         }
 
         if (lblMontantTotal != null) {
-            lblMontantTotal.setText(String.format("%.2f DT", montantTotal));
+            lblMontantTotal.setText(format.format(montantTotalEnDT) + " " + DEVISE_REFERENCE);
         }
+
+        if (lblTotalParDevise != null) {
+            lblTotalParDevise.setText(totalParDeviseText.length() > 0 ? totalParDeviseText.toString() : "Aucune facture");
+        }
+
+        if (lblNbFactures != null) {
+            lblNbFactures.setText(total + " facture(s)");
+        }
+
+        // Log pour débogage
+        System.out.println("📊 Statistiques factures :");
+        System.out.println("  - Total factures : " + total);
+        System.out.println("  - Montant total en " + DEVISE_REFERENCE + " : " + format.format(montantTotalEnDT));
+        System.out.println("  - Totaux par devise : " + totalParDeviseText);
     }
 
     // ── Actions ──
@@ -447,6 +561,11 @@ public class FactureController {
     }
 
     @FXML
+    private void onFiltrer() {
+        appliquerFiltres();
+    }
+
+    @FXML
     private void onReinitialiser() {
         if (txtRecherche != null) {
             txtRecherche.clear();
@@ -454,19 +573,10 @@ public class FactureController {
         if (comboFiltreStatut != null) {
             comboFiltreStatut.setValue("Tous");
         }
-        chargerDonnees();
-    }
-
-    @FXML
-    private void onFiltrer() {
-        if (comboFiltreStatut != null) {
-            String statut = comboFiltreStatut.getValue();
-            if ("Tous".equals(statut)) {
-                chargerDonnees();
-            } else {
-                filtrerParStatut(statut);
-            }
+        if (comboFiltreDevise != null) {
+            comboFiltreDevise.setValue("Toutes");
         }
+        chargerDonnees();
     }
 
     // ── Méthodes utilitaires ──

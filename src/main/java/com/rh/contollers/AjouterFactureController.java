@@ -1,16 +1,14 @@
 package com.rh.contollers;
 
 import com.rh.models.Facture;
-import com.rh.models.Facture.ModePaiement;
-import com.rh.models.Facture.StatutFacture;
 import com.rh.models.Fournisseur;
 import com.rh.services.ServiceFacture;
+import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.stage.Stage;
 
 import java.text.NumberFormat;
-import java.text.ParseException;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Locale;
@@ -27,6 +25,8 @@ public class AjouterFactureController {
     private TextField txtMontantTva;
     @FXML
     private TextField txtMontantTtc;
+    @FXML
+    private ComboBox<String> comboDevise; // NOUVEAU : sélecteur de devise
     @FXML
     private DatePicker datePickerFacture;
     @FXML
@@ -47,31 +47,39 @@ public class AjouterFactureController {
     private Runnable onAjoutReussi;
     private NumberFormat format = NumberFormat.getInstance(Locale.FRENCH);
 
+    // Liste des devises disponibles
+    private static final String[] DEVISES = {"TND", "EUR", "USD", "GBP", "CHF", "JPY", "CAD", "DZD", "MAD"};
+
     @FXML
     public void initialize() {
         service = new ServiceFacture();
 
-        // Configurer les ComboBox
-        comboStatut.setItems(javafx.collections.FXCollections.observableArrayList(
+        // ── Configurer le sélecteur de devise ──
+        comboDevise.setItems(FXCollections.observableArrayList(DEVISES));
+        comboDevise.setValue("TND"); // Devise par défaut
+
+        // ── Configurer les ComboBox ──
+        comboStatut.setItems(FXCollections.observableArrayList(
                 "En attente", "Payée", "Annulée"
         ));
         comboStatut.setValue("En attente");
 
-        comboModePaiement.setItems(javafx.collections.FXCollections.observableArrayList(
+        comboModePaiement.setItems(FXCollections.observableArrayList(
                 "Espèces", "Chèque", "Virement", "Carte bancaire"
         ));
         comboModePaiement.setValue("Virement");
 
-        // Définir la date par défaut
+        // ── Dates par défaut ──
         datePickerFacture.setValue(LocalDate.now());
         datePickerEcheance.setValue(LocalDate.now().plusDays(30));
 
-        // Calcul automatique du TTC
-        txtMontantHt.textProperty().addListener((obs, oldVal, newVal) -> {
-            calculerTtc();
-        });
+        // ── Calcul automatique du TTC ──
+        txtMontantHt.textProperty().addListener((obs, oldVal, newVal) -> calculerTtc());
+        txtMontantTva.textProperty().addListener((obs, oldVal, newVal) -> calculerTtc());
 
-        txtMontantTva.textProperty().addListener((obs, oldVal, newVal) -> {
+        // ── Ajouter le symbole de devise à côté du montant ──
+        comboDevise.setOnAction(e -> {
+            // Mettre à jour l'affichage des montants si nécessaire
             calculerTtc();
         });
     }
@@ -81,9 +89,10 @@ public class AjouterFactureController {
             double ht = parseMontant(txtMontantHt.getText());
             double tva = parseMontant(txtMontantTva.getText());
             double ttc = ht + tva;
-            txtMontantTtc.setText(format.format(ttc));
+            String devise = comboDevise.getValue();
+            txtMontantTtc.setText(format.format(ttc) + " " + devise);
         } catch (Exception e) {
-            // Ignorer les erreurs de parsing
+            // Ignorer
         }
     }
 
@@ -92,7 +101,6 @@ public class AjouterFactureController {
             return 0;
         }
         try {
-            // Remplacer la virgule par un point pour le parsing
             String cleanText = text.trim().replace(",", ".");
             return Double.parseDouble(cleanText);
         } catch (NumberFormatException e) {
@@ -101,7 +109,7 @@ public class AjouterFactureController {
     }
 
     public void setFournisseurs(List<Fournisseur> fournisseurs) {
-        comboFournisseur.setItems(javafx.collections.FXCollections.observableArrayList(fournisseurs));
+        comboFournisseur.setItems(FXCollections.observableArrayList(fournisseurs));
         comboFournisseur.setCellFactory(param -> new ListCell<Fournisseur>() {
             @Override
             protected void updateItem(Fournisseur item, boolean empty) {
@@ -140,7 +148,8 @@ public class AjouterFactureController {
             facture.setIdFournisseur(fournisseur.getIdFournisseur());
             facture.setMontantHt(parseMontant(txtMontantHt.getText()));
             facture.setMontantTva(parseMontant(txtMontantTva.getText()));
-            facture.setMontantTtc(parseMontant(txtMontantTtc.getText()));
+            facture.setMontantTtc(parseMontant(txtMontantTtc.getText().split(" ")[0])); // Prendre que le nombre
+            facture.setDevise(comboDevise.getValue());
             facture.setDateFacture(datePickerFacture.getValue());
             facture.setDateEcheance(datePickerEcheance.getValue());
             facture.setStatut(comboStatut.getValue());
@@ -185,6 +194,10 @@ public class AjouterFactureController {
             } catch (Exception e) {
                 erreurs.append("• Le montant HT n'est pas valide\n");
             }
+        }
+
+        if (comboDevise.getValue() == null) {
+            erreurs.append("• La devise est obligatoire\n");
         }
 
         if (datePickerFacture.getValue() == null) {
