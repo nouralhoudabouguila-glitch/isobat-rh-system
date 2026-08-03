@@ -1562,3 +1562,113 @@
 .notification-ref {
     -fx-text-fill: #666666 !important;
 }
+
+/* ── Style pour le Chatbot ── */
+.chatbot-container {
+    -fx-background-color: #F5F0EA;
+}
+
+.chatbot-user-message {
+    -fx-background-color: #4F6815;
+    -fx-text-fill: white;
+    -fx-padding: 10 14;
+    -fx-background-radius: 12;
+    -fx-max-width: 500;
+    -fx-wrap-text: true;
+}
+
+.chatbot-ai-message {
+    -fx-background-color: #F0E6DA;
+    -fx-padding: 10 14;
+    -fx-background-radius: 12;
+    -fx-max-width: 500;
+}
+
+.chatbot-system-message {
+    -fx-background-color: #FFF8E1;
+    -fx-padding: 12 16;
+    -fx-background-radius: 8;
+    -fx-max-width: 550;
+    -fx-border-color: #FFEDAB;
+    -fx-border-radius: 8;
+}
+
+.chatbot-input {
+    -fx-background-color: #F5F5F5;
+    -fx-background-radius: 20;
+    -fx-padding: 10 16;
+    -fx-border-color: #E0D8D0;
+    -fx-border-radius: 20;
+    -fx-pref-height: 40;
+}
+
+.chatbot-header {
+    -fx-background-color: #FFFFFF;
+    -fx-padding: 12 20;
+    -fx-border-color: #F0E6DA;
+    -fx-border-width: 0 0 1 0;
+}
+
+.chatbot-footer {
+    -fx-background-color: #FFFFFF;
+    -fx-padding: 10 20 15 20;
+    -fx-border-color: #F0E6DA;
+    -fx-border-width: 1 0 0 0;
+}
+/* ── Style pour le bouton Chatbot dans le header ── */
+.btn-chatbot {
+    -fx-font-size: 22px;
+    -fx-background-color: transparent;
+    -fx-cursor: hand;
+    -fx-padding: 4 8;
+    -fx-border-radius: 50%;
+    -fx-background-radius: 50%;
+}
+
+.btn-chatbot:hover {
+    -fx-background-color: #E8F0D8;
+    -fx-effect: dropshadow(gaussian, rgba(79,104,21,0.2), 8, 0, 0, 2);
+}
+
+/* Animation du chatbot */
+.btn-chatbot {
+    -fx-transition: all 0.3s ease;
+}
+
+.btn-chatbot:pressed {
+    -fx-scale-x: 0.9;
+    -fx-scale-y: 0.9;
+}
+/* ── Style pour le bouton Chatbot dans le header ── */
+.btn-chatbot-header {
+    -fx-font-size: 22px;
+    -fx-background-color: transparent;
+    -fx-cursor: hand;
+    -fx-padding: 4 8;
+    -fx-border-radius: 50%;
+    -fx-background-radius: 50%;
+    -fx-transition: all 0.3s ease;
+}
+
+.btn-chatbot-header:hover {
+    -fx-background-color: #E8F0D8;
+    -fx-effect: dropshadow(gaussian, rgba(79,104,21,0.3), 10, 0, 0, 2);
+    -fx-scale-x: 1.1;
+    -fx-scale-y: 1.1;
+}
+
+.btn-chatbot-header:pressed {
+    -fx-scale-x: 0.9;
+    -fx-scale-y: 0.9;
+}
+
+/* Animation d'attention pour le chatbot */
+.btn-chatbot-header-attention {
+    -fx-animation: pulse-chatbot 2s ease-in-out infinite;
+}
+
+@keyframes pulse-chatbot {
+    0% { -fx-scale-x: 1; -fx-scale-y: 1; }
+    50% { -fx-scale-x: 1.15; -fx-scale-y: 1.15; }
+    100% { -fx-scale-x: 1; -fx-scale-y: 1; }
+}

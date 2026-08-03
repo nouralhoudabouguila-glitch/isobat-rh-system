@@ -1,6 +1,7 @@
 package com.rh.contollers;
 
 import com.rh.models.Notification;
+import com.rh.scheduler.NotificationScheduler;
 import com.rh.services.ServiceNotification;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
@@ -45,10 +46,13 @@ public class MainController {
     @FXML
     private Label lblNotifBadge;
 
+    @FXML
+    private Button btnChatbotHeader; // UNIQUEMENT le bouton du header
+
     private PaieController paieController;
     private ServiceNotification serviceNotification;
     private Timeline notificationTimer;
-    private Stage panneauNotificationsStage; // Pour garder une référence
+    private Stage panneauNotificationsStage;
 
     @FXML
     public void initialize() {
@@ -59,13 +63,13 @@ public class MainController {
         serviceNotification.addListener(() -> {
             Platform.runLater(() -> {
                 mettreAJourBadgeNotifications();
-                // Si le panneau est ouvert, le rafraîchir
                 if (panneauNotificationsStage != null && panneauNotificationsStage.isShowing()) {
-                    ouvrirPanneauNotifications(); // Rafraîchir
+                    ouvrirPanneauNotifications();
                 }
             });
         });
 
+        // Configurer le sous-menu Recrutement
         if (btnRecrutement != null && subMenuRecrutement != null) {
             btnRecrutement.setOnAction(e -> {
                 boolean visible = subMenuRecrutement.isVisible();
@@ -75,10 +79,17 @@ public class MainController {
             });
         }
 
+        // Charger la page par défaut
         loadPage("dashboard", "Tableau de bord");
 
+        // Configurer les notifications
         if (btnNotifications != null) {
             btnNotifications.setOnAction(e -> ouvrirPanneauNotifications());
+        }
+
+        // Configurer le bouton Chatbot dans le header
+        if (btnChatbotHeader != null) {
+            btnChatbotHeader.setOnAction(e -> loadPage("chatbot", "🤖 Assistant RH"));
         }
 
         mettreAJourBadgeNotifications();
@@ -89,7 +100,10 @@ public class MainController {
      * Démarre la vérification périodique des notifications
      */
     private void demarrerVerificationNotifications() {
-        // Vérification toutes les 30 secondes (ou 1 minute)
+        // Vérification immédiate
+        verifierNotifications();
+
+        // Vérification toutes les 30 secondes
         notificationTimer = new Timeline(new KeyFrame(Duration.seconds(30), e -> {
             serviceNotification.actualiser();
             Platform.runLater(() -> mettreAJourBadgeNotifications());
@@ -98,6 +112,22 @@ public class MainController {
         notificationTimer.play();
 
         System.out.println("🔄 Vérification des notifications démarrée (toutes les 30 secondes)");
+    }
+
+    /**
+     * Vérifie les notifications
+     */
+    private void verifierNotifications() {
+        new Thread(() -> {
+            try {
+                serviceNotification.verifierEtGenererNotifications();
+                Platform.runLater(() -> {
+                    mettreAJourBadgeNotifications();
+                });
+            } catch (Exception e) {
+                System.err.println("Erreur lors de la vérification des notifications : " + e.getMessage());
+            }
+        }).start();
     }
 
     /**
@@ -136,7 +166,7 @@ public class MainController {
     }
 
     /**
-     * Ouvre le panneau de notifications avec rafraîchissement en temps réel
+     * Ouvre le panneau de notifications
      */
     @FXML
     private void onNotifications() {
@@ -148,11 +178,6 @@ public class MainController {
      */
     private void ouvrirPanneauNotifications() {
         try {
-            // Si la fenêtre est déjà ouverte, la refermer et la rouvrir
-            if (panneauNotificationsStage != null && panneauNotificationsStage.isShowing()) {
-                panneauNotificationsStage.close();
-            }
-
             List<Notification> notifications = serviceNotification.getAllNotifications();
             int nbNonLues = serviceNotification.compterNonLues();
 
@@ -164,7 +189,6 @@ public class MainController {
             panneauNotificationsStage.setWidth(700);
             panneauNotificationsStage.setHeight(600);
 
-            // ── Conteneur principal ──
             VBox root = new VBox(10);
             root.setStyle("-fx-background-color: #F5F0EA; -fx-padding: 20;");
             root.setPrefWidth(680);
@@ -183,15 +207,10 @@ public class MainController {
 
             // Bouton Actualiser
             Button btnRefresh = new Button("🔄");
-            btnRefresh.setStyle(
-                    "-fx-background-color: transparent; " +
-                            "-fx-font-size: 18px; " +
-                            "-fx-cursor: hand;"
-            );
+            btnRefresh.setStyle("-fx-background-color: transparent; -fx-font-size: 18px; -fx-cursor: hand;");
             btnRefresh.setTooltip(new Tooltip("Actualiser les notifications"));
             btnRefresh.setOnAction(e -> {
                 serviceNotification.actualiser();
-                // Fermer et rouvrir pour rafraîchir
                 panneauNotificationsStage.close();
                 ouvrirPanneauNotifications();
             });
@@ -199,7 +218,6 @@ public class MainController {
             Region spacer = new Region();
             HBox.setHgrow(spacer, Priority.ALWAYS);
 
-            // Bouton "Tout marquer comme lu"
             Button btnToutLu = new Button("✅ Tout marquer comme lu");
             btnToutLu.setStyle(
                     "-fx-background-color: #4F6815; " +
@@ -256,7 +274,7 @@ public class MainController {
 
             scrollPane.setContent(notifList);
 
-            // ── Footer avec info actualisation ──
+            // ── Footer ──
             HBox footer = new HBox(10);
             footer.setAlignment(Pos.CENTER_RIGHT);
             footer.setPadding(new Insets(10, 0, 0, 0));
@@ -316,7 +334,6 @@ public class MainController {
         lblTitre.setWrapText(true);
         HBox.setHgrow(lblTitre, Priority.ALWAYS);
 
-        // Indicateur "NON LU"
         if (!notif.isEstLue()) {
             Label lblNonLu = new Label("● NON LU");
             lblNonLu.setFont(Font.font("Segoe UI", FontWeight.BOLD, 9));
@@ -337,7 +354,6 @@ public class MainController {
         footer.setAlignment(Pos.CENTER_LEFT);
         footer.setPadding(new Insets(5, 0, 0, 0));
 
-        // Badge de priorité
         Label badge = new Label(notif.getBadgePriorite());
         badge.setFont(Font.font("Segoe UI", FontWeight.BOLD, 10));
         String couleurBadge = notif.getCouleurPriorite();
@@ -371,7 +387,6 @@ public class MainController {
         Region spacer = new Region();
         HBox.setHgrow(spacer, Priority.ALWAYS);
 
-        // Bouton d'action
         Button btnAction = new Button(notif.getActionLabel());
         btnAction.setStyle(
                 "-fx-background-color: transparent;" +
@@ -452,6 +467,9 @@ public class MainController {
 
     // ── Navigation ──
 
+    /**
+     * Charge une page dans le conteneur principal
+     */
     public void loadPage(String page, String title) {
         try {
             String fxmlPath = "/com/rh/views/" + page + ".fxml";
@@ -487,11 +505,30 @@ public class MainController {
 
     // ── Navigation ──
 
-    @FXML private void onDashboard() { loadPage("dashboard", "Tableau de bord"); }
-    @FXML private void onEmploye() { loadPage("employe", "Gestion des Employés"); }
-    @FXML private void onPresence() { loadPage("presence", "Gestion des Présences"); }
-    @FXML private void onConges() { loadPage("conges", "Gestion des Congés"); }
-    @FXML private void onPlanning() { loadPage("planning", "Planning"); }
+    @FXML
+    private void onDashboard() {
+        loadPage("dashboard", "Tableau de bord");
+    }
+
+    @FXML
+    private void onEmploye() {
+        loadPage("employe", "Gestion des Employés");
+    }
+
+    @FXML
+    private void onPresence() {
+        loadPage("presence", "Gestion des Présences");
+    }
+
+    @FXML
+    private void onConges() {
+        loadPage("conges", "Gestion des Congés");
+    }
+
+    @FXML
+    private void onPlanning() {
+        loadPage("planning", "Planning");
+    }
 
     @FXML
     private void onRecrutement() {
@@ -503,17 +540,66 @@ public class MainController {
         }
     }
 
-    @FXML private void onTriTelephonique() { loadPage("tri_telephonique", "Tri Téléphonique"); }
-    @FXML private void onEntretienPhysique() { loadPage("entretien_physique", "Entretien Physique"); }
-    @FXML private void onSessionFormation() { loadPage("session_formation", "Session de Formation"); }
-    @FXML private void onPaie() { loadPage("paie", "Gestion de la Paie"); }
-    @FXML private void onAvance() { loadPage("avance", "Demandes d'avance sur salaire"); }
-    @FXML private void onTicket() { loadPage("ticket", "Tickets Restaurant"); }
-    @FXML private void onRetenue() { loadPage("retenue", "Gestion des Retenues"); }
-    @FXML private void onDepense() { loadPage("depense", "Gestion des Dépenses"); }
-    @FXML private void onFacture() { loadPage("facture", "Gestion des Factures"); }
-    @FXML private void onFournisseur() { loadPage("fournisseur", "Gestion des Fournisseurs"); }
-    @FXML private void onParametres() { loadPage("parametres", "Paramètres"); }
+    @FXML
+    private void onTriTelephonique() {
+        loadPage("tri_telephonique", "Tri Téléphonique");
+    }
+
+    @FXML
+    private void onEntretienPhysique() {
+        loadPage("entretien_physique", "Entretien Physique");
+    }
+
+    @FXML
+    private void onSessionFormation() {
+        loadPage("session_formation", "Session de Formation");
+    }
+
+    @FXML
+    private void onPaie() {
+        loadPage("paie", "Gestion de la Paie");
+    }
+
+    @FXML
+    private void onAvance() {
+        loadPage("avance", "Demandes d'avance sur salaire");
+    }
+
+    @FXML
+    private void onTicket() {
+        loadPage("ticket", "Tickets Restaurant");
+    }
+
+    @FXML
+    private void onRetenue() {
+        loadPage("retenue", "Gestion des Retenues");
+    }
+
+    @FXML
+    private void onDepense() {
+        loadPage("depense", "Gestion des Dépenses");
+    }
+
+    @FXML
+    private void onFacture() {
+        loadPage("facture", "Gestion des Factures");
+    }
+
+    @FXML
+    private void onFournisseur() {
+        loadPage("fournisseur", "Gestion des Fournisseurs");
+    }
+
+    @FXML
+    private void onParametres() {
+        loadPage("parametres", "Paramètres");
+    }
+
+    // 🤖 Méthode pour le Chatbot
+    @FXML
+    private void onChatbot() {
+        loadPage("chatbot", "🤖 Assistant RH");
+    }
 
     @FXML
     private void onLogout() {

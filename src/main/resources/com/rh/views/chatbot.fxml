@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.geometry.Insets?>
+
+<BorderPane xmlns="http://javafx.com/javafx/17"
+            xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="com.rh.contollers.ChatbotController"
+            style="-fx-background-color: #F5F0EA;">
+
+    <top>
+        <HBox style="-fx-background-color: #FFFFFF; -fx-padding: 12 20; -fx-border-color: #F0E6DA; -fx-border-width: 0 0 1 0;">
+            <Label text="🤖 Assistant RH" style="-fx-font-size: 18px; -fx-font-weight: bold; -fx-text-fill: #1A1A1A;"/>
+            <Region HBox.hgrow="ALWAYS"/>
+            <Button text="💡 Exemples" onAction="#onExemples" styleClass="btn-secondary" style="-fx-font-size: 12px; -fx-padding: 4 12;"/>
+            <Button text="🧹 Effacer" onAction="#onEffacerChat" styleClass="btn-back" style="-fx-font-size: 12px; -fx-padding: 4 12;"/>
+        </HBox>
+    </top>
+
+    <center>
+        <VBox spacing="10" style="-fx-padding: 10;">
+            <ScrollPane fx:id="scrollPane" fitToWidth="true" style="-fx-background-color: transparent; -fx-background: transparent;">
+                <VBox fx:id="chatContainer" spacing="8" style="-fx-background-color: transparent; -fx-padding: 10;">
+                    <!-- Les messages seront ajoutés ici dynamiquement -->
+                </VBox>
+            </ScrollPane>
+        </VBox>
+    </center>
+
+    <bottom>
+        <VBox spacing="5" style="-fx-background-color: #FFFFFF; -fx-padding: 10 20 15 20; -fx-border-color: #F0E6DA; -fx-border-width: 1 0 0 0;">
+            <HBox spacing="10" alignment="CENTER">
+                <TextField fx:id="txtQuestion" promptText="Posez votre question..."
+                           style="-fx-background-color: #F5F5F5; -fx-background-radius: 20; -fx-padding: 10 16; -fx-border-color: #E0D8D0; -fx-border-radius: 20; -fx-pref-height: 40;"
+                           HBox.hgrow="ALWAYS"/>
+                <Button fx:id="btnEnvoyer" text="✉️ Envoyer" styleClass="btn-primary" style="-fx-padding: 8 20; -fx-border-radius: 20;"/>
+            </HBox>
+            <HBox alignment="CENTER">
+                <Label fx:id="lblStatut" text="✅ Prêt" style="-fx-font-size: 11px; -fx-text-fill: #888;"/>
+            </HBox>
+        </VBox>
+    </bottom>
+
+</BorderPane>
