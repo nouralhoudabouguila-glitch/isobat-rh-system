@@ -60,7 +60,7 @@ public class CongesController implements Initializable {
     private FilteredList<DemandeConge>   filteredList;
 
     private static final DateTimeFormatter FMT = DateTimeFormatter.ofPattern("dd/MM/yyyy");
-    private static final int SOLDE_INITIAL = 18; // Solde initial fixe de 18 jours
+    private static final int SOLDE_INITIAL = 18;
 
     // ── Initialize ────────────────────────────────────────────────────────────
 
@@ -232,18 +232,25 @@ public class CongesController implements Initializable {
                 d.getValue().getCommentaire() != null ? d.getValue().getCommentaire() : ""));
         colCommentaire.setCellFactory(col -> textCell("#999999", true));
 
-        // Actions
+        // ── Actions ──────────────────────────────────────────────────────────
         colActions.setCellFactory(col -> new TableCell<>() {
-            private final Button btnEdit = makeBtn("✏", "#FFF8F0", "#854F0B");
-            private final Button btnOk   = makeBtn("✔", "#F0F5E8", "#4F6815");
-            private final Button btnNo   = makeBtn("✕", "#FFF0F0", "#75070C");
-            private final Button btnDel  = makeBtn("🗑", "#FFF0F0", "#75070C");
+            // 🔥 CORRECTION : Utiliser des caractères ASCII ou Unicode
+            private final Button btnEdit = makeBtn("\u270F", "#FFF8F0", "#854F0B"); // ✏
+            private final Button btnOk   = makeBtn("\u2714", "#F0F5E8", "#4F6815"); // ✔
+            private final Button btnNo   = makeBtn("\u2716", "#FFF0F0", "#75070C"); // ✕
+            private final Button btnDel  = makeBtn("\uD83D\uDDD1", "#FFF0F0", "#75070C"); // 🗑 ou utiliser "🗑" en texte
 
             {
                 btnEdit.setOnAction(e -> openForm(getTableView().getItems().get(getIndex())));
                 btnOk.setOnAction(e -> handleApprouver(getTableView().getItems().get(getIndex())));
                 btnNo.setOnAction(e -> handleRefuser(getTableView().getItems().get(getIndex())));
                 btnDel.setOnAction(e -> handleDelete(getTableView().getItems().get(getIndex())));
+
+                // Ajouter des tooltips pour plus de clarté
+                Tooltip.install(btnEdit, new Tooltip("Modifier"));
+                Tooltip.install(btnOk, new Tooltip("Approuver"));
+                Tooltip.install(btnNo, new Tooltip("Refuser"));
+                Tooltip.install(btnDel, new Tooltip("Supprimer"));
             }
 
             @Override protected void updateItem(Void v, boolean empty) {
@@ -253,8 +260,11 @@ public class CongesController implements Initializable {
                 HBox box = new HBox(4);
                 box.setAlignment(Pos.CENTER_LEFT);
                 box.getChildren().add(btnEdit);
-                if (d.getStatut() == Statut.EN_ATTENTE) box.getChildren().addAll(btnOk, btnNo);
-                else box.getChildren().add(btnDel);
+                if (d.getStatut() == Statut.EN_ATTENTE) {
+                    box.getChildren().addAll(btnOk, btnNo);
+                } else {
+                    box.getChildren().add(btnDel);
+                }
                 setGraphic(box);
             }
         });
@@ -337,10 +347,6 @@ public class CongesController implements Initializable {
         } catch (Exception ex) { ex.printStackTrace(); }
     }
 
-    /**
-     * Approuve une demande et déduit automatiquement les jours du solde.
-     * Si le solde est insuffisant, la demande ne peut pas être approuvée.
-     */
     private void handleApprouver(DemandeConge d) {
         SoldeConge s = soldeService.getSolde(
                 d.getEmploye().getId(),
@@ -359,7 +365,6 @@ public class CongesController implements Initializable {
             if (bt != ButtonType.YES) return;
             int result = service.approuver(d);
             if (result == 1) {
-                // Solde insuffisant
                 Alert warn = new Alert(Alert.AlertType.WARNING);
                 warn.setTitle("Solde insuffisant");
                 warn.setHeaderText("Solde de " + d.getNomEmploye() + " insuffisant");
@@ -399,7 +404,8 @@ public class CongesController implements Initializable {
         Button b = new Button(text);
         b.setStyle("-fx-font-size:12;-fx-background-color:" + bg + ";-fx-text-fill:" + fg + ";" +
                 "-fx-background-radius:6;-fx-cursor:hand;-fx-border-color:transparent;" +
-                "-fx-min-width:28;-fx-min-height:28;");
+                "-fx-min-width:28;-fx-min-height:28;-fx-max-width:28;-fx-max-height:28;" +
+                "-fx-padding:0;-fx-alignment:CENTER;");
         return b;
     }
 

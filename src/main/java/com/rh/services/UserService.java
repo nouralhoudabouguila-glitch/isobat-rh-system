@@ -6,14 +6,25 @@ import com.rh.utils.IsobatDB;
 import java.sql.*;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Random;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class UserService {
 
     private final Connection cnx;
+    private final SmsService smsService;
+
+    // 🔥 Stockage des codes de réinitialisation (en mémoire)
+    // En production, utiliser Redis ou une table en base de données
+    private final Map<String, CodeVerification> resetCodes;
 
     public UserService() {
         this.cnx = IsobatDB.getInstance().getCnx();
+        this.smsService = new SmsService();
+        this.resetCodes = new ConcurrentHashMap<>();
     }
 
     // ── AUTHENTIFICATION ──────────────────────────────────────────────────────
@@ -150,6 +161,140 @@ public class UserService {
         return false;
     }
 
+    // ── 🔥 NOUVELLES MÉTHODES : RÉINITIALISATION PAR SMS ────────────────────
+
+    /**
+     * Récupère le numéro de téléphone d'un utilisateur par son email
+     */
+    public String getTelephoneByEmail(String email) {
+        String sql = "SELECT telephone FROM users WHERE email = ?";
+        try (PreparedStatement ps = cnx.prepareStatement(sql)) {
+            ps.setString(1, email.trim().toLowerCase());
+            ResultSet rs = ps.executeQuery();
+            if (rs.next()) {
+                return rs.getString("telephone");
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    /**
+     * Génère un code aléatoire à 6 chiffres
+     */
+    private String genererCode() {
+        Random random = new Random();
+        int code = 100000 + random.nextInt(900000);
+        return String.valueOf(code);
+    }
+
+    /**
+     * Envoie un code de réinitialisation par SMS
+     * @param email Email de l'utilisateur
+     * @return true si le SMS a été envoyé avec succès
+     */
+    public boolean envoyerCodeReinitialisation(String email) {
+        // Vérifier que l'email existe
+        if (!emailExists(email)) {
+            System.err.println("❌ Email non trouvé: " + email);
+            return false;
+        }
+
+        // Récupérer le téléphone
+        String telephone = getTelephoneByEmail(email);
+        if (telephone == null || telephone.trim().isEmpty()) {
+            System.err.println("❌ Aucun numéro de téléphone pour: " + email);
+            return false;
+        }
+
+        // Nettoyer le numéro (garder seulement les chiffres et le +)
+        telephone = telephone.replaceAll("[^\\d+]", "");
+
+        // Générer un code
+        String code = genererCode();
+
+        // Envoyer le SMS
+        boolean smsEnvoye = smsService.envoyerCodeReinitialisation(telephone, code);
+
+        if (smsEnvoye) {
+            // Stocker le code avec timestamp (valable 5 minutes)
+            resetCodes.put(email, new CodeVerification(code, LocalDateTime.now()));
+            System.out.println("✅ Code envoyé à " + email + " (tél: " + telephone + ")");
+            return true;
+        }
+
+        return false;
+    }
+
+    /**
+     * Vérifie si le code de réinitialisation est valide
+     */
+    public boolean verifierCode(String email, String code) {
+        CodeVerification stored = resetCodes.get(email);
+        if (stored == null) {
+            System.err.println("❌ Aucun code pour: " + email);
+            return false;
+        }
+
+        // Vérifier l'expiration (5 minutes)
+        if (stored.isExpired()) {
+            resetCodes.remove(email);
+            System.err.println("❌ Code expiré pour: " + email);
+            return false;
+        }
+
+        // Vérifier le code
+        boolean valide = stored.code.equals(code);
+        if (valide) {
+            System.out.println("✅ Code valide pour: " + email);
+        } else {
+            System.err.println("❌ Code invalide pour: " + email);
+        }
+        return valide;
+    }
+
+    /**
+     * Réinitialise le mot de passe après validation du code SMS
+     */
+    public boolean reinitialiserMotDePasse(String email, String code, String nouveauMotDePasse) {
+        // Vérifier le code
+        if (!verifierCode(email, code)) {
+            return false;
+        }
+
+        // Vérifier que le nouveau mot de passe est valide
+        if (nouveauMotDePasse == null || nouveauMotDePasse.length() < 6) {
+            System.err.println("❌ Mot de passe trop court (min 6 caractères)");
+            return false;
+        }
+
+        // Mettre à jour le mot de passe
+        String sql = "UPDATE users SET mot_de_passe = ? WHERE email = ?";
+        try (PreparedStatement ps = cnx.prepareStatement(sql)) {
+            ps.setString(1, nouveauMotDePasse);
+            ps.setString(2, email.trim().toLowerCase());
+            int affected = ps.executeUpdate();
+
+            if (affected > 0) {
+                // Supprimer le code utilisé
+                resetCodes.remove(email);
+                System.out.println("✅ Mot de passe réinitialisé pour: " + email);
+                return true;
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
+
+    /**
+     * Nettoie les codes expirés (à appeler périodiquement)
+     */
+    public void nettoyerCodesExpires() {
+        resetCodes.entrySet().removeIf(entry -> entry.getValue().isExpired());
+    }
+
     // ── ACTIVER / DÉSACTIVER ──────────────────────────────────────────────────
 
     public void toggleActif(int userId, boolean actif) {
@@ -195,5 +340,22 @@ public class UserService {
         if (updated != null) u.setUpdatedAt(updated.toLocalDateTime());
 
         return u;
+    }
+
+    // ── CLASSE INTERNE POUR LES CODES ──────────────────────────────────────
+
+    private static class CodeVerification {
+        private final String code;
+        private final LocalDateTime timestamp;
+        private static final int EXPIRATION_MINUTES = 5;
+
+        CodeVerification(String code, LocalDateTime timestamp) {
+            this.code = code;
+            this.timestamp = timestamp;
+        }
+
+        boolean isExpired() {
+            return LocalDateTime.now().isAfter(timestamp.plusMinutes(EXPIRATION_MINUTES));
+        }
     }
 }

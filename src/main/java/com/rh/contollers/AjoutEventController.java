@@ -23,7 +23,7 @@ public class AjoutEventController implements Initializable {
 
     @FXML private Label lblTitle;
     @FXML private TextField tfTitre;
-    @FXML private TextField tfDescription;
+    @FXML private TextArea tfDescription;
     @FXML private DatePicker dpDate;
     @FXML private TextField tfHeureDebut;
     @FXML private TextField tfHeureFin;
@@ -32,8 +32,9 @@ public class AjoutEventController implements Initializable {
     @FXML private ComboBox<PrioritePlanning> cbPriorite;
     @FXML private Label errTitre;
     @FXML private Label errDate;
-    @FXML private Label errForm;
-    @FXML private CheckBox cbSynchroGoogle;  // 🔥 AJOUTÉ
+    // 🔥 SUPPRIMÉ : @FXML private Label errForm;
+    @FXML private CheckBox cbSynchroGoogle;
+    @FXML private CheckBox cbEnvoyerEmail;
 
     private final PlanningService service = new PlanningService();
     private final EmailService emailService = new EmailService();
@@ -52,9 +53,11 @@ public class AjoutEventController implements Initializable {
         cbPriorite.setValue(PrioritePlanning.MOYENNE);
         dpDate.setValue(LocalDate.now());
 
-        // 🔥 Vérifier que cbSynchroGoogle n'est pas null
         if (cbSynchroGoogle != null) {
             cbSynchroGoogle.setSelected(true);
+        }
+        if (cbEnvoyerEmail != null) {
+            cbEnvoyerEmail.setSelected(true);
         }
     }
 
@@ -128,9 +131,8 @@ public class AjoutEventController implements Initializable {
             service.update(p);
         }
 
-        // ── Synchronisation avec Google Calendar ──────────────────────────
+        // ── Synchronisation Google Calendar ──────────────────────────
         if (cbSynchroGoogle != null && cbSynchroGoogle.isSelected()) {
-            // Exécuter dans un thread séparé pour ne pas bloquer l'UI
             new Thread(() -> {
                 boolean synchroOK = googleCalendarService.ajouterEvenement(p);
                 if (synchroOK) {
@@ -142,7 +144,7 @@ public class AjoutEventController implements Initializable {
         }
 
         // ── Email de confirmation ──────────────────────────────────────────
-        if (EmailConfig.EMAIL_ENABLED && isNew) {
+        if (EmailConfig.EMAIL_ENABLED && isNew && cbEnvoyerEmail != null && cbEnvoyerEmail.isSelected()) {
             String destinataire = EmailConfig.DESTINATAIRE_DEFAUT;
             if (SessionManager.getInstance().getCurrentUser() != null) {
                 destinataire = SessionManager.getInstance().getCurrentUser().getEmail();
@@ -176,8 +178,8 @@ public class AjoutEventController implements Initializable {
         errTitre.setManaged(false);
         errDate.setText("");
         errDate.setManaged(false);
-        errForm.setVisible(false);
-        errForm.setManaged(false);
+        // 🔥 SUPPRIMÉ : errForm.setVisible(false);
+        // 🔥 SUPPRIMÉ : errForm.setManaged(false);
     }
 
     private void close() {

@@ -7,7 +7,6 @@ import com.rh.models.Planning.TypePlanning;
 import com.rh.services.EmailService;
 import com.rh.services.GoogleCalendarService;
 import com.rh.services.PlanningService;
-import com.rh.services.TimerService;
 import com.rh.utils.EmailConfig;
 import com.rh.utils.SessionManager;
 import javafx.fxml.FXML;
@@ -29,6 +28,8 @@ import java.time.format.TextStyle;
 import java.util.List;
 import java.util.Locale;
 import java.util.ResourceBundle;
+import java.util.Timer;
+import java.util.TimerTask;
 
 public class PlanningController implements Initializable {
 
@@ -48,6 +49,9 @@ public class PlanningController implements Initializable {
     private LocalDate selectedDate;
     private List<Planning> allEvents;
 
+    // Timer pour les rappels
+    private Timer timer;
+
     private static final DateTimeFormatter FMT_DATE = DateTimeFormatter.ofPattern("dd/MM/yyyy");
 
     @Override
@@ -55,7 +59,6 @@ public class PlanningController implements Initializable {
         currentMonth = YearMonth.now();
         selectedDate = LocalDate.now();
 
-        // 🔥 Configuration du ScrollPane principal
         mainScrollPane.setFitToWidth(true);
         mainScrollPane.setVbarPolicy(ScrollPane.ScrollBarPolicy.AS_NEEDED);
         mainScrollPane.setHbarPolicy(ScrollPane.ScrollBarPolicy.NEVER);
@@ -72,7 +75,6 @@ public class PlanningController implements Initializable {
         calendrierGrid.getChildren().clear();
         calendrierGrid.getColumnConstraints().clear();
 
-        // 7 colonnes de taille égale
         for (int i = 0; i < 7; i++) {
             ColumnConstraints cc = new ColumnConstraints();
             cc.setPercentWidth(100.0 / 7);
@@ -91,14 +93,12 @@ public class PlanningController implements Initializable {
         int row = 0;
         int col = 0;
 
-        // Jours vides
         for (int i = 0; i < startOffset; i++) {
             VBox emptyCell = createDayCell(null);
             calendrierGrid.add(emptyCell, col, row);
             col++;
         }
 
-        // Jours du mois
         for (int day = 1; day <= daysInMonth; day++) {
             if (col == 7) {
                 col = 0;
@@ -112,7 +112,6 @@ public class PlanningController implements Initializable {
             col++;
         }
 
-        // RowConstraints pour que les cellules s'agrandissent
         calendrierGrid.getRowConstraints().clear();
         for (int r = 0; r <= row; r++) {
             RowConstraints rc = new RowConstraints();
@@ -122,7 +121,6 @@ public class PlanningController implements Initializable {
             calendrierGrid.getRowConstraints().add(rc);
         }
 
-        // 🔥 Hauteur minimale du GridPane pour le scroll
         int totalRows = row + 1;
         double minHeight = totalRows * 85;
         calendrierGrid.setMinHeight(minHeight);
@@ -266,22 +264,51 @@ public class PlanningController implements Initializable {
         Label type = new Label(p.getTypeLabel());
         type.setStyle("-fx-font-family:'Poppins';-fx-font-size:8;-fx-text-fill:#FFFFFF;-fx-background-color:#75070C;-fx-background-radius:10;-fx-padding:1 8 1 8;");
 
-        Button btnEdit = new Button("✏️");
-        btnEdit.setStyle("-fx-font-size:10;-fx-background-color:transparent;-fx-text-fill:#888888;-fx-cursor:hand;");
+        // 🔥 Boutons sans emoji inutile - style épuré
+        Button btnEdit = new Button("Modifier");
+        btnEdit.setStyle("-fx-font-family:'Poppins';-fx-font-size:9;-fx-background-color:#F0EAE4;-fx-text-fill:#333333;-fx-background-radius:4;-fx-padding:3 10 3 10;-fx-cursor:hand;");
         btnEdit.setOnAction(e -> openEditForm(p));
 
-        Button btnDelete = new Button("🗑️");
-        btnDelete.setStyle("-fx-font-size:10;-fx-background-color:transparent;-fx-text-fill:#888888;-fx-cursor:hand;");
+        Button btnDelete = new Button("Supprimer");
+        btnDelete.setStyle("-fx-font-family:'Poppins';-fx-font-size:9;-fx-background-color:#FFE8E8;-fx-text-fill:#75070C;-fx-background-radius:4;-fx-padding:3 10 3 10;-fx-cursor:hand;");
         btnDelete.setOnAction(e -> deleteEvent(p));
 
-        Label syncLabel = new Label("☁️");
-        syncLabel.setStyle("-fx-font-size:10;-fx-text-fill:#4285F4;");
-        Tooltip.install(syncLabel, new Tooltip("Synchronisé avec Google Calendar"));
+        // 🔥 Nouveau bouton "Voir détails"
+        Button btnDetails = new Button("Détails");
+        btnDetails.setStyle("-fx-font-family:'Poppins';-fx-font-size:9;-fx-background-color:#E6F1FB;-fx-text-fill:#0C447C;-fx-background-radius:4;-fx-padding:3 10 3 10;-fx-cursor:hand;");
+        btnDetails.setOnAction(e -> showEventDetails(p));
 
-        item.getChildren().addAll(colorDot, heure, titre, new Region(), type, syncLabel, btnEdit, btnDelete);
+        item.getChildren().addAll(colorDot, heure, titre, new Region(), type, btnDetails, btnEdit, btnDelete);
         HBox.setHgrow(titre, Priority.ALWAYS);
 
         return item;
+    }
+
+    // ── Affichage des détails d'un événement ─────────────────────────────
+
+    private void showEventDetails(Planning p) {
+        Alert alert = new Alert(Alert.AlertType.INFORMATION);
+        alert.setTitle("📋 Détails de l'événement");
+        alert.setHeaderText(p.getTitre());
+
+        String details = """
+            📅 Date : %s
+            ⏰ Horaire : %s
+            📍 Lieu : %s
+            📋 Type : %s
+            🔴 Priorité : %s
+            📝 Description : %s
+            """.formatted(
+                p.getDateStr(),
+                p.getHeureStr(),
+                p.getLieu() != null && !p.getLieu().isEmpty() ? p.getLieu() : "Non spécifié",
+                p.getTypeLabel(),
+                p.getPrioriteLabel(),
+                p.getDescription() != null && !p.getDescription().isEmpty() ? p.getDescription() : "Aucune description"
+        );
+
+        alert.setContentText(details);
+        alert.showAndWait();
     }
 
     // ── Formulaire en popup ─────────────────────────────────────────────────
@@ -313,7 +340,7 @@ public class PlanningController implements Initializable {
 
             Stage stage = new Stage();
             stage.setTitle(p == null ? "➕ Nouvel événement" : "✏️ Modifier l'événement");
-            stage.setScene(new Scene(root, 520, 620));
+            stage.setScene(new Scene(root, 520, 680));
             stage.initModality(Modality.APPLICATION_MODAL);
 
             if (calendrierGrid.getScene() != null) {
@@ -331,9 +358,17 @@ public class PlanningController implements Initializable {
     // ── Timer pour les rappels ─────────────────────────────────────────────
 
     private void startRappelTimer() {
-        TimerService.startTimer(() -> {
-            checkRappels();
-        }, 60000);
+        if (timer != null) {
+            timer.cancel();
+        }
+        timer = new Timer(true);
+        timer.scheduleAtFixedRate(new TimerTask() {
+            @Override
+            public void run() {
+                checkRappels();
+            }
+        }, 0, 60000);
+        System.out.println("⏰ Timer de rappel démarré");
     }
 
     // ── Vérification des rappels ───────────────────────────────────────────
@@ -422,6 +457,9 @@ public class PlanningController implements Initializable {
     }
 
     public void stop() {
-        TimerService.stopTimer();
+        if (timer != null) {
+            timer.cancel();
+            timer = null;
+        }
     }
 }

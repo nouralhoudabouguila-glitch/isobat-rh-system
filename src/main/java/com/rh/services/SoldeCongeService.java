@@ -5,12 +5,16 @@ import com.rh.models.SoldeConge;
 import com.rh.utils.IsobatDB;
 
 import java.sql.*;
+import java.time.LocalDate;
+import java.time.YearMonth;
 import java.util.ArrayList;
 import java.util.List;
 
 public class SoldeCongeService {
 
     private final Connection cnx;
+    private static final double SOLDE_ANNUEL = 18.0;
+    private static final double ACQUISITION_PAR_MOIS = SOLDE_ANNUEL / 12; // 1.5 jours par mois
 
     public SoldeCongeService() {
         this.cnx = IsobatDB.getInstance().getCnx();
@@ -35,21 +39,7 @@ public class SoldeCongeService {
         } catch (SQLException e) { e.printStackTrace(); }
     }
 
-    // ── GET BY EMPLOYE + ANNEE ───────────────────────────────────────────────
-
-    public List<SoldeConge> getByEmploye(int employeId, int annee) {
-        List<SoldeConge> list = new ArrayList<>();
-        String sql = "SELECT * FROM solde_conge WHERE employe_id=? AND annee=?";
-        try (PreparedStatement ps = cnx.prepareStatement(sql)) {
-            ps.setInt(1, employeId);
-            ps.setInt(2, annee);
-            ResultSet rs = ps.executeQuery();
-            while (rs.next()) list.add(map(rs, employeId));
-        } catch (SQLException e) { e.printStackTrace(); }
-        return list;
-    }
-
-    // ── GET SOLDE SPECIFIQUE ─────────────────────────────────────────────────
+    // ── GET SOLDE SPÉCIFIQUE ─────────────────────────────────────────────────
 
     public SoldeConge getSolde(int employeId, String typeConge, int annee) {
         String sql = "SELECT * FROM solde_conge WHERE employe_id=? AND type_conge=? AND annee=?";
@@ -63,11 +53,11 @@ public class SoldeCongeService {
         return null;
     }
 
-    // ── GET ALL (tous employés, année courante) ──────────────────────────────
+    // ── GET ALL ──────────────────────────────────────────────────────────────
 
     public List<SoldeConge> getAllAnnee(int annee) {
         List<SoldeConge> list = new ArrayList<>();
-        String sql = "SELECT sc.*, e.nom, e.prenom, e.profil FROM solde_conge sc " +
+        String sql = "SELECT sc.*, e.nom, e.prenom, e.profil, e.dateEmbauche FROM solde_conge sc " +
                 "JOIN employe e ON sc.employe_id = e.id WHERE sc.annee=? ORDER BY e.nom";
         try (PreparedStatement ps = cnx.prepareStatement(sql)) {
             ps.setInt(1, annee);
@@ -93,7 +83,7 @@ public class SoldeCongeService {
         } catch (SQLException e) { e.printStackTrace(); }
     }
 
-    // ── CONSOMMER (appelé quand demande approuvée, mode = SOLDE) ─────────────
+    // ── CONSOMMER ─────────────────────────────────────────────────────────────
 
     public void consommer(int employeId, String typeConge, int annee, double jours) {
         String sql = "UPDATE solde_conge SET solde_consomme = solde_consomme + ?, " +
@@ -106,7 +96,7 @@ public class SoldeCongeService {
         } catch (SQLException e) { e.printStackTrace(); }
     }
 
-    // ── RESTITUER (appelé quand demande annulée/supprimée) ───────────────────
+    // ── RESTITUER ─────────────────────────────────────────────────────────────
 
     public void restituer(int employeId, String typeConge, int annee, double jours) {
         String sql = "UPDATE solde_conge SET solde_consomme = GREATEST(0, solde_consomme - ?), " +
@@ -119,20 +109,79 @@ public class SoldeCongeService {
         } catch (SQLException e) { e.printStackTrace(); }
     }
 
-    // ── INIT SOLDES ANNUELS ──────────────────────────────────────────────────
+    // ── CALCUL DU SOLDE SELON LA DATE D'EMBAUCHE ────────────────────────────
 
     /**
-     * Initialise le solde annuel pour un employé (appelé en début d'année ou
-     * à l'embauche).
+     * Calcule le solde de congés pour un employé selon sa date d'embauche.
+     * Règle ISOBAT : 1.5 jour par mois travaillé dans l'année.
      *
-     * Règle ISOBAT : le congé ANNUEL est toujours de 18 jours/an, quel que
-     * soit l'employé. (Les autres types ci-dessous sont indicatifs — à
-     * adapter/retirer si votre convention ne les suit pas via ce mécanisme
-     * de solde.)
+     * @param emp L'employé
+     * @param annee L'année de référence
+     * @return Le solde calculé (arrondi à 0.5 près)
      */
-    public void initSoldesAnnuels(Employe emp, int annee) {
-        String[] types  = {"ANNUEL", "MALADIE", "EXCEPTIONNEL"};
-        double[] soldes = {18,        15,         5};
+    public double calculerSolde(Employe emp, int annee) {
+        if (emp.getDateEmbauche() == null) {
+            return 0;
+        }
+
+        LocalDate dateEmbauche = emp.getDateEmbauche();
+        int moisEmbauche = dateEmbauche.getMonthValue();
+        int anneeEmbauche = dateEmbauche.getYear();
+
+        // Si l'employé a été embauché après le 1er juillet, il n'a pas de congé cette année
+        // (Règle ISOBAT : les congés sont pris en Août et Décembre)
+        if (anneeEmbauche == annee && moisEmbauche > 6) {
+            return 0;
+        }
+
+        // Si l'employé a été embauché l'année précédente ou avant, il a 18 jours
+        if (anneeEmbauche < annee) {
+            return SOLDE_ANNUEL;
+        }
+
+        // Calcul des mois travaillés (de la date d'embauche à Juin)
+        int moisTravailles = 0;
+        if (anneeEmbauche == annee) {
+            // De Janvier à Juin (période d'acquisition)
+            for (int m = moisEmbauche; m <= 6; m++) {
+                // Vérifier si l'employé a travaillé tout le mois
+                // (on considère que si embauché après le 15, le mois ne compte pas)
+                if (dateEmbauche.getDayOfMonth() <= 15) {
+                    moisTravailles++;
+                } else {
+                    // Si embauché après le 15, on ne compte que le mois suivant
+                    if (m > moisEmbauche) {
+                        moisTravailles++;
+                    }
+                }
+            }
+        }
+
+        double solde = moisTravailles * ACQUISITION_PAR_MOIS;
+
+        // Arrondir à 0.5 près (ex: 4.5, 6.0, 7.5)
+        solde = Math.round(solde * 2) / 2.0;
+
+        return Math.min(solde, SOLDE_ANNUEL);
+    }
+
+    /**
+     * Initialise le solde pour un employé pour une année donnée.
+     * Utilise la date d'embauche pour calculer le solde.
+     */
+    public void initSolde(Employe emp, int annee) {
+        // Ne pas initialiser pour les employés qui n'ont pas encore de droit
+        if (emp.getDateEmbauche() == null) {
+            return;
+        }
+
+        double solde = calculerSolde(emp, annee);
+
+        // Pour les autres types de congés (maladie, exceptionnel, etc.)
+        // On initialise avec des valeurs par défaut (à ajuster selon les règles de l'entreprise)
+        String[] types = {"ANNUEL", "MALADIE", "EXCEPTIONNEL"};
+        double[] soldes = {solde, 15, 5}; // MALADIE: 15 jours, EXCEPTIONNEL: 5 jours
+
         for (int i = 0; i < types.length; i++) {
             SoldeConge existing = getSolde(emp.getId(), types[i], annee);
             if (existing == null) {
@@ -142,7 +191,15 @@ public class SoldeCongeService {
         }
     }
 
-    // ── MAP ResultSet ────────────────────────────────────────────────────────
+    /**
+     * Initialise les soldes pour tous les employés pour une année donnée.
+     * À appeler en début d'année ou lors de l'ajout d'un nouvel employé.
+     */
+    public void initSoldesAnnuels(Employe emp, int annee) {
+        initSolde(emp, annee);
+    }
+
+    // ── MAP ───────────────────────────────────────────────────────────────────
 
     private SoldeConge map(ResultSet rs, int employeId) throws SQLException {
         SoldeConge s = new SoldeConge();
@@ -151,6 +208,10 @@ public class SoldeCongeService {
         emp.setId(employeId);
         try { emp.setNom(rs.getString("nom")); } catch (Exception ignored) {}
         try { emp.setPrenom(rs.getString("prenom")); } catch (Exception ignored) {}
+        try {
+            Date d = rs.getDate("dateEmbauche");
+            if (d != null) emp.setDateEmbauche(d.toLocalDate());
+        } catch (Exception ignored) {}
         s.setEmploye(emp);
         s.setAnnee(rs.getInt("annee"));
         s.setTypeConge(rs.getString("type_conge"));

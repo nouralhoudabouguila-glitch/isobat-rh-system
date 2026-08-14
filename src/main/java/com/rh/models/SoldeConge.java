@@ -2,6 +2,11 @@ package com.rh.models;
 
 public class SoldeConge {
 
+    // ── Constantes ────────────────────────────────────────────────────────────
+    public static final double SOLDE_ANNUEL_TOTAL = 18.0;
+    public static final double ACQUISITION_PAR_MOIS = SOLDE_ANNUEL_TOTAL / 12; // 1.5 jours par mois
+
+    // ── Attributs ─────────────────────────────────────────────────────────────
     private int id;
     private Employe employe;
     private int annee;

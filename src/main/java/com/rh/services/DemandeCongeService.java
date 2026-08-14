@@ -90,7 +90,6 @@ public class DemandeCongeService {
     // ── DELETE ────────────────────────────────────────────────────────────────
 
     public void delete(DemandeConge d) {
-        // Si approuvée → restituer les jours
         if (d.getStatut() == DemandeConge.Statut.APPROUVE) {
             soldeService.restituer(d.getEmploye().getId(),
                     d.getTypeConge().name(), LocalDate.now().getYear(), d.getNombreJours());
@@ -102,41 +101,57 @@ public class DemandeCongeService {
         } catch (SQLException e) { e.printStackTrace(); }
     }
 
-    // ── APPROUVER (simplifié) ────────────────────────────────────────────────
+    // ── APPROUVER ─────────────────────────────────────────────────────────────
 
     /**
-     * Approve une demande et déduit automatiquement les jours du solde
+     * Approuve une demande et déduit automatiquement les jours du solde.
+     * Vérifie d'abord si le solde est suffisant selon la règle ISOBAT.
      * Retourne : 0 = OK, 1 = solde insuffisant
      */
     public int approuver(DemandeConge d) {
-        // Vérifie le solde disponible
-        SoldeConge solde = soldeService.getSolde(
-                d.getEmploye().getId(),
-                d.getTypeConge().name(),
-                LocalDate.now().getYear()
-        );
+        Employe emp = d.getEmploye();
+        int annee = LocalDate.now().getYear();
 
-        // Initialise le solde à 18j si inexistant
-        if (solde == null) {
-            soldeService.initSoldesAnnuels(d.getEmploye(), LocalDate.now().getYear());
-            solde = soldeService.getSolde(
-                    d.getEmploye().getId(), d.getTypeConge().name(), LocalDate.now().getYear());
+        // Vérifier si l'employé a droit à des congés cette année
+        // (Règle ISOBAT : embauché après Juillet = pas de congé cette année)
+        if (emp.getDateEmbauche() != null) {
+            int moisEmbauche = emp.getDateEmbauche().getMonthValue();
+            int anneeEmbauche = emp.getDateEmbauche().getYear();
+
+            // Si embauché après le 1er juillet, pas de congé cette année
+            if (anneeEmbauche == annee && moisEmbauche > 6) {
+                return 1; // Pas de droit aux congés
+            }
         }
 
-        // Vérifie si le solde est suffisant
+        // Vérifier le solde disponible
+        SoldeConge solde = soldeService.getSolde(
+                emp.getId(),
+                d.getTypeConge().name(),
+                annee
+        );
+
+        // Initialiser le solde si inexistant (avec calcul selon date d'embauche)
+        if (solde == null) {
+            soldeService.initSoldesAnnuels(emp, annee);
+            solde = soldeService.getSolde(
+                    emp.getId(), d.getTypeConge().name(), annee);
+        }
+
+        // Vérifier si le solde est suffisant
         if (solde != null && solde.getSoldeRestant() < d.getNombreJours()) {
             return 1; // solde insuffisant
         }
 
-        // Approuve la demande
+        // Approuver la demande
         d.setStatut(DemandeConge.Statut.APPROUVE);
         update(d);
 
-        // Décrémente le solde
+        // Décrémenter le solde
         soldeService.consommer(
-                d.getEmploye().getId(),
+                emp.getId(),
                 d.getTypeConge().name(),
-                LocalDate.now().getYear(),
+                annee,
                 d.getNombreJours()
         );
         return 0; // OK

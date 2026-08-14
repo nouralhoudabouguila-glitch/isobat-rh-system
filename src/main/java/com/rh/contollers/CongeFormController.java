@@ -17,38 +17,35 @@ import javafx.util.StringConverter;
 
 import java.net.URL;
 import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.ResourceBundle;
 
 public class CongeFormController implements Initializable {
 
-    // Employé
+    // ── FXML ─────────────────────────────────────────────────────────────────
     @FXML private ComboBox<Employe> cbEmploye;
     @FXML private Label lblPoste;
     @FXML private Label lblSoldeRestant;
     @FXML private Label lblSoldeInitial;
     @FXML private HBox soldeBox;
 
-    // Type de congé
     @FXML private ToggleButton tbTypeAnnuel;
     @FXML private ToggleButton tbTypeMaladie;
     @FXML private ToggleButton tbTypeExceptionnel;
     @FXML private ToggleButton tbTypeSansSolde;
     @FXML private ToggleButton tbTypeRecup;
 
-    // Dates
     @FXML private DatePicker dpDebut;
     @FXML private DatePicker dpFin;
     @FXML private Label lblNbJours;
 
-    // Infos complémentaires
     @FXML private TextField tfRemplacant;
     @FXML private ToggleButton tbStatutAttente;
     @FXML private ToggleButton tbStatutApprouve;
     @FXML private ToggleButton tbStatutRefuse;
     @FXML private TextArea taCommentaire;
 
-    // Labels erreur
     @FXML private Label errEmploye;
     @FXML private Label errType;
     @FXML private Label errDebut;
@@ -58,14 +55,18 @@ public class CongeFormController implements Initializable {
     @FXML private Button btnCancel;
     @FXML private Button btnSave;
 
+    // ── Services ──────────────────────────────────────────────────────────────
     private final DemandeCongeService service = new DemandeCongeService();
     private final EmployeService employeService = new EmployeService();
     private final SoldeCongeService soldeService = new SoldeCongeService();
 
+    // ── Attributs ─────────────────────────────────────────────────────────────
     private DemandeConge editing = null;
     private CongesController parent;
 
-    // Styles ToggleButton
+    private static final DateTimeFormatter FMT_DATE = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+
+    // ── Styles ToggleButton ──────────────────────────────────────────────────
     private static final String TB_OFF =
             "-fx-font-family:'Poppins';-fx-font-size:11;-fx-font-weight:bold;" +
                     "-fx-background-color:#FFFFFF;-fx-border-color:#E0D0BE;" +
@@ -109,13 +110,14 @@ public class CongeFormController implements Initializable {
                     "-fx-border-radius:8;-fx-background-radius:8;-fx-border-width:1.5;" +
                     "-fx-text-fill:#75070C;-fx-cursor:hand;-fx-padding:8 12 8 12;";
 
+    // ── Initialize ────────────────────────────────────────────────────────────
+
     @Override
     public void initialize(URL url, ResourceBundle rb) {
         setupEmployeCombo();
         setupToggleGroups();
         setupToggleStyles();
         setupDateListeners();
-        // Défaut : En attente
         tbStatutAttente.setSelected(true);
     }
 
@@ -131,11 +133,11 @@ public class CongeFormController implements Initializable {
             @Override public Employe fromString(String s) { return null; }
         });
 
-        // Quand on sélectionne un employé → affiche le poste + le solde
         cbEmploye.valueProperty().addListener((obs, old, emp) -> {
             if (emp == null) {
                 lblPoste.setText("—");
-                soldeBox.setVisible(false); soldeBox.setManaged(false);
+                soldeBox.setVisible(false);
+                soldeBox.setManaged(false);
                 return;
             }
             lblPoste.setText(emp.getProfil() != null ? emp.getProfil() : "—");
@@ -151,7 +153,6 @@ public class CongeFormController implements Initializable {
         tbTypeSansSolde.setToggleGroup(typeGroup);
         tbTypeRecup.setToggleGroup(typeGroup);
 
-        // Quand type change → refresh solde
         typeGroup.selectedToggleProperty().addListener((obs, old, n) -> {
             Employe emp = cbEmploye.getValue();
             if (emp != null) refreshSolde(emp);
@@ -164,12 +165,12 @@ public class CongeFormController implements Initializable {
     }
 
     private void setupToggleStyles() {
-        // Types
         for (ToggleButton tb : new ToggleButton[]{
                 tbTypeAnnuel, tbTypeMaladie, tbTypeExceptionnel, tbTypeSansSolde, tbTypeRecup
-        }) tb.selectedProperty().addListener((o, was, is) -> tb.setStyle(is ? TB_ON : TB_OFF));
+        }) {
+            tb.selectedProperty().addListener((o, was, is) -> tb.setStyle(is ? TB_ON : TB_OFF));
+        }
 
-        // Statuts
         tbStatutAttente.selectedProperty().addListener((o, was, is) ->
                 tbStatutAttente.setStyle(is ? STATUT_ATTENTE_ON : STATUT_ATTENTE_OFF));
         tbStatutApprouve.selectedProperty().addListener((o, was, is) ->
@@ -178,15 +179,14 @@ public class CongeFormController implements Initializable {
                 tbStatutRefuse.setStyle(is ? STATUT_NO_ON : STATUT_NO_OFF));
     }
 
-    /** Calcule automatiquement les jours ouvrables quand les dates changent */
     private void setupDateListeners() {
         dpDebut.valueProperty().addListener((obs, o, n) -> updateJours());
-        dpFin.valueProperty().addListener((obs, o, n)   -> updateJours());
+        dpFin.valueProperty().addListener((obs, o, n) -> updateJours());
     }
 
     private void updateJours() {
         LocalDate debut = dpDebut.getValue();
-        LocalDate fin   = dpFin.getValue();
+        LocalDate fin = dpFin.getValue();
         if (debut != null && fin != null && !fin.isBefore(debut)) {
             int jours = DemandeCongeService.calculerJoursOuvrables(debut, fin);
             lblNbJours.setText(jours + " jour" + (jours > 1 ? "s" : ""));
@@ -195,60 +195,74 @@ public class CongeFormController implements Initializable {
         }
     }
 
+    /**
+     * Rafraîchit le solde affiché en utilisant le calcul selon la date d'embauche
+     */
     private void refreshSolde(Employe emp) {
         TypeConge type = getTypeConge();
         if (type == null) {
-            soldeBox.setVisible(false); soldeBox.setManaged(false);
+            soldeBox.setVisible(false);
+            soldeBox.setManaged(false);
             return;
         }
-        SoldeConge solde = soldeService.getSolde(
-                emp.getId(), type.name(), LocalDate.now().getYear()
-        );
+
+        int annee = LocalDate.now().getYear();
+        SoldeConge solde = soldeService.getSolde(emp.getId(), type.name(), annee);
+
+        if (solde == null) {
+            soldeService.initSoldesAnnuels(emp, annee);
+            solde = soldeService.getSolde(emp.getId(), type.name(), annee);
+        }
+
         if (solde != null) {
-            lblSoldeRestant.setText((int) solde.getSoldeRestant() + " jours restants");
-            lblSoldeInitial.setText("sur 18 initiaux");
-            soldeBox.setVisible(true); soldeBox.setManaged(true);
+            double restant = solde.getSoldeRestant();
+            lblSoldeRestant.setText((int) restant + " jours restants");
+            lblSoldeInitial.setText("sur " + (int) solde.getSoldeInitial() + " initiaux");
+            soldeBox.setVisible(true);
+            soldeBox.setManaged(true);
         } else {
-            soldeBox.setVisible(false); soldeBox.setManaged(false);
+            soldeBox.setVisible(false);
+            soldeBox.setManaged(false);
         }
     }
 
     // ── Setters ───────────────────────────────────────────────────────────────
 
-    public void setParent(CongesController parent) { this.parent = parent; }
+    public void setParent(CongesController parent) {
+        this.parent = parent;
+    }
 
     public void setDemande(DemandeConge d) {
         this.editing = d;
         if (d == null) return;
         if (lblFormTitle != null) lblFormTitle.setText("Modifier la demande");
 
-        // Employé
         cbEmploye.getItems().stream()
                 .filter(e -> e.getId() == d.getEmploye().getId())
                 .findFirst().ifPresent(cbEmploye::setValue);
 
-        // Type
-        if (d.getTypeConge() != null) switch (d.getTypeConge()) {
-            case ANNUEL       -> tbTypeAnnuel.setSelected(true);
-            case MALADIE      -> tbTypeMaladie.setSelected(true);
-            case EXCEPTIONNEL -> tbTypeExceptionnel.setSelected(true);
-            case SANS_SOLDE   -> tbTypeSansSolde.setSelected(true);
-            case RECUPERATION -> tbTypeRecup.setSelected(true);
+        if (d.getTypeConge() != null) {
+            switch (d.getTypeConge()) {
+                case ANNUEL -> tbTypeAnnuel.setSelected(true);
+                case MALADIE -> tbTypeMaladie.setSelected(true);
+                case EXCEPTIONNEL -> tbTypeExceptionnel.setSelected(true);
+                case SANS_SOLDE -> tbTypeSansSolde.setSelected(true);
+                case RECUPERATION -> tbTypeRecup.setSelected(true);
+            }
         }
 
-        // Dates
         dpDebut.setValue(d.getDateDebut());
         dpFin.setValue(d.getDateFin());
 
-        // Remplaçant + Commentaire
         tfRemplacant.setText(d.getRemplacant() != null ? d.getRemplacant() : "");
         taCommentaire.setText(d.getCommentaire() != null ? d.getCommentaire() : "");
 
-        // Statut
-        if (d.getStatut() != null) switch (d.getStatut()) {
-            case APPROUVE -> tbStatutApprouve.setSelected(true);
-            case REFUSE   -> tbStatutRefuse.setSelected(true);
-            default       -> tbStatutAttente.setSelected(true);
+        if (d.getStatut() != null) {
+            switch (d.getStatut()) {
+                case APPROUVE -> tbStatutApprouve.setSelected(true);
+                case REFUSE -> tbStatutRefuse.setSelected(true);
+                default -> tbStatutAttente.setSelected(true);
+            }
         }
     }
 
@@ -273,15 +287,10 @@ public class CongeFormController implements Initializable {
 
         if (editing == null) {
             service.add(d);
-            // Si directement approuvé → décrémenter le solde
             if (d.getStatut() == Statut.APPROUVE) {
                 int result = service.approuver(d);
                 if (result == 1) {
-                    Alert warn = new Alert(Alert.AlertType.WARNING);
-                    warn.setTitle("Solde insuffisant");
-                    warn.setHeaderText("Solde insuffisant");
-                    warn.setContentText("Le solde de l'employé est insuffisant pour approuver cette demande.");
-                    warn.showAndWait();
+                    showSoldeInsuffisantAlert(d);
                     return;
                 }
             }
@@ -294,56 +303,127 @@ public class CongeFormController implements Initializable {
     }
 
     @FXML
-    private void handleCancel() { close(); }
+    private void handleCancel() {
+        close();
+    }
 
     // ── Validation ────────────────────────────────────────────────────────────
 
     private boolean validateFields() {
         boolean ok = true;
-        String errStyle = "-fx-font-family:'Poppins';-fx-font-size:12;-fx-padding:9 12 9 12;" +
-                "-fx-background-color:#FFF5F5;-fx-border-color:#75070C;" +
-                "-fx-border-radius:8;-fx-background-radius:8;-fx-border-width:1.5;";
 
         if (cbEmploye.getValue() == null) {
-            errEmploye.setText("Veuillez sélectionner un employé"); ok = false;
+            errEmploye.setText("Veuillez sélectionner un employé");
+            ok = false;
         }
         if (getTypeConge() == null) {
-            errType.setText("Veuillez choisir un type de congé"); ok = false;
+            errType.setText("Veuillez choisir un type de congé");
+            ok = false;
         }
         if (dpDebut.getValue() == null) {
-            errDebut.setText("Date de début obligatoire"); ok = false;
+            errDebut.setText("Date de début obligatoire");
+            ok = false;
         }
         if (dpFin.getValue() == null) {
-            errFin.setText("Date de fin obligatoire"); ok = false;
+            errFin.setText("Date de fin obligatoire");
+            ok = false;
         }
         if (dpDebut.getValue() != null && dpFin.getValue() != null
                 && dpFin.getValue().isBefore(dpDebut.getValue())) {
-            errFin.setText("La date de fin doit être après la date de début"); ok = false;
+            errFin.setText("La date de fin doit être après la date de début");
+            ok = false;
         }
+
+        // Vérification ISOBAT : les congés annuels doivent être en Août ou Décembre
+        if (dpDebut.getValue() != null && dpFin.getValue() != null
+                && getTypeConge() == TypeConge.ANNUEL) {
+            LocalDate debut = dpDebut.getValue();
+            LocalDate fin = dpFin.getValue();
+            int moisDebut = debut.getMonthValue();
+            int moisFin = fin.getMonthValue();
+
+            boolean estEnAout = (moisDebut == 8 || moisFin == 8);
+            boolean estEnDecembre = (moisDebut == 12 || moisFin == 12);
+
+            if (!estEnAout && !estEnDecembre) {
+                Alert warning = new Alert(Alert.AlertType.WARNING);
+                warning.setTitle("Période de congé");
+                warning.setHeaderText("⚠️ Période non standard");
+                warning.setContentText("Selon la règle ISOBAT, les congés annuels sont pris en Août ou Décembre.\n" +
+                        "La période demandée (" + debut.format(FMT_DATE) + " - " + fin.format(FMT_DATE) + ") est en dehors de ces mois.\n\n" +
+                        "Souhaitez-vous continuer ?");
+                ButtonType continuer = new ButtonType("Continuer quand même");
+                ButtonType annuler = new ButtonType("Annuler", ButtonBar.ButtonData.CANCEL_CLOSE);
+                warning.getButtonTypes().setAll(continuer, annuler);
+
+                var result = warning.showAndWait();
+                if (result.isPresent() && result.get() == annuler) {
+                    return false;
+                }
+            }
+        }
+
         return ok;
     }
 
     private void clearErrors() {
-        errEmploye.setText(""); errType.setText("");
-        errDebut.setText(""); errFin.setText("");
+        errEmploye.setText("");
+        errType.setText("");
+        errDebut.setText("");
+        errFin.setText("");
     }
 
-    private void close() { ((Stage) btnCancel.getScene().getWindow()).close(); }
+    private void close() {
+        ((Stage) btnCancel.getScene().getWindow()).close();
+    }
+
+    // ── Alertes ───────────────────────────────────────────────────────────────
+
+    private void showSoldeInsuffisantAlert(DemandeConge d) {
+        Employe emp = d.getEmploye();
+        Alert warn = new Alert(Alert.AlertType.WARNING);
+        warn.setTitle("Solde insuffisant");
+        warn.setHeaderText("Solde insuffisant");
+
+        String msg = "L'employé " + emp.getNom() + " " + emp.getPrenom() + " n'a pas assez de jours de congé.\n\n";
+
+        if (emp.getDateEmbauche() != null) {
+            int annee = LocalDate.now().getYear();
+            int moisEmbauche = emp.getDateEmbauche().getMonthValue();
+            int anneeEmbauche = emp.getDateEmbauche().getYear();
+
+            if (anneeEmbauche == annee && moisEmbauche > 6) {
+                msg += "⚠️ Employé embauché après le 1er Juillet " + annee + ".\n";
+                msg += "Selon la règle ISOBAT, il n'a pas droit aux congés cette année.\n";
+                msg += "Il devra attendre l'année prochaine.";
+            } else {
+                SoldeConge solde = soldeService.getSolde(emp.getId(), d.getTypeConge().name(), annee);
+                if (solde != null) {
+                    msg += "Solde restant : " + (int) solde.getSoldeRestant() + " jours\n";
+                    msg += "Jours demandés : " + d.getNombreJours() + " jours\n";
+                    msg += "Il manque " + (d.getNombreJours() - (int) solde.getSoldeRestant()) + " jours.";
+                }
+            }
+        }
+
+        warn.setContentText(msg);
+        warn.showAndWait();
+    }
 
     // ── Helpers ───────────────────────────────────────────────────────────────
 
     private TypeConge getTypeConge() {
-        if (tbTypeAnnuel.isSelected())       return TypeConge.ANNUEL;
-        if (tbTypeMaladie.isSelected())      return TypeConge.MALADIE;
+        if (tbTypeAnnuel.isSelected()) return TypeConge.ANNUEL;
+        if (tbTypeMaladie.isSelected()) return TypeConge.MALADIE;
         if (tbTypeExceptionnel.isSelected()) return TypeConge.EXCEPTIONNEL;
-        if (tbTypeSansSolde.isSelected())    return TypeConge.SANS_SOLDE;
-        if (tbTypeRecup.isSelected())        return TypeConge.RECUPERATION;
+        if (tbTypeSansSolde.isSelected()) return TypeConge.SANS_SOLDE;
+        if (tbTypeRecup.isSelected()) return TypeConge.RECUPERATION;
         return null;
     }
 
     private Statut getStatut() {
         if (tbStatutApprouve.isSelected()) return Statut.APPROUVE;
-        if (tbStatutRefuse.isSelected())   return Statut.REFUSE;
+        if (tbStatutRefuse.isSelected()) return Statut.REFUSE;
         return Statut.EN_ATTENTE;
     }
 }
